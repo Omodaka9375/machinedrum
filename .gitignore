@@ -1,0 +1,11 @@
+# No build step and no runtime deps — nothing here should normally appear.
+node_modules/
+
+# npx writes these into the project dir if a tool ever wants a cache.
+.npx-cache/
+*.local
+
+# OS / editor junk
+Thumbs.db
+Desktop.ini
+.DS_Store

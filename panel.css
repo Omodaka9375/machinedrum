@@ -1,0 +1,2048 @@
+body {
+  padding: 24px 2.5vw;
+}
+header {
+  margin-bottom: 18px;
+}
+header b {
+  font-size: 17px;
+  letter-spacing: 3px;
+}
+.machine {
+  padding: 12px 15px 26px;
+  max-width: 1500px;
+}
+.portline {
+  display: grid;
+  grid-template-columns: 30% 30% 40%;
+  text-align: center;
+  font-size: 8px;
+  color: #4d554a;
+  height: 38px;
+  letter-spacing: 0.3px;
+  line-height: 13px;
+}
+.portline span {
+  padding-top: 4px;
+}
+.upper {
+  grid-template-columns: 30% 30% 40%;
+  align-items: stretch;
+  min-height: 390px;
+  border-top: 0;
+}
+.soundselect {
+  display: grid;
+  grid-template-columns: 25% 75%;
+  padding: 25px 17px 15px 5px;
+  border-right: 1px solid #89917f;
+  gap: 0;
+}
+.leftutility {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 21px;
+  padding: 0 9px 0 0;
+}
+.master {
+  display: flex;
+  flex-direction: column-reverse;
+  font-size: 8px;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+.master input {
+  width: 65px;
+  margin: 18px auto;
+  height: 4px;
+}
+.modelegend {
+  font-size: 8px;
+  line-height: 2.2;
+  text-align: left;
+  white-space: nowrap;
+}
+.modelegend i,
+.datafoot i {
+  display: inline-block;
+  background: #5c2d25;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.modelegend i:first-child,
+.datafoot i {
+  background: #fa4f38;
+  box-shadow: 0 0 3px #e72c26;
+}
+.leftutility button {
+  font-size: 8px;
+  padding: 10px 5px;
+  width: 100%;
+}
+#lock {
+  margin-top: auto;
+  background: linear-gradient(#eeecdd, #bdc3b1);
+  color: #343e32;
+}
+#lock.active {
+  background: linear-gradient(#ce5942, #a82d23);
+  color: #fff;
+}
+.soundbank {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.soundbank h2 {
+  font-size: 8px;
+  text-align: center;
+  border-top: 1px solid #6f7867;
+  padding-top: 7px;
+  margin: 0 0 14px;
+}
+#tracks {
+  grid-template-columns: repeat(8, 1fr);
+  gap: 13px 3px;
+}
+.track {
+  font-size: 8px;
+}
+.track i {
+  width: 10px;
+  height: 10px;
+  margin-bottom: 6px;
+}
+#jog {
+  width: clamp(115px, 13vw, 200px);
+  height: clamp(115px, 13vw, 200px);
+  border-radius: 50%;
+  margin: 24px auto 17px;
+  background: radial-gradient(ellipse at 37% 20%, #434a45, #292e2c 65%, #1e2621);
+  border: 3px solid #c1c8b8;
+  outline: 1px solid #626d5d;
+  box-shadow:
+    inset 0 2px 3px #89908066,
+    inset 0 -3px 4px #000b,
+    1px 4px 5px #222b2377;
+  position: relative;
+}
+#jog span {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  left: 18%;
+  bottom: 15%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 60% 80%, #363e35, #141a16);
+  box-shadow:
+    inset 1px 2px 3px #0009,
+    0 1px 1px #929b7966;
+}
+.choker {
+  margin: auto 0 0;
+  font-size: 8px;
+}
+.displaycase {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 25px 19px;
+  background: linear-gradient(
+    to bottom,
+    #101715 0%,
+    #101715 66%,
+    #c8cec0 66%,
+    #c8cec0 67%,
+    #232d23 67%,
+    #232d23 68%,
+    #d4d7cd 68%,
+    #d4d7cd 69%,
+    #374335 69%,
+    #374335 70%,
+    #cbd0c3 70%
+  );
+  border: 0;
+  border-right: 1px solid #838e7b;
+  box-shadow: inset 0 2px 4px #0008;
+}
+.screenbrand {
+  color: #c9d0c5;
+  font-size: clamp(13px, 1.5vw, 21px);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin: 20px 0 20px;
+  text-align: left;
+}
+.display {
+  min-height: 0;
+  padding: 11px 10px;
+  flex: none;
+  box-shadow:
+    inset 0 2px 5px #192d2277,
+    0 0 2px 1px #b8db8a66,
+    0 0 12px #b4d98735;
+}
+.lcdhead {
+  font-size: 9px;
+}
+h1 {
+  font-size: 17px;
+  margin: 12px 0 3px;
+}
+canvas {
+  height: 53px;
+}
+#lcdValues {
+  grid-template-columns: repeat(4, 1fr);
+  font-size: 8px;
+  gap: 7px 2px;
+}
+#lcdValues span {
+  display: block;
+  padding: 0;
+}
+#lcdValues b {
+  display: block;
+  width: fit-content;
+  margin-top: 3px;
+  font-size: 10px;
+}
+.lcdfoot {
+  font-size: 8px;
+  gap: 3px;
+}
+.displaylabel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  margin: 20px 0 0;
+  color: #3a4436;
+  text-shadow: 0 1px #fff7;
+  font-size: 6px;
+}
+.displaylabel b {
+  font-size: 25px;
+  color: #3d4438;
+  letter-spacing: -1px;
+}
+.displaylabel b span {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+.data {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  grid-column: auto;
+}
+.maker {
+  height: 105px;
+  border-bottom: 1px solid #8b9580;
+  box-shadow: 0 1px #eff0dc77;
+  text-align: right;
+  padding: 21px 25px;
+  color: #707c68;
+  font-size: clamp(20px, 2.3vw, 35px);
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow:
+    0 1px #fff8,
+    0 -1px #434d3b55;
+}
+.maker span {
+  display: block;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  margin-top: 7px;
+}
+.datahead {
+  padding: 20px 25px 0;
+  justify-content: space-between;
+}
+.datahead h2 {
+  margin-bottom: 8px;
+  font-size: 9px;
+}
+.datahead select {
+  font-size: 9px;
+}
+.databody {
+  display: grid;
+  grid-template-columns: 19% 81%;
+  padding: 8px 20px 0 16px;
+  gap: 0;
+}
+.tempo {
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 20px;
+  padding-right: 12px;
+}
+.tempo label {
+  font-size: 8px;
+}
+.tempo input {
+  width: 100%;
+  font-size: 14px;
+  padding: 6px 2px;
+}
+#knobs {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px 9px;
+  margin: 0;
+}
+.knob {
+  width: clamp(36px, 3.8vw, 56px);
+  height: clamp(36px, 3.8vw, 56px);
+}
+.knob:after {
+  left: calc(50% - 1.5px);
+  top: 10%;
+  height: 25%;
+  transform-origin: 1.5px calc(clamp(36px, 3.8vw, 56px) * 0.4 - 2px);
+}
+.knobcell small {
+  font-size: 7px;
+  margin-top: 9px;
+  letter-spacing: 0;
+}
+.knobcell output {
+  font-size: 10px;
+}
+.datafoot {
+  margin: auto 0 0;
+  padding: 15px 20px;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 8px;
+}
+.datafoot button {
+  font-size: 8px;
+}
+.middle {
+  display: grid;
+  grid-template-columns: 30% 30% 40%;
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+  min-height: 132px;
+}
+.patternsection {
+  padding: 19px 22px;
+  border-right: 1px solid #89917f;
+}
+.patternsection h2 {
+  border-top: 1px solid #929b87;
+  padding-top: 7px;
+  font-size: 8px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+#patterns {
+  justify-content: space-between;
+  gap: 10px;
+}
+#patterns button {
+  width: 100%;
+  height: 32px;
+}
+.sublegend {
+  font-size: 8px;
+  text-align: center;
+  display: block;
+  margin-top: 11px;
+  letter-spacing: 5px;
+}
+.navigation {
+  display: grid;
+  grid-template-columns: 33% 67%;
+  gap: 10px;
+  padding: 23px 20px;
+  border-right: 1px solid #89917f;
+}
+.confirmkeys {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 13px;
+}
+.confirmkeys button {
+  font-size: 8px;
+  padding: 7px 4px;
+  background: linear-gradient(#f0f0df, #bfc6b3);
+  color: #303a2a;
+}
+.arrows {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+.arrows button {
+  padding: 6px 0;
+  font-size: 14px;
+  height: 31px;
+}
+.arrows button:first-child {
+  grid-column: 2;
+}
+.arrows button:nth-child(2) {
+  grid-column: 1;
+}
+.performance {
+  display: grid;
+  grid-template-columns: 58% 42%;
+}
+.transport {
+  padding: 30px 20px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-content: center;
+  border-right: 1px solid #89917f;
+}
+.transport button {
+  width: 100%;
+  height: 35px;
+}
+.transport span {
+  grid-column: 1/-1;
+  font-size: 8px;
+  text-align: center;
+}
+.kitactions {
+  padding: 22px 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: center;
+  gap: 9px;
+}
+.kitactions h2 {
+  grid-column: 1/-1;
+  text-align: center;
+  font-size: 8px;
+  margin: 0;
+}
+.kitactions button {
+  font-size: 8px;
+  padding: 8px 3px;
+}
+.sequencer {
+  padding: 18px 18px 0;
+}
+.seqhead {
+  margin-bottom: 6px;
+}
+.seqhead h2 {
+  font-size: 8px;
+  margin: 0;
+}
+.seqhead span {
+  font-size: 8px;
+}
+#steps {
+  grid-template-columns: repeat(16, 1fr);
+  gap: 9px;
+  margin-top: 18px;
+}
+.step {
+  height: clamp(44px, 5vw, 73px);
+}
+.step small {
+  top: calc(100% + 8px);
+  font-size: 8px;
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 3px;
+  background: #6c776433;
+  color: #333f2c;
+}
+.step small span {
+  font-size: 7px;
+}
+.seqfoot {
+  margin-top: 31px;
+  font-size: 8px;
+}
+.seqfoot span:last-child {
+  display: inline;
+}
+footer {
+  max-width: 1500px;
+}
+@media (max-width: 1000px) and (min-width: 701px) {
+  .machine {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .soundselect {
+    padding-left: 0;
+    padding-right: 9px;
+  }
+  .leftutility {
+    padding-right: 5px;
+  }
+  .leftutility button {
+    font-size: 7px;
+  }
+  .displaycase {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+  .databody {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .datahead {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  #tracks {
+    gap: 12px 2px;
+  }
+  .track {
+    font-size: 6px;
+  }
+  .track i {
+    width: 8px;
+    height: 8px;
+  }
+  .navigation {
+    padding: 24px 12px;
+    gap: 7px;
+  }
+  .kitactions {
+    padding: 20px 8px;
+  }
+  .transport {
+    padding: 25px 12px;
+  }
+  .portline {
+    font-size: 6px;
+  }
+  .knobcell small {
+    font-size: 6px;
+  }
+  #steps {
+    gap: 6px;
+  }
+  .sequencer {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+  .step small {
+    padding: 1px;
+    font-size: 7px;
+  }
+  .step small span {
+    font-size: 6px;
+  }
+}
+@media (max-width: 700px) {
+  body {
+    padding: 14px 8px;
+  }
+  .portline {
+    display: none;
+  }
+  .upper {
+    grid-template-columns: 1fr 1fr;
+  }
+  .soundselect {
+    padding: 24px 13px 16px 4px;
+    grid-template-columns: 25% 75%;
+  }
+  #tracks {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .leftutility {
+    gap: 14px;
+  }
+  .master input {
+    width: 42px;
+  }
+  .master {
+    font-size: 7px;
+  }
+  .modelegend {
+    font-size: 6px;
+  }
+  .leftutility button {
+    font-size: 7px;
+  }
+  .displaycase {
+    padding: 15px;
+  }
+  .screenbrand {
+    font-size: 13px;
+    margin: 10px 0 18px;
+  }
+  .display {
+    padding: 9px 7px;
+  }
+  .lcdhead {
+    font-size: 7px;
+  }
+  h1 {
+    font-size: 14px;
+  }
+  #lcdValues {
+    grid-template-columns: repeat(4, 1fr);
+    font-size: 7px;
+  }
+  .lcdfoot {
+    font-size: 7px;
+  }
+  .displaylabel b {
+    font-size: 21px;
+  }
+  .data {
+    grid-column: 1/-1;
+    border-top: 1px solid #89917f;
+  }
+  .maker {
+    display: none;
+  }
+  .datahead {
+    padding-top: 15px;
+  }
+  .databody {
+    grid-template-columns: 16% 84%;
+    padding-bottom: 5px;
+  }
+  #knobs {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 17px 8px;
+  }
+  .knob {
+    width: 42px;
+    height: 42px;
+  }
+  .knob:after {
+    transform-origin: 1.5px 14.8px;
+  }
+  .datafoot {
+    padding: 12px 20px;
+  }
+  .middle {
+    grid-template-columns: 1fr 1fr;
+  }
+  .patternsection {
+    padding: 17px 15px;
+  }
+  .navigation {
+    border-right: 0;
+    padding: 20px 15px;
+  }
+  .performance {
+    grid-column: 1/-1;
+    border-top: 1px solid #89917f;
+  }
+  .transport {
+    padding: 15px 35px;
+  }
+  .kitactions {
+    padding: 15px 25px;
+  }
+  .sequencer {
+    padding: 18px 6px 0;
+  }
+  #steps {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 33px 8px;
+  }
+  .step {
+    height: 44px;
+  }
+  .seqhead span {
+    max-width: 180px;
+  }
+  .seqfoot span:last-child {
+    display: none;
+  }
+  .sublegend {
+    letter-spacing: 2px;
+  }
+  .portline + section {
+    border-top: 0;
+  }
+  .choker {
+    font-size: 7px;
+    gap: 3px;
+  }
+  .choker select {
+    padding: 3px;
+  }
+  .machine {
+    padding: 15px 9px 23px;
+  }
+}
+
+@font-face {
+  font-family: PanelNarrow;
+  src: local('Arial Narrow');
+  font-weight: 400;
+}
+@font-face {
+  font-family: PanelNarrow;
+  src: local('Arial Narrow Bold');
+  font-weight: 700;
+}
+.machine {
+  font-family: PanelNarrow, 'Arial Narrow', Arial, 'Microsoft Yahei', sans-serif;
+}
+.machine h2,
+.portline,
+.modelegend,
+.datafoot,
+.knobcell small,
+.sublegend,
+.transport > span {
+  letter-spacing: 0.15px;
+  font-weight: 700;
+}
+.screenbrand,
+.maker {
+  font-family: Arial, Helvetica, sans-serif;
+  font-stretch: normal;
+  letter-spacing: -0.6px;
+  font-weight: 700;
+}
+.screenbrand {
+  font-size: clamp(14px, 1.55vw, 23px);
+}
+.display {
+  font-family: 'Courier New', monospace;
+}
+.display h1 {
+  font-weight: 700;
+}
+.transport #play,
+.transport #stop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.transport button svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  flex: none;
+}
+@media (max-width: 700px) {
+  .screenbrand {
+    font-size: 13px;
+  }
+}
+
+.track kbd {
+  display: block;
+  font:
+    7px Arial,
+    sans-serif;
+  color: #69725f;
+  margin-top: 3px;
+  letter-spacing: 0;
+}
+.shift-bank .track:nth-child(n + 9) kbd {
+  color: #a3291e;
+  font-weight: bold;
+  background: #efead3;
+}
+.shift-bank .track:nth-child(-n + 8) {
+  opacity: 0.45;
+}
+
+.transport {
+  grid-template-columns: repeat(3, 1fr);
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.transport #record {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font: 18px Arial;
+  color: #b74235;
+}
+.transport #record.active {
+  color: #fff;
+  background: #bb3d30;
+  box-shadow: 0 0 7px #b7353060;
+}
+.performModes {
+  display: flex;
+  gap: 6px;
+}
+.performModes button {
+  font-size: 8px;
+  padding: 4px 8px;
+}
+.seqhead {
+  align-items: center;
+}
+.seqhead > span {
+  max-width: 42%;
+  text-align: right;
+}
+.step {
+  touch-action: none;
+  user-select: none;
+}
+.step.held {
+  outline: 2px solid #a44331;
+  outline-offset: 3px;
+}
+.step.padHit {
+  background: #ad4934;
+  box-shadow: 0 0 8px #a9342680;
+}
+.track kbd {
+  pointer-events: none;
+}
+@media (max-width: 700px) {
+  .seqhead {
+    flex-wrap: wrap;
+  }
+  .seqhead > span {
+    max-width: none;
+    width: 100%;
+    text-align: left;
+  }
+  .transport {
+    padding: 16px;
+  }
+  .kitactions {
+    padding: 16px 10px;
+  }
+}
+
+.clearActions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+}
+.clearActions button {
+  font-size: 9px;
+  padding: 5px 7px;
+  letter-spacing: 0;
+}
+
+.stepPages {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 6px 0;
+}
+.stepPages button.active {
+  background: #923f31;
+  color: white;
+}
+.step.keyPage {
+  border-bottom-color: #9a4638;
+}
+.lcdPages {
+  display: flex;
+  gap: 5px;
+  margin: 9px 0 6px;
+}
+.lcdPages button {
+  font:
+    9px 'Courier New',
+    monospace;
+  color: inherit;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  padding: 3px 8px;
+  box-shadow: none;
+}
+.lcdPages button.active {
+  background: #344633;
+  color: #c2d3a1;
+}
+.display.fxPage #scope {
+  display: none;
+}
+.fxPage #lcdValues {
+  gap: 8px 5px;
+  min-height: 142px;
+}
+.fxPage #lcdValues .fxDial {
+  text-align: center;
+  font-size: 8px;
+}
+.fxDial svg {
+  display: block;
+  width: 42px;
+  height: 38px;
+  max-width: 100%;
+  margin: 3px auto 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: square;
+}
+.fxDial .dialTrack {
+  opacity: 0.22;
+  stroke-width: 3;
+}
+.fxDial .dialFill {
+  stroke-width: 3;
+}
+.fxPage #lcdValues b {
+  margin: 0 auto;
+  background: none;
+  color: inherit;
+  font-weight: bold;
+  font-size: 10px;
+}
+.fxDial.empty {
+  opacity: 0.35;
+}
+.knob:disabled {
+  opacity: 0.3;
+}
+@media (max-width: 700px) {
+  .stepPages small {
+    font-size: 9px;
+  }
+}
+
+/* Fixed LCD geometry: status column and eight parameter cells on both pages. */
+.displaycase {
+  padding: 22px 24px 18px;
+  justify-content: center;
+}
+.screenbrand {
+  margin: 12px 0 20px;
+  font-size: 18px;
+}
+.display {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1.9;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: 28% 72%;
+  grid-template-rows: 1fr 1fr 22px;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  border-radius: 0;
+  background: #ed694e;
+  color: #321e19;
+  box-shadow:
+    0 0 3px #ee725877,
+    0 0 12px #ed694e25,
+    inset 0 0 5px #53291d77;
+  text-shadow: none;
+}
+.display #scope {
+  display: none;
+}
+.display .lcdhead {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid currentColor;
+  padding: 3px;
+  font-size: 8px;
+}
+.display #lcdTempo {
+  font-size: 20px;
+  line-height: 1;
+  font-weight: bold;
+}
+.display h1 {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+  border: 1px solid currentColor;
+  border-top: 0;
+  padding: 4px 2px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.display #lcdValues {
+  grid-column: 2;
+  grid-row: 1/3;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  min-height: 0;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+}
+.display #lcdValues .fxDial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  border-left: 1px dotted currentColor;
+  border-bottom: 1px dotted currentColor;
+  padding: 2px 0;
+  font-size: 8px;
+}
+.fxDial em {
+  font-style: normal;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.display .fxDial svg {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 1;
+  min-height: 0;
+  margin: 0;
+  fill: currentColor;
+  stroke: none;
+}
+.display .fxDial svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.display #lcdValues b {
+  font-size: 8px;
+  line-height: 1;
+  background: none;
+  color: inherit;
+  padding: 0;
+  margin: 0 auto;
+}
+.display .lcdPages {
+  grid-column: 1;
+  grid-row: 3;
+  margin: 0;
+  gap: 0;
+  align-items: stretch;
+}
+.display .lcdPages button {
+  flex: 1;
+  font-size: 7px;
+  padding: 0 1px;
+  color: inherit;
+  box-shadow: none;
+  border: 1px solid currentColor;
+  background: none;
+}
+.display .lcdPages button.active {
+  background: #321e19;
+  color: #ed694e;
+}
+.display .lcdfoot {
+  grid-column: 2;
+  grid-row: 3;
+  margin: 0;
+  padding: 3px 2px;
+  font-size: 6px;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.displaylabel {
+  margin-top: 16px;
+}
+.upper {
+  min-height: 370px;
+}
+
+@font-face {
+  font-family: 'MD Pixel';
+  src: url('./fonts/fusion-pixel-12px-proportional-latin.otf.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+.displaycase {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.display {
+  font-family: 'MD Pixel', monospace;
+  aspect-ratio: 1.65;
+  grid-template-rows: 1fr 1fr 26px;
+  font-synthesis: none;
+}
+.display .lcdhead {
+  font-size: 12px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+.display #lcdTempo {
+  font-size: 24px;
+  font-weight: 400;
+}
+.display h1 {
+  font-size: 12px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.display #lcdValues .fxDial,
+.display #lcdValues b {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+}
+.display .fxDial em {
+  font-weight: 400;
+}
+.display .fxDial svg {
+  width: 34px;
+  height: 34px;
+}
+.display .lcdPages button {
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.display .lcdfoot {
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.display #lcdEdit {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.display #lcdStep {
+  flex-shrink: 0;
+}
+
+#info {
+  flex-shrink: 0;
+  margin-left: 18px;
+}
+#manual {
+  width: min(920px, 94vw);
+  max-height: 88vh;
+  padding: 0;
+  border: 1px solid #8c9589;
+  border-radius: 5px;
+  background: #d5d7cd;
+  color: #282e29;
+  box-shadow: 0 20px 80px #0009;
+  font:
+    14px/1.7 'Segoe UI',
+    'Microsoft Yahei',
+    sans-serif;
+}
+#manual::backdrop {
+  background: #0d1416b8;
+}
+.manualTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  border-bottom: 1px solid #a2aa9b;
+  background: #c9cdc1;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.manualTop small {
+  font:
+    12px 'MD Pixel',
+    monospace;
+  letter-spacing: 2px;
+}
+.manualTop h2 {
+  font-size: 22px;
+  letter-spacing: 2px;
+  margin: 3px 0 0;
+  color: #303930;
+}
+.manualBody {
+  padding: 0 28px 24px;
+}
+.manualBody section {
+  padding: 22px 0;
+  border-bottom: 1px solid #a9b1a3;
+}
+.manualBody section:last-child {
+  border-bottom: 0;
+}
+.manualBody h3 {
+  font-size: 15px;
+  color: #9b392c;
+  margin: 0 0 16px;
+}
+.manualBody p {
+  margin: 12px 0 0;
+}
+.manualFlow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.manualFlow > span {
+  flex: 1;
+  border: 1px solid #a2aa9b;
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 13px;
+  background: #e2e4db;
+}
+.manualFlow small {
+  display: block;
+  font-size: 11px;
+  color: #5d685d;
+}
+.manualKeys {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 20px;
+}
+.manualKeys > div {
+  text-align: center;
+  min-width: 0;
+}
+.manualBody kbd {
+  display: inline-block;
+  border: 1px solid #767f73;
+  border-bottom-width: 3px;
+  border-radius: 3px;
+  background: #eff0e8;
+  color: #293429;
+  padding: 2px 7px;
+  font:
+    14px 'MD Pixel',
+    monospace;
+}
+.manualKeys kbd {
+  display: block;
+  padding: 12px 2px;
+  font-size: 18px;
+  white-space: nowrap;
+}
+.manualKeys small {
+  display: block;
+  font-size: 10px;
+  margin-top: 6px;
+}
+.manualLegend {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+.manualCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.manualCards article {
+  padding: 14px;
+  background: #e2e4db;
+  border-top: 2px solid #9b392c;
+}
+.manualCards p {
+  font-size: 13px;
+}
+.manualFx,
+.manualShortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.manualFx span,
+.manualShortcuts span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.manualFx b {
+  display: inline-block;
+  width: 25px;
+  text-align: center;
+  background: #a34838;
+  color: #f0ded1;
+}
+.manualNote {
+  color: #637062;
+  font-size: 12px;
+}
+@media (max-width: 650px) {
+  .manualBody {
+    padding: 0 16px 16px;
+  }
+  .manualTop {
+    padding: 15px 16px;
+  }
+  .manualCards {
+    grid-template-columns: 1fr;
+  }
+  .manualFlow {
+    flex-wrap: wrap;
+  }
+  .manualFlow > span {
+    flex-basis: 35%;
+  }
+  .manualKeys {
+    gap: 4px;
+  }
+  .manualKeys kbd {
+    font-size: 14px;
+  }
+  .manualKeys small {
+    font-size: 8px;
+  }
+  .manualLegend {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .manualFx,
+  .manualShortcuts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@font-face {
+  font-family: 'Machinedrum UW';
+  src: url('./fonts/MachinedrumUW.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+.display {
+  font-family: 'Machinedrum UW', 'MD Pixel', monospace;
+  background: #f16a50;
+  color: #241710;
+  grid-template-columns: 27% 73%;
+}
+.display .lcdhead {
+  font-size: 14px;
+  line-height: 1.1;
+}
+.display #lcdTempo {
+  font-size: 28px;
+}
+.display h1 {
+  font-size: 16px;
+}
+.display #lcdValues .fxDial {
+  padding: 0 0 3px;
+  font-size: 14px;
+  gap: 2px;
+}
+.display .fxDial em {
+  display: block;
+  width: 100%;
+  line-height: 18px;
+  border-bottom: 1px solid currentColor;
+  font-size: 14px;
+}
+.display #lcdValues b {
+  font-size: 14px;
+  line-height: 14px;
+}
+.display .fxDial svg {
+  width: 32px;
+  height: 32px;
+}
+.display .fxDial svg .dialRim {
+  stroke-width: 1;
+}
+.display .lcdPages button {
+  font-size: 14px;
+}
+.display .lcdfoot {
+  font-size: 12px;
+}
+.display #lcdValues .fxDial {
+  border-left-style: solid;
+  border-bottom-style: solid;
+}
+
+.timingSwitches {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.timingSwitches button {
+  font-size: 8px;
+  padding: 5px 2px;
+  letter-spacing: 0;
+}
+.tempo {
+  gap: 10px;
+}
+
+.timingSwitches {
+  gap: 12px;
+}
+.timingSwitches button,
+.timingSwitches button.active {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #535d50;
+  box-shadow: none;
+  font-size: 8px;
+  letter-spacing: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+.timingSwitches button:active {
+  transform: none;
+}
+.switchTrack {
+  position: relative;
+  display: block;
+  width: 30px;
+  height: 15px;
+  flex: 0 0 30px;
+  border: 1px solid #858d7f;
+  border-radius: 3px;
+  background: linear-gradient(#737c70, #c6ccbf);
+  box-shadow:
+    0 1px 0 #eff2e0,
+    inset 0 1px 2px #27302399;
+}
+.switchTrack:before {
+  content: '';
+  position: absolute;
+  inset: 4px 3px;
+  background: #263029;
+  border-radius: 2px;
+  box-shadow: 0 1px #e5ead088;
+}
+.switchTrack i {
+  position: absolute;
+  left: 2px;
+  top: 1px;
+  width: 12px;
+  height: 11px;
+  border-radius: 2px;
+  border: 1px solid #202a23;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, #84907d66 2px 3px), linear-gradient(#64705f, #30392f);
+  box-shadow:
+    0 1px 2px #17221799,
+    inset 0 1px #acb69b;
+  transition: transform 0.12s ease;
+}
+.timingSwitches button.active .switchTrack i {
+  transform: translateX(12px);
+}
+.timingSwitches button.active {
+  color: #833e32;
+}
+.timingSwitches button.active .switchTrack:before {
+  background: linear-gradient(90deg, #b75d45 0 50%, #263029 50%);
+}
+
+.databody > .timingSwitches {
+  grid-column: 1/-1;
+  flex-direction: row;
+  gap: 18px;
+  align-items: center;
+  margin-top: 14px;
+}
+.displaylabel img {
+  display: block;
+  width: 160px;
+  max-width: 85%;
+  height: auto;
+  filter: brightness(0.25);
+}
+
+.patternConfirm {
+  max-width: 400px;
+  background: #d4d4c5;
+  color: #242722;
+  border: 2px solid #545951;
+  padding: 24px;
+  font: 14px monospace;
+}
+.patternConfirm p {
+  white-space: pre-line;
+  line-height: 1.5;
+}
+.patternConfirm button {
+  margin: 12px 12px 0 0;
+  padding: 10px;
+}
+.patternConfirm::backdrop {
+  background: #0008;
+}
+
+.patternMenu {
+  position: fixed;
+  z-index: 1000;
+  background: #d4d4c5;
+  border: 1px solid #545951;
+  padding: 4px;
+  box-shadow: 2px 3px 8px #0006;
+  min-width: 150px;
+}
+.patternMenu button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  text-align: left;
+  font: 12px monospace;
+  color: #242722;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.patternMenu button:focus {
+  outline: 1px solid #545951;
+  background: #b5b9aa;
+}
+.patternMenu button:disabled {
+  opacity: 0.4;
+}
+
+@media (max-width: 700px) {
+  .upper {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .soundselect,
+  .displaycase,
+  .data {
+    grid-column: 1;
+    min-width: 0;
+  }
+  .soundselect {
+    border-right: 0;
+  }
+  .displaycase {
+    padding: 14px 12px;
+    border-right: 0;
+  }
+  .screenbrand {
+    margin: 0 0 12px;
+  }
+  .display {
+    grid-template-columns: 30% minmax(0, 1fr);
+    grid-template-rows: minmax(64px, 1fr) minmax(64px, 1fr) 26px 22px;
+    aspect-ratio: 1.4;
+    min-height: 220px;
+  }
+  .display .lcdPages {
+    min-width: 0;
+    grid-column: 1/-1;
+    grid-row: 3;
+  }
+  .display .lcdPages button {
+    min-width: 0;
+    font-size: 12px;
+  }
+  .display .lcdhead {
+    min-width: 0;
+    font-size: 12px;
+  }
+  .display #lcdTempo {
+    font-size: 24px;
+  }
+  .display h1 {
+    font-size: 14px;
+  }
+  .display .lcdfoot {
+    min-width: 0;
+    font-size: 10px;
+    grid-column: 1/-1;
+    grid-row: 4;
+  }
+  .display #lcdValues .fxDial,
+  .display .fxDial em,
+  .display #lcdValues b {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  .displaylabel {
+    margin-top: 12px;
+  }
+}
+
+#steps {
+  user-select: none;
+  touch-action: none;
+}
+
+#linkToggle,
+#linkSync {
+  font: 10px monospace;
+  padding: 8px;
+  white-space: nowrap;
+}
+#linkToggle.active,
+#linkSync.active {
+  color: #c7eaaa;
+  box-shadow: inset 0 0 5px #a3d87366;
+}
+@media (max-width: 700px) {
+  body {
+    padding: 6px;
+  }
+  header {
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 6px;
+    letter-spacing: 0;
+  }
+  header > div {
+    flex: 1;
+  }
+  header b {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  header small {
+    display: none;
+  }
+  #info {
+    margin-left: 0;
+    padding: 6px;
+  }
+  #linkToggle,
+  #linkSync {
+    font-size: 8px;
+    padding: 6px;
+  }
+  .machine {
+    padding: 6px 7px 14px;
+  }
+  .screw {
+    display: none;
+  }
+  .upper {
+    min-height: 0;
+  }
+  .soundselect {
+    padding: 6px 0;
+    grid-template-columns: 66px minmax(0, 1fr);
+    gap: 6px;
+  }
+  .leftutility {
+    padding: 0;
+    gap: 5px;
+  }
+  .master {
+    font-size: 7px;
+  }
+  .master input {
+    margin: 7px auto;
+    width: 52px;
+  }
+  .modelegend,
+  .soundbank h2,
+  #jog,
+  .screenbrand,
+  .displaylabel {
+    display: none;
+  }
+  .leftutility button {
+    min-height: 25px;
+    padding: 4px;
+  }
+  #lock {
+    margin-top: 0;
+  }
+  #tracks {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 7px 2px;
+  }
+  .track i {
+    width: 7px;
+    height: 7px;
+    margin-bottom: 3px;
+  }
+  .track {
+    font-size: 7px;
+  }
+  .track kbd {
+    display: none;
+  }
+  .choker {
+    margin: 6px 0 0;
+    font-size: 7px;
+  }
+  .choker select {
+    padding: 1px 5px;
+    font-size: 9px;
+  }
+  .displaycase {
+    padding: 5px;
+  }
+  .display {
+    aspect-ratio: auto;
+    min-height: 0;
+    height: 184px;
+    padding: 3px;
+    grid-template-rows: 60px 60px 26px 24px;
+  }
+  .display .fxDial svg {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+  .display #lcdValues .fxDial {
+    gap: 0;
+    padding-bottom: 1px;
+  }
+  .display .fxDial em {
+    line-height: 15px;
+  }
+  .display #lcdValues b {
+    line-height: 12px;
+  }
+  .datahead {
+    padding: 5px 2px 0;
+  }
+  .datahead h2 {
+    margin: 0;
+    font-size: 8px;
+  }
+  .databody {
+    padding: 5px 2px 0;
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+  .tempo {
+    gap: 5px;
+    padding-right: 6px;
+  }
+  .tempo label {
+    gap: 2px;
+    font-size: 7px;
+  }
+  .tempo input {
+    font-size: 12px;
+    padding: 3px 1px;
+  }
+  #knobs {
+    gap: 6px 5px;
+  }
+  .knob {
+    width: 32px;
+    height: 32px;
+  }
+  .knob:after {
+    transform-origin: 1.5px 10.8px;
+  }
+  .knobcell small {
+    font-size: 7px;
+    margin: 3px 0 0;
+  }
+  .knobcell output {
+    font-size: 9px;
+  }
+  .databody > .timingSwitches {
+    margin-top: 5px;
+    gap: 18px;
+  }
+  .datafoot {
+    padding: 3px 2px;
+    gap: 5px;
+  }
+  .datafoot button {
+    padding: 4px 6px;
+  }
+  .middle {
+    min-height: 0;
+  }
+  .patternsection {
+    padding: 5px;
+  }
+  .patternsection h2 {
+    margin: 0 0 5px;
+    padding-top: 3px;
+  }
+  #patterns {
+    gap: 4px;
+  }
+  #patterns button {
+    height: 26px;
+    padding: 4px;
+  }
+  .clearActions {
+    margin-top: 5px;
+    gap: 3px;
+  }
+  .clearActions button {
+    font-size: 7px;
+    padding: 5px 3px;
+  }
+  .navigation {
+    padding: 6px;
+    gap: 5px;
+  }
+  .confirmkeys {
+    gap: 5px;
+  }
+  .confirmkeys button {
+    font-size: 7px;
+    padding: 5px 2px;
+  }
+  .arrows {
+    gap: 4px;
+  }
+  .arrows button {
+    height: 25px;
+    padding: 2px;
+  }
+  .transport {
+    padding: 6px;
+    gap: 5px;
+  }
+  .transport button {
+    height: 28px;
+  }
+  .transport span {
+    display: none;
+  }
+  .kitactions {
+    padding: 5px;
+    gap: 4px;
+  }
+  .kitactions h2 {
+    display: none;
+  }
+  .kitactions button {
+    padding: 6px 3px;
+  }
+  .sequencer {
+    padding: 7px 0 0;
+  }
+  .seqhead {
+    margin: 0;
+  }
+  .seqhead > span,
+  .stepPages small,
+  .seqfoot {
+    display: none;
+  }
+  .stepPages {
+    margin: 5px 0;
+    gap: 5px;
+  }
+  .stepPages button {
+    padding: 5px 9px;
+  }
+  #steps {
+    margin-top: 4px;
+    gap: 25px 5px;
+  }
+  .step {
+    height: 32px;
+    margin-top: 10px;
+  }
+  .step:before {
+    top: -10px;
+  }
+  .step small {
+    top: calc(100% + 3px);
+    font-size: 7px;
+  }
+  footer {
+    margin: 7px 0;
+    font-size: 8px;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+}
+
+.arrows button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.arrows button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex: none;
+  pointer-events: none;
+}
+#info,
+#linkToggle {
+  font: 10px/1 monospace;
+  letter-spacing: 0;
+  width: 64px;
+  height: 32px;
+  padding: 0;
+  flex: 0 0 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (max-width: 700px) {
+  #info,
+  #linkToggle {
+    font-size: 8px;
+    width: 44px;
+    height: 26px;
+    flex-basis: 44px;
+  }
+}
+.display #lcdTempo {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  letter-spacing: 0;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+  outline-offset: 1px;
+  cursor: text;
+}
+#lcdTempo:focus {
+  outline: 1px dotted currentColor;
+}
+.master input {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 15px;
+  border: 1px solid #858d7f;
+  border-radius: 3px;
+  background: linear-gradient(#737c70, #c6ccbf);
+  box-shadow:
+    0 1px #eff2e0,
+    inset 0 1px 2px #27302399;
+  padding: 2px;
+  cursor: ew-resize;
+}
+.master input::-webkit-slider-runnable-track {
+  height: 5px;
+  background: #263029;
+  border-radius: 2px;
+  box-shadow: 0 1px #e5ead088;
+}
+.master input::-moz-range-track {
+  height: 5px;
+  background: #263029;
+  border-radius: 2px;
+  box-shadow: 0 1px #e5ead088;
+}
+.master input::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 11px;
+  margin-top: -3px;
+  border-radius: 2px;
+  border: 1px solid #202a23;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, #84907d66 2px 3px), linear-gradient(#64705f, #30392f);
+  box-shadow:
+    0 1px 2px #17221799,
+    inset 0 1px #acb69b;
+}
+.master input::-moz-range-thumb {
+  width: 12px;
+  height: 11px;
+  border-radius: 2px;
+  border: 1px solid #202a23;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, #84907d66 2px 3px), linear-gradient(#64705f, #30392f);
+  box-shadow:
+    0 1px 2px #17221799,
+    inset 0 1px #acb69b;
+}
+#linkToggle,
+#linkSync,
+#info {
+  height: 32px;
+  font: 10px/1 monospace;
+  letter-spacing: 0;
+  border: 1px solid #171d1d;
+  border-radius: 4px;
+  background: linear-gradient(#394040, #222829);
+  color: #d1d3c9;
+  box-shadow:
+    inset 0 2px 1px #65706a,
+    0 3px 0 #1118;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
+}
+#linkSync {
+  padding: 0 9px;
+  flex-shrink: 0;
+}
+.screw {
+  font-size: 0;
+  line-height: 0;
+  display: block;
+  transform: rotate(20deg);
+  background: radial-gradient(circle at 32% 25%, #f5f4e8, #b2b4a9 48%, #797b71 80%);
+  box-shadow:
+    inset 0 0 0 1px #e7e9df99,
+    0 1px 2px #444;
+}
+.screw:before,
+.screw:after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #52564d;
+  box-shadow: 1px 1px 0 #eeeee080;
+  border-radius: 0.5px;
+}
+.screw:before {
+  width: 9px;
+  height: 2px;
+}
+.screw:after {
+  width: 2px;
+  height: 9px;
+}
+@media (max-width: 700px) {
+  #linkToggle,
+  #linkSync,
+  #info {
+    height: 26px;
+    font-size: 8px;
+  }
+  .screw {
+    display: none;
+  }
+}

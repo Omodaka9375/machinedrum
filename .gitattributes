@@ -1,0 +1,9 @@
+# Source is authored and formatted LF (Prettier's default). Pin it in the index
+# AND the working tree so a clone with core.autocrlf=true does not hand back
+# CRLF files that Prettier then rewrites into a whole-tree phantom diff.
+* text=auto eol=lf
+
+# Fonts and images are binary; never rewrite them.
+*.woff2 binary
+*.ttf binary
+*.png binary
