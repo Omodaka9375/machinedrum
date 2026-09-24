@@ -12,8 +12,21 @@ manual.innerHTML = `<div class="manualTop"><div><small>FIELD GUIDE / 01</small><
 <section><h3>05 / FX signal path</h3><div class="manualFlow"><span>current track<small>dry, straight out</small></span><b>→</b><span>A / D.SEND<br>B / R.SEND<small>per-track send level</small></span><b>→</b><span>DELAY / REVERB<small>C–G global parameters</small></span><b>→</b><span>OUTPUT</span></div><p>Click FX on the centre screen and the right-hand knobs switch pages with it. Raise the A or B send first, then trim the effect — with return level but no send level you will hear no wet signal. FX is a track / global setting and is never written into per-step parameter locks.</p><div class="manualFx"><span><b>A</b>D.SEND · delay send</span><span><b>B</b>R.SEND · reverb send</span><span><b>C</b>TIME · delay time / ms</span><span><b>D</b>FDBK · delay feedback</span><span><b>E</b>D.RET · delay return</span><span><b>F</b>DECAY · reverb length / s</span><span><b>G</b>R.RET · reverb return</span><span><b>H</b>unassigned</span></div></section>
 <section><h3>06 / Shortcut reference</h3><div class="manualShortcuts"><span><kbd>SPACE</kbd>play / stop</span><span><kbd>ENTER</kbd>audition the current sound</span><span><kbd>← →</kbd>previous / next step</span><span><kbd>↑ ↓</kbd>SYNTH pitch / FX send A</span><span><kbd>L</kbd>per-step parameter lock</span><span><kbd>ESC</kbd>exit the lock / close the manual</span></div><p>Knobs respond to vertical dragging and to the scroll wheel; when a knob has focus, the arrow keys trim it, HOME / END jump to minimum / maximum, and double-click auditions. While an input box is being edited, the performance shortcuts stay out of the way.</p><p class="manualNote">Editing is auto-saved to this browser. While the manual is open, the performance shortcuts pause and the music keeps playing. Close it with the × at the top right, a click outside, or ESC.</p></section></div>`;
 document.body.append(manual);
-document.querySelector('#info').onclick = () => manual.showModal();
+
+// The info button is a toggle: clicking it opens or closes the manual, and its state reflects
+// however the dialog got closed (the X, a click outside, or ESC).
+const infoButton = document.querySelector('#info');
+const syncInfoState = () => {
+  const open = manual.open;
+  infoButton.setAttribute('aria-expanded', String(open));
+  infoButton.classList.toggle('active', open);
+};
+infoButton.onclick = () => {
+  if (manual.open) manual.close();
+  else manual.showModal();
+};
 document.querySelector('#closeManual').onclick = () => manual.close();
+manual.addEventListener('close', syncInfoState);
 manual.addEventListener('click', (e) => {
   if (e.target === manual) {
     const r = manual.getBoundingClientRect();
@@ -21,3 +34,4 @@ manual.addEventListener('click', (e) => {
       manual.close();
   }
 });
+syncInfoState();
