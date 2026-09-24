@@ -525,8 +525,8 @@ canvas {
   box-shadow: 0 0 5px #e34223;
 }
 .step.selected {
-  outline: 1px solid #515c50;
-  outline-offset: 4px;
+  outline: 2px solid #c3cd9f;
+  outline-offset: 3px;
 }
 .step.current {
   background: #b14d3e;

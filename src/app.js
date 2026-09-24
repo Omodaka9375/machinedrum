@@ -227,6 +227,11 @@ function render() {
     : recording
       ? 'LIVE RECORD / 1:16'
       : 'KIT / SYNTHESIS';
+  // The arrow buttons / arrow keys move the step selection at rest, and that must be readable:
+  // during playback the onStep callback owns this readout (it shows the playing step), so only
+  // write it here while stopped and in sequence mode.
+  if (!audio.playing && gridMode === 'sequence')
+    $('#lcdStep').textContent = `${String(step + 1).padStart(2, '0')} / 16`;
   $('#lock').classList.toggle('active', lock);
   $('#lock').setAttribute('aria-pressed', lock);
   $('#mute').classList.toggle('active', current().mute);
