@@ -631,7 +631,7 @@ $('#reloadKit').onclick = () => {
   status('Kit sounds restored · patterns, parameter locks and mutes kept · playback continues');
 };
 $('#demo').onclick = () => {
-  if (!confirm('Restore the four demo patterns and the default sounds? Your current edits will be replaced.'))
+  if (!confirm('Factory reset: load the four demo patterns and default sounds? Your current edits will be replaced.'))
     return;
   stop();
   project = demo();
@@ -644,7 +644,7 @@ $('#demo').onclick = () => {
   lock = false;
   save();
   render();
-  status('Demo restored');
+  status('Factory reset done');
 };
 const lfoSpec = [
   ['wave', 'WAVE', 0, 3, 1],
