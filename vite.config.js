@@ -8,6 +8,11 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // GitHub Pages serves a project site from https://<user>.github.io/<repo>/, so all URLs must
+  // resolve relative to wherever the build lands. Relative base means the same dist/ works at
+  // any subpath — Pages, a local subdirectory, or the domain root.
+  base: './',
+
   build: {
     target: 'es2022',
     // One CSS bundle and one JS chunk is right for an app this size; per-page splitting would
@@ -24,9 +29,11 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
 
       manifest: {
-        id: '/',
-        scope: '/',
-        start_url: '/',
+        // Relative so the manifest stays valid under the repo subpath on GitHub Pages. Vite
+        // rewrites these against `base` when it emits manifest.webmanifest.
+        id: './',
+        scope: './',
+        start_url: './',
         name: 'MACHINEDRUM — Drum Study',
         short_name: 'MACHINEDRUM',
         description:

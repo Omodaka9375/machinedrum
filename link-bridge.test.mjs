@@ -65,7 +65,7 @@ console.log('\nRFC 6455 §1.3 handshake known-answer');
 }
 
 // ---- 2. real client against the bridge ------------------------------------------------
-const { LinkClock } = await import('./link.js');
+const { LinkClock } = await import('./src/link.js');
 
 function makeClient(name) {
   const c = { name, label: '(none)', transport: null, anchorBpm: 0, sawFirstAnchor: false };
