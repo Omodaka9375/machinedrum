@@ -1,6 +1,6 @@
-import { LinkClock } from './link.js?v=link17';
-import { migrateLfo, lfoRate } from './lfo.js?v=link17';
-import { migrateFx } from './fx.js?v=link17';
+import { LinkClock } from './link.js';
+import { migrateLfo, lfoRate } from './lfo.js';
+import { migrateFx } from './fx.js';
 import {
   names,
   params,
@@ -11,8 +11,8 @@ import {
   storeKit,
   reloadKit,
   recordParameter,
-} from './model.js?v=link17';
-import { Audio } from './audio.js?v=link17';
+} from './model.js';
+import { Audio } from './audio.js';
 const $ = (s) => document.querySelector(s),
   key = 'ferro-study-v1';
 let project = demo();

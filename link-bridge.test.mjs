@@ -56,9 +56,10 @@ await sleep(900);
 // and only surfaced as a client-side "incorrect Sec-WebSocket-Accept" rejection.
 console.log('\nRFC 6455 §1.3 handshake known-answer');
 {
-  const guid = (await readFile('./link-bridge.mjs', 'utf8')).match(/const GUID = '([^']+)'/)[1];
+  const m = (await readFile('./link-bridge.mjs', 'utf8')).match(/const GUID = '([^']+)'/);
+  if (!m) throw new Error('GUID declaration not found in link-bridge.mjs — regex out of date?');
   const accept = createHash('sha1')
-    .update('dGhlIHNhbXBsZSBub25jZQ==' + guid)
+    .update('dGhlIHNhbXBsZSBub25jZQ==' + m[1])
     .digest('base64');
   ok(accept === 's3pPLMBiTxaQ9kYGzzhZRbK+xOo=', 'bridge GUID reproduces the RFC example Accept value');
 }

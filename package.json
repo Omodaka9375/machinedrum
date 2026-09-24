@@ -1,0 +1,24 @@
+{
+  "name": "machinedrum",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone Web Audio drum machine with a local Link session bridge",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "icons": "node scripts/make-icons.mjs",
+    "serve": "node serve.mjs",
+    "link": "node link-bridge.mjs",
+    "test": "node link-bridge.test.mjs",
+    "check": "npm run typecheck && npm run test"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "typescript": "^5",
+    "vite": "^7",
+    "vite-plugin-pwa": "^1"
+  }
+}

@@ -9,6 +9,7 @@ import { extname, join, resolve, sep } from 'node:path';
 const ROOT = resolve(import.meta.dirname);
 const PORT = Number(process.argv[2] ?? 4173);
 
+/** @type {Record<string, string>} */
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -25,7 +26,7 @@ const TYPES = {
 
 const server = createServer(async (req, res) => {
   try {
-    const raw = decodeURIComponent(new URL(req.url, 'http://internal').pathname);
+    const raw = decodeURIComponent(new URL(req.url ?? '/', 'http://internal').pathname);
     let target = join(ROOT, raw === '/' ? 'index.html' : raw);
 
     // Reject anything that escapes the mirrored folder.

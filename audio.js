@@ -1,7 +1,7 @@
-import { applyLfo } from './lfo.js?v=link17';
-import { Effects, stepFx } from './fx.js?v=link17';
-import { drumVoice } from './drums.js?v=link17';
-import { resolved, duration, recordHit } from './model.js?v=link17';
+import { applyLfo } from './lfo.js';
+import { Effects, stepFx } from './fx.js';
+import { drumVoice } from './drums.js';
+import { resolved, duration, recordHit } from './model.js';
 const buffers = new WeakMap();
 export function voice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) {
   if (['kick', 'snare', 'hat', 'fm'].includes(engine))
@@ -113,6 +113,31 @@ export class Audio {
     this.chokes = new Map();
     this.timeline = [];
     this.skipHits = [];
+
+    // Created lazily in init(), which must run on a user gesture. Declared here so the types exist
+    // for readers that run before or after it.
+    /** @type {AudioContext | null} */
+    this.ctx = null;
+    /** @type {GainNode | null} */
+    this.master = null;
+    /** @type {GainNode | null} */
+    this.metronome = null;
+    /** @type {DynamicsCompressorNode | null} */
+    this.comp = null;
+    /** @type {AnalyserNode | null} */
+    this.analyser = null;
+    /** @type {import('./fx.js').Effects | null} */
+    this.effects = null;
+
+    // Hooks assigned from app.js — this class cannot reach UI state or the link session directly.
+    /** @type {import('./link.js').LinkClock | null} */
+    this.link = null;
+    /** @type {(() => boolean) | null} */
+    this.isRecording = null;
+    /** @type {((n: number) => void) | null} */
+    this.onCount = null;
+    /** @type {((position: number) => void) | null} */
+    this.beforeStep = null;
   }
   async init() {
     if (!this.ctx) {

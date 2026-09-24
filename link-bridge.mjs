@@ -109,6 +109,8 @@ class Conn {
     this.dead = false;
     this.seen = Date.now();
     this.messages = 0;
+    /** Liveness sweep, assigned right after the handshake succeeds. @type {ReturnType<typeof setInterval> | null} */
+    this.sweep = null;
 
     socket.on('data', (chunk) => {
       this.buffer = this.buffer.length ? Buffer.concat([this.buffer, chunk]) : chunk;
@@ -184,9 +186,14 @@ class Conn {
 // Beats are quarter notes, matching Link's convention (16 steps = 4 beats).
 class Session {
   constructor() {
+    /** Shared session tempo, kept within TEMPO_MIN..TEMPO_MAX. @type {number} */
     this.bpm = 124;
+    /** Whether the shared transport is running. @type {boolean} */
     this.playing = false;
-    this.reanchor(0);
+    /** Beat position (quarter notes; 16 steps = 4 beats) frozen at the `at` timestamp. @type {number} */
+    this.beat = 0;
+    /** Wall-clock ms corresponding to `beat`. @type {number} */
+    this.at = Date.now();
   }
 
   reanchor(beat) {
@@ -221,6 +228,7 @@ class Session {
 // --------------------------------------------------------------------------- wiring
 
 function parseArgs(argv) {
+  /** @type {{ port: number; host: string; quiet: boolean; origins: string[] | null }} */
   const opts = { port: 19876, host: '127.0.0.1', quiet: false, origins: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -284,7 +292,10 @@ server.on('upgrade', (req, socket) => {
       'Connection: Upgrade\r\n' +
       `Sec-WebSocket-Accept: ${accept}\r\n\r\n`,
   );
-  socket.setNoDelay(true);
+  // Node types the 'upgrade' socket as Duplex, but at runtime it is a net.Socket (documented
+  // behaviour), and setNoDelay only exists on Socket.
+  const netSocket = /** @type {import('node:net').Socket} */ (socket);
+  netSocket.setNoDelay(true);
 
   const id = peers.size + 1;
   const onMessage = (conn, msg) => handle(conn, msg);

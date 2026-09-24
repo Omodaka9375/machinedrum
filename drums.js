@@ -1,4 +1,4 @@
-import { applyLfo } from './lfo.js?v=link17';
+import { applyLfo } from './lfo.js';
 const noiseCache = new WeakMap();
 
 // Each layer has its own envelope; the final gain is reserved for choke events.
