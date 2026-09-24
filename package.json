@@ -12,7 +12,7 @@
     "icons": "node scripts/make-icons.mjs",
     "serve": "node serve.mjs",
     "link": "node link-bridge.mjs",
-    "test": "node link-bridge.test.mjs && node fx.test.mjs",
+    "test": "node link-bridge.test.mjs && node fx.test.mjs && node save.test.mjs",
     "check": "npm run typecheck && npm run test"
   },
   "devDependencies": {

@@ -109,9 +109,28 @@ audio.onCount = (n) => {
 };
 const current = () => project.tracks[track],
   selected = () => project.patterns[pattern][track][step];
+// save() is trailing-debounced: change() fires per input event while a knob is being dragged,
+// and serialising the ~32 KB project plus a blocking localStorage write on every tick buys no
+// durability that the flush hooks below don't already cover. Edits land once the burst settles.
+const SAVE_DEBOUNCE_MS = 300;
+let saveTimer = null;
 function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSave, SAVE_DEBOUNCE_MS);
+}
+function flushSave() {
+  if (saveTimer === null) return; // nothing pending — no write needed
+  clearTimeout(saveTimer);
+  saveTimer = null;
   localStorage.setItem(key, JSON.stringify(project));
 }
+// Durability backstops, so the debounce never widens the loss window:
+//   pagehide                fires on close / refresh / navigation, even into bfcache
+//   visibilitychange hidden  is the checkpoint when a hidden tab can be killed outright
+window.addEventListener('pagehide', flushSave);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushSave();
+});
 function status(text) {
   $('#status').textContent = text;
 }
