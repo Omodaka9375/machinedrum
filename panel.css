@@ -828,7 +828,7 @@ footer {
   user-select: none;
 }
 .step.held {
-  outline: 2px solid #a44331;
+  outline: 2px solid #c3cd9f;
   outline-offset: 3px;
 }
 .step.padHit {

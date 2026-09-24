@@ -131,11 +131,11 @@ input {
 button {
   cursor: pointer;
 }
-/* Buttons keep the focus ring: they are pure chrome and the ring is the only focus cue on
-   the dark panel. Form controls (select/input) do not — the red ring reads as an error state
-   on the panel, and the controls already show their own focus treatment. */
+/* Buttons keep a focus ring: they are pure chrome and the ring is the only focus cue on
+   the dark panel. LCD green — the red read as an error state on this panel. Form controls
+   (select/input) show their own inset treatment instead. */
 button:focus-visible {
-  outline: 2px solid var(--red);
+  outline: 2px solid #c3cd9f;
   outline-offset: 4px;
 }
 select:focus-visible,
@@ -424,7 +424,7 @@ canvas {
   padding: 8px;
 }
 #patterns button.pending {
-  outline: 1px dashed var(--red);
+  outline: 1px dashed #c3cd9f;
   outline-offset: 3px;
 }
 .tempo {
