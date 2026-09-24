@@ -813,25 +813,81 @@ function frame(now) {
 render();
 requestAnimationFrame(frame);
 
-$('#jog').addEventListener(
+// Jog wheel: drag to rotate. A step fires when the pointer crosses the midpoint between two
+// notch positions (22.5° per track, threshold at ±11.25° of accumulated travel since the last
+// step), so a slow full turn sweeps all 16 tracks and quick circular strokes rack up steps like
+// a real jog wheel. A plain click (no rotation) still auditions.
+const jog = $('#jog');
+const jogAngle = (e) => Math.atan2(e.clientY - jogCenter.y, e.clientX - jogCenter.x);
+let jogCenter = { x: 0, y: 0 };
+let jogDrag = null;
+jog.addEventListener(
   'wheel',
   (e) => {
     e.preventDefault();
     if (held) return;
-    track = (track + (e.deltaY > 0 ? 1 : 15)) % 16;
-    render();
+    jogStep(e.deltaY > 0 ? 1 : -1);
   },
   { passive: false },
 );
-$('#jog').onclick = audition;
-$('#jog').onkeydown = (e) => {
+jog.onpointerdown = (e) => {
+  if (e.button !== 0 || held) return;
+  const r = jog.getBoundingClientRect();
+  jogCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  jogDrag = { pointer: e.pointerId, moved: false, angle: jogAngle(e), crossing: 0 };
+  jog.setPointerCapture(e.pointerId);
+};
+jog.onpointermove = (e) => {
+  if (!jogDrag || jogDrag.pointer !== e.pointerId) return;
+  const angle = jogAngle(e);
+  let delta = angle - jogDrag.angle;
+  // atan2 wraps at ±π; a drag the long way round arrives as many small events, but a single
+  // event can still straddle the wrap, so normalise to the signed short way.
+  if (delta > Math.PI) delta -= 2 * Math.PI;
+  else if (delta < -Math.PI) delta += 2 * Math.PI;
+  jogDrag.angle = angle;
+  if (Math.abs(delta) > 0) jogDrag.moved = true;
+  // Detent accumulator: fires a step once travel since the last step reaches the midpoint
+  // (±half a sector), consuming a full sector. Strict comparisons both ways: after a forward
+  // fire the residue sits at exactly −half-sector when the threshold was hit dead-on, and a
+  // non-strict reverse loop would immediately cancel the step it just fired.
+  const sector = (2 * Math.PI) / 16;
+  jogDrag.crossing += delta;
+  while (jogDrag.crossing > sector / 2) {
+    jogDrag.crossing -= sector;
+    jogStep(1);
+  }
+  while (jogDrag.crossing < -sector / 2) {
+    jogDrag.crossing += sector;
+    jogStep(-1);
+  }
+};
+jog.onpointerup = (e) => {
+  if (!jogDrag || jogDrag.pointer !== e.pointerId) return;
+  const moved = jogDrag.moved;
+  jogDrag = null;
+  // A click with no rotation auditions, as before; a drag does not.
+  if (!moved) audition();
+};
+jog.onpointercancel = () => (jogDrag = null);
+jog.onclick = (e) => {
+  // pointerup already handled the audition; suppress the duplicate click.
+  e.preventDefault();
+};
+function jogStep(direction) {
+  track = (track + (direction > 0 ? 1 : 15)) % 16;
+  jog.style.setProperty('--jog', `${(track * 360) / 16}deg`);
+  render();
+}
+jog.onkeydown = (e) => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
     e.preventDefault();
     if (held) return;
-    track = (track + (['ArrowDown', 'ArrowRight'].includes(e.key) ? 1 : 15)) % 16;
-    render();
+    jogStep(['ArrowDown', 'ArrowRight'].includes(e.key) ? 1 : -1);
   }
 };
+// Rotate the notch to the restored/current track on load.
+jog.style.setProperty('--jog', `${(track * 360) / 16}deg`);
 $('#exitLock').onclick = () => {
   lock = false;
   render();

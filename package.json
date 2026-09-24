@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/make-icons.mjs",
     "serve": "node serve.mjs",
-    "test": "node fx.test.mjs && node save.test.mjs",
+    "test": "node fx.test.mjs && node save.test.mjs && node jog.test.mjs",
     "check": "pnpm run typecheck && pnpm run test"
   },
   "devDependencies": {

@@ -13,8 +13,7 @@
   <body>
     <header>
       <div><b>MACHINEDRUM</b><span> SYNTHETIC RHYTHM INSTRUMENT</span></div>
-      <small><i></i> LOCAL AUDIO / STUDY 001</small
-      ><button
+      <button
         id="info"
         aria-haspopup="dialog"
         aria-expanded="false"
@@ -50,12 +49,13 @@
             <div id="tracks"></div>
             <button
               id="jog"
-              aria-label="Track jog wheel — scroll to change track, click to audition"
-              title="Scroll / arrow keys change track, click to audition"
+              aria-label="Track jog wheel — drag to rotate and select track, click to audition"
+              title="Drag to rotate · scroll wheel / arrow keys step · click to audition"
             >
-              <span></span></button
-            ><label class="choker"
-              >CHOKE
+              <span></span>
+            </button>
+            <label class="choker">
+              CHOKE
               <select id="choke" aria-label="Choke group">
                 <option value="0">OFF</option>
                 <option value="1">1</option>
@@ -70,8 +70,8 @@
           <div class="screenbrand">MACHINEDRUM</div>
           <div class="display">
             <div class="lcdhead">
-              <span id="lcdPattern">A01</span><span id="lcdState">READY</span
-              ><input
+              <span id="lcdPattern">A01</span><span id="lcdState">READY</span>
+              <input
                 id="lcdTempo"
                 aria-label="Tempo BPM"
                 inputmode="decimal"
@@ -109,15 +109,16 @@
                 aria-pressed="true"
                 title="Quantize recording to the steps; off keeps the exact hit offset"
               >
-                <span class="switchTrack" aria-hidden="true"><i></i></span><span>QUANT</span></button
-              ><button id="swingEnabled" aria-pressed="true" title="Enable or bypass Swing">
+                <span class="switchTrack" aria-hidden="true"><i></i></span><span>QUANT</span>
+              </button>
+              <button id="swingEnabled" aria-pressed="true" title="Enable or bypass Swing">
                 <span class="switchTrack" aria-hidden="true"><i></i></span><span>SWING</span>
               </button>
             </div>
           </div>
           <div class="datafoot">
-            <span><i></i> SYNTHESIS</span
-            ><button id="unlock" title="Remove every parameter lock on the current step">CLEAR LOCKS</button>
+            <span><i></i> SYNTHESIS</span>
+            <button id="unlock" title="Remove every parameter lock on the current step">CLEAR LOCKS</button>
           </div>
         </div>
       </section>

@@ -128,8 +128,23 @@ header b {
     inset 0 -3px 4px #000b,
     1px 4px 5px #222b2377;
   position: relative;
+  /* The wheel rotates under the pointer; touch drags must not scroll the page. */
+  touch-action: none;
+  cursor: grab;
 }
+#jog:active {
+  cursor: grabbing;
+}
+/* Rotation layer: spans the whole wheel and turns around its centre. The notch index
+   dot is drawn by ::after so it can spin with the wheel face. */
 #jog span {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--jog, 0deg));
+  pointer-events: none;
+}
+#jog span::after {
+  content: '';
   position: absolute;
   width: 20%;
   height: 20%;
