@@ -321,6 +321,38 @@ $('#steps').onpointermove = (e) => {
   render();
   save();
 };
+// While a step drag is in progress the wheel must never scroll the page: the paint-drag reads
+// document.elementFromPoint against a layout that must not move under the pointer, and a scroll
+// mid-drag also lands the cursor somewhere the musician never intended. Non-passive so the
+// preventDefault is allowed; with nothing held this listener does nothing at all.
+document.addEventListener(
+  'wheel',
+  (e) => {
+    if (held) e.preventDefault();
+  },
+  { passive: false },
+);
+// The panel hint promises "hold a step + scroll wheel to lock params". Over a knob, the knob's
+// own wheel handler already does that; over the step grid the wheel mirrors the up/down arrow
+// keys (SYNTH pitch / FX send A), and change() writes the result as a parameter lock for the
+// held step.
+$('#steps').addEventListener(
+  'wheel',
+  (e) => {
+    if (!held) return;
+    e.preventDefault();
+    change(
+      'pitch',
+      (editPage === 'lfo'
+        ? lfoValue('pitch')
+        : editPage === 'fx'
+          ? fxValue('pitch')
+          : (isLocked() ? resolved(current(), selected()) : current().p).pitch) +
+        (e.deltaY < 0 ? 1 : -1) * increment('pitch'),
+    );
+  },
+  { passive: false },
+);
 function releaseHold(e) {
   if (!held || (e && e.pointerId !== held.pointer)) return;
   if (!e || held.changed || performance.now() - held.started > 200)
