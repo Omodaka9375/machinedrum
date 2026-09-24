@@ -1,4 +1,3 @@
-import { LinkClock } from './link.js';
 import { migrateLfo, lfoRate } from './lfo.js';
 import { migrateFx } from './fx.js';
 import {
@@ -57,50 +56,6 @@ const audio = new Audio(
     renderPatterns();
   },
 );
-let resumeWithLink = false;
-const link = new LinkClock(
-  (label, bpm, first) => {
-    $('#linkToggle').textContent = label;
-    $('#linkToggle').classList.toggle('active', link.ready);
-    $('#linkToggle').setAttribute('aria-pressed', link.ready);
-    if (bpm) {
-      project.bpm = bpm;
-      if (document.activeElement !== $('#lcdTempo')) $('#lcdTempo').value = bpm.toFixed(1);
-    }
-    if (first && resumeWithLink) {
-      resumeWithLink = false;
-      play(true);
-    }
-    if (label === 'LINK OFF') {
-      if (audio.playing) stop(true);
-      status('Link disconnected. Start the bridge, then click LINK to reconnect.');
-    }
-  },
-  (playing) => {
-    if (playing && !audio.playing) play(true);
-    else if (!playing && audio.playing) stop(true);
-  },
-);
-audio.link = link;
-$('#linkToggle').onclick = async () => {
-  if (link.ws) {
-    link.disconnect();
-    return;
-  }
-  resumeWithLink = audio.playing;
-  if (audio.playing) stop(true);
-  try {
-    await audio.init();
-    link.connect();
-  } catch {
-    status('Cannot open audio. Try LINK again.');
-  }
-};
-$('#linkSync').onclick = () => {
-  link.setSync(!link.sync);
-  $('#linkSync').setAttribute('aria-pressed', link.sync);
-  $('#linkSync').classList.toggle('active', link.sync);
-};
 audio.isRecording = () => recording;
 audio.onCount = (n) => {
   $('#lcdState').textContent = 'COUNT ' + n;
@@ -503,7 +458,7 @@ for (const b of document.querySelectorAll('.knob')) {
   };
   b.ondblclick = audition;
 }
-async function play(remote = false) {
+async function play() {
   if (starting) return;
   if (audio.playing) {
     stop();
@@ -512,7 +467,6 @@ async function play(remote = false) {
   starting = true;
   try {
     await audio.start(pattern, recording);
-    if (!remote) link.transport(true);
     $('#play').innerHTML =
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h5v16H5zM14 4h5v16h-5z"/></svg>';
     $('#play').setAttribute('aria-label', 'Pause');
@@ -523,8 +477,7 @@ async function play(remote = false) {
     starting = false;
   }
 }
-function stop(remote = false) {
-  if (!remote) link.transport(false);
+function stop() {
   recording = false;
   gridMode = 'sequence';
   gesture = null;
@@ -1092,7 +1045,6 @@ function setTempo(value) {
   const number = Number(value);
   if (String(value).trim() !== '' && Number.isFinite(number)) {
     project.bpm = Math.max(40, Math.min(240, number));
-    if (link.ready) link.send({ type: 'tempo', bpm: project.bpm });
     save();
   }
   $('#lcdTempo').value = project.bpm.toFixed(1);

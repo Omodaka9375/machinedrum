@@ -27,13 +27,11 @@
   // What this gate covers, and why:
   //
   //   - Included: files this project owns that stand alone (only node:* imports) — the static
-  //     server, the Link bridge, the icon generator — plus vite.config.js.
+  //     server and the icon generator — plus vite.config.js.
   //   - NOT included: the instrument (app.js, audio.js, drums.js, fx.js, info.js, lfo.js,
-  //     link.js, model.js) and link-bridge.test.mjs, which imports ./link.js and would pull
-  //     instrument code back into the program. Forcing strict types through ~3,500 lines of
-  //     plain-JS DOM code is a large refactor with real risk to a working instrument; a narrow
-  //     gate is the honest scope. `npm run check` still covers the test file — by executing it
-  //     (21 runtime assertions), which exercises far more than tsc would.
+  //     model.js). Forcing strict types through ~3,500 lines of plain-JS DOM code is a large
+  //     refactor with real risk to a working instrument; a narrow gate is the honest scope.
+  //     `npm run test` covers the behavioural suites by executing them.
   //   - index.html is not JS and is not affected by checkJs.
-  "include": ["vite.config.js", "serve.mjs", "link-bridge.mjs", "scripts/make-icons.mjs"]
+  "include": ["vite.config.js", "serve.mjs", "scripts/make-icons.mjs"]
 }

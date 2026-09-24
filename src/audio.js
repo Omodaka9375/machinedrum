@@ -129,9 +129,7 @@ export class Audio {
     /** @type {import('./fx.js').Effects | null} */
     this.effects = null;
 
-    // Hooks assigned from app.js — this class cannot reach UI state or the link session directly.
-    /** @type {import('./link.js').LinkClock | null} */
-    this.link = null;
+    // Hooks assigned from app.js — this class cannot reach UI state directly.
     /** @type {(() => boolean) | null} */
     this.isRecording = null;
     /** @type {((n: number) => void) | null} */
@@ -217,11 +215,6 @@ export class Audio {
     this.skipHits = [];
     this.step = 0;
     this.next = this.ctx.currentTime + 0.015;
-    this.linkBeat = null;
-    if (this.link?.ready) {
-      this.linkBeat = Math.ceil(this.link.beatAt(performance.now() + 150) / 4) * 4;
-      this.next = this.link.audioTime(this.linkBeat, this.ctx);
-    }
     this.lfoEpoch = this.next + (countIn ? (4 * 60) / this.get().bpm : 0);
     this.counting = countIn;
     this.metronome.gain.value = countIn ? 1 : 0;
@@ -233,7 +226,6 @@ export class Audio {
         this.events.push({ time: at, count: 4 - i });
       }
       this.next += 4 * beat;
-      if (this.linkBeat !== null) this.linkBeat += 4;
       this.countEnd = this.next;
     }
     this.clock = setInterval(() => this.schedule(), 20);
@@ -266,21 +258,8 @@ export class Audio {
     if (!t.mute) this.trigger(t, s, now + 0.003);
     return position;
   }
-  linkTime() {
-    if (!this.link?.ready || this.linkBeat === null) return;
-    const p = this.get(),
-      swing = p.swingEnabled === false ? 0 : p.swing;
-    this.next = this.link.audioTime(this.linkBeat + (this.step % 2 ? swing / 400 : 0), this.ctx);
-  }
   schedule() {
     const p = this.get();
-    this.linkTime();
-    if (this.link?.ready && this.next < this.ctx.currentTime - 0.05) {
-      // A suspended tab cannot replay missed beats; resume on a future bar.
-      this.linkBeat = Math.ceil(this.link.beatAt(performance.now() + 150) / 4) * 4;
-      this.step = 0;
-      this.linkTime();
-    }
     while (this.next < this.ctx.currentTime + 0.07) {
       if (this.step === 0 && this.pending !== null) {
         this.pattern = this.pending;
@@ -305,10 +284,6 @@ export class Audio {
       this.skipHits = this.skipHits.filter((h) => h.time > this.next);
       this.next += duration(p.bpm, p.swingEnabled === false ? 0 : p.swing, this.step);
       this.step = (this.step + 1) % 16;
-      if (this.link?.ready && this.linkBeat !== null) {
-        this.linkBeat += 0.25;
-        this.linkTime();
-      }
     }
   }
   tick() {

@@ -2,7 +2,7 @@
   "name": "machinedrum",
   "version": "1.0.0",
   "private": true,
-  "description": "Standalone Web Audio drum machine with a local Link session bridge",
+  "description": "Standalone Web Audio drum machine",
   "type": "module",
   "packageManager": "pnpm@10.23.0",
   "scripts": {
@@ -12,8 +12,7 @@
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/make-icons.mjs",
     "serve": "node serve.mjs",
-    "link": "node link-bridge.mjs",
-    "test": "node link-bridge.test.mjs && node fx.test.mjs && node save.test.mjs",
+    "test": "node fx.test.mjs && node save.test.mjs",
     "check": "pnpm run typecheck && pnpm run test"
   },
   "devDependencies": {

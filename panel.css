@@ -1594,14 +1594,12 @@ footer {
   touch-action: none;
 }
 
-#linkToggle,
-#linkSync {
+#info {
   font: 10px monospace;
   padding: 8px;
   white-space: nowrap;
 }
-#linkToggle.active,
-#linkSync.active {
+#info.active {
   color: #c7eaaa;
   box-shadow: inset 0 0 5px #a3d87366;
 }
@@ -1627,11 +1625,6 @@ footer {
   }
   #info {
     margin-left: 0;
-    padding: 6px;
-  }
-  #linkToggle,
-  #linkSync {
-    font-size: 8px;
     padding: 6px;
   }
   .machine {
@@ -1891,8 +1884,7 @@ footer {
   flex: none;
   pointer-events: none;
 }
-#info,
-#linkToggle {
+#info {
   font: 10px/1 monospace;
   letter-spacing: 0;
   width: 64px;
@@ -1904,8 +1896,7 @@ footer {
   justify-content: center;
 }
 @media (max-width: 700px) {
-  #info,
-  #linkToggle {
+  #info {
     font-size: 8px;
     width: 44px;
     height: 26px;
@@ -1983,10 +1974,8 @@ footer {
     0 1px 2px #17221799,
     inset 0 1px #acb69b;
 }
-#linkToggle,
-#linkSync,
 #info {
-  height: 32px;
+  ght: 32px;
   font: 10px/1 monospace;
   letter-spacing: 0;
   border: 1px solid #171d1d;
@@ -2001,10 +1990,6 @@ footer {
   justify-content: center;
   appearance: none;
   -webkit-appearance: none;
-}
-#linkSync {
-  padding: 0 9px;
-  flex-shrink: 0;
 }
 .screw {
   font-size: 0;
@@ -2036,8 +2021,6 @@ footer {
   height: 9px;
 }
 @media (max-width: 700px) {
-  #linkToggle,
-  #linkSync,
   #info {
     height: 26px;
     font-size: 8px;
