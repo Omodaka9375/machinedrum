@@ -1,4 +1,7 @@
 export const defaultFx = () => ({ time: 300, feedback: 35, delay: 30, room: 1.5, reverb: 25 });
+
+// Trailing debounce for reverb IR regeneration — see Effects.update().
+const IR_DEBOUNCE_MS = 120;
 export function migrateFx(p) {
   p.fx = { ...defaultFx(), ...p.fx };
   p.tracks.forEach((t) => {
@@ -23,6 +26,11 @@ export class Effects {
     this.echo.gain.value = 0;
     this.wet.gain.value = 0;
     this.delay.delayTime.value = 0.3;
+    // IR regeneration state. `room` is the tail length the current buffer was built for;
+    // `pendingRoom` + `roomTimer` debounce DECAY-knob rebuilds (see update).
+    this.room = undefined;
+    this.pendingRoom = undefined;
+    this.roomTimer = null;
     this.delay.connect(this.feedback);
     this.feedback.connect(this.delay);
     this.delay.connect(this.echo);
@@ -56,18 +64,43 @@ export class Effects {
       this.inputs[i].r.gain.setTargetAtTime(track.send.reverb / 100, t, 0.02);
     });
     if (this.room !== f.room) {
-      this.room = f.room;
-      const b = c.createBuffer(2, Math.ceil(c.sampleRate * f.room), c.sampleRate);
-      let seed = 123;
-      for (let ch = 0; ch < 2; ch++) {
-        const a = b.getChannelData(ch);
-        for (let i = 0; i < a.length; i++) {
-          seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-          a[i] = (seed / 2147483648 - 1) * Math.pow(1 - i / a.length, 2.5);
-        }
-      }
-      this.reverb.buffer = b;
+      // The first build must be synchronous: init() runs on the gesture that starts the app and
+      // the wet path must not be silent. Later changes (the DECAY knob) are trailing-debounced:
+      // update() fires per input event while dragging, and regenerating up to 384k samples of
+      // noise IR per tick (14-36 ms measured on the main thread) both janks the UI and clicks,
+      // because every raw ConvolverNode buffer swap restarts the convolution. Gains above keep
+      // updating live on every event; only the buffer swap waits for the knob to settle.
+      if (this.room === undefined) this.buildIR(f.room);
+      else this.scheduleIR(f.room);
+    } else if (this.pendingRoom !== undefined) {
+      // The knob returned to the value the current buffer was built for — cancel the rebuild.
+      clearTimeout(this.roomTimer);
+      this.roomTimer = null;
+      this.pendingRoom = undefined;
     }
+  }
+  scheduleIR(room) {
+    this.pendingRoom = room;
+    clearTimeout(this.roomTimer);
+    this.roomTimer = setTimeout(() => {
+      this.roomTimer = null;
+      const target = this.pendingRoom;
+      this.pendingRoom = undefined;
+      if (target !== undefined && this.ctx.state !== 'closed') this.buildIR(target);
+    }, IR_DEBOUNCE_MS);
+  }
+  buildIR(room) {
+    this.room = room;
+    const b = this.ctx.createBuffer(2, Math.ceil(this.ctx.sampleRate * room), this.ctx.sampleRate);
+    let seed = 123;
+    for (let ch = 0; ch < 2; ch++) {
+      const a = b.getChannelData(ch);
+      for (let i = 0; i < a.length; i++) {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        a[i] = (seed / 2147483648 - 1) * Math.pow(1 - i / a.length, 2.5);
+      }
+    }
+    this.reverb.buffer = b;
   }
 }
 
