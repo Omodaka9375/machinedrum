@@ -1,5 +1,18 @@
+/* The panel is an instrument faceplate: silkscreen labels (h2s, port legends, LCD readouts) are
+   not copyable text, and drag-selecting them during performance is noise. Select everything OFF
+   at the root, then re-enable exactly where text is the point: input fields (BPM, swing), the
+   field-guide dialog, and the footer note. */
 body {
   padding: 24px 2.5vw;
+  user-select: none;
+  -webkit-user-select: none;
+}
+input,
+#manual,
+#status,
+.patternConfirm {
+  user-select: text;
+  -webkit-user-select: text;
 }
 header {
   margin-bottom: 18px;

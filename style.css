@@ -131,11 +131,16 @@ input {
 button {
   cursor: pointer;
 }
-button:focus-visible,
-select:focus-visible,
-input:focus-visible {
+/* Buttons keep the focus ring: they are pure chrome and the ring is the only focus cue on
+   the dark panel. Form controls (select/input) do not — the red ring reads as an error state
+   on the panel, and the controls already show their own focus treatment. */
+button:focus-visible {
   outline: 2px solid var(--red);
   outline-offset: 4px;
+}
+select:focus-visible,
+input:focus-visible {
+  outline: none;
 }
 button {
   background: linear-gradient(#394040, #222829);
@@ -917,6 +922,11 @@ button {
   letter-spacing: 1px;
   margin: 0 0 17px;
   color: #5b6556;
+}
+.choker select:focus-visible {
+  outline: none;
+  border-color: #5f6a5b;
+  box-shadow: inset 0 0 0 2px #5f6a5b;
 }
 .choker select {
   background: #bbc2b0;
