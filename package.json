@@ -4,6 +4,7 @@
   "private": true,
   "description": "Standalone Web Audio drum machine with a local Link session bridge",
   "type": "module",
+  "packageManager": "pnpm@10.23.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,12 +14,17 @@
     "serve": "node serve.mjs",
     "link": "node link-bridge.mjs",
     "test": "node link-bridge.test.mjs && node fx.test.mjs && node save.test.mjs",
-    "check": "npm run typecheck && npm run test"
+    "check": "pnpm run typecheck && pnpm run test"
   },
   "devDependencies": {
     "@types/node": "^24",
     "typescript": "^5",
     "vite": "^7",
     "vite-plugin-pwa": "^1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

@@ -1,0 +1,6 @@
+# pnpm v10+ reads build-script approvals from this file, not from package.json's pnpm field
+# (that one is ignored since v10). esbuild needs its postinstall to place the platform binary;
+# without it vite build dies with "The esbuild loader is not installed".
+
+onlyBuiltDependencies:
+  - esbuild
