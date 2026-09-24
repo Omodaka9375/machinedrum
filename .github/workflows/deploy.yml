@@ -3,14 +3,14 @@
 # Requirements on the repo (Settings → Pages):
 #   Source: GitHub Actions
 #
-# Pushes to master rebuild the site. The workflow is the current Pages pattern (v4):
+# Pushes to main rebuild the site. The workflow is the current Pages pattern (v4):
 # one job uploads the artifact, the predefined pages-deploy job delivers it.
 
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
