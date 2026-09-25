@@ -569,9 +569,10 @@ canvas {
   white-space: nowrap;
 }
 /* Status line moved into the displaycase, under the SPS-1 plate: same small-print face as
-   the label row, muted green like the LCD readouts. */
+   the label row. Panel gray, not the pale LCD green — on the displaycase's dark gradient
+   the green washed out; this gray stays readable. */
 #status {
-  color: #bfcaaf;
+  color: #adb8ae;
   margin: 10px 0 0;
   font-size: 8px;
   letter-spacing: 0.4px;
