@@ -3,7 +3,6 @@
 //
 //   node midi.test.mjs        (also runs as part of `pnpm test`)
 
-import assert from 'node:assert/strict';
 import {
   parseMidiMessage,
   parseBlePacket,
@@ -137,7 +136,9 @@ ok(trackFromNote('x') === null, 'non-number is null');
 // ---- velocityScale ----------------------------------------------------------------------
 
 ok(velocityScale(127) === 1, 'velocity 127 -> 1.0');
-ok(Math.abs(velocityScale(64) - 64 / 127) < 1e-12, 'velocity 64 scales');
+// velocityScale returns number|null, so the scaling case needs the null branch settled first.
+const v64 = /** @type {number} */ (velocityScale(64));
+ok(Math.abs(v64 - 64 / 127) < 1e-12, 'velocity 64 scales');
 ok(velocityScale(0) === null, 'velocity 0 is not a playable hit');
 ok(velocityScale(-5) === null, 'negative velocity is null');
 ok(velocityScale(200) === 1, 'oversized velocity clamps to 1');

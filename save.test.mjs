@@ -6,7 +6,6 @@
 //
 //   node save.test.mjs        (also runs as part of `npm test`)
 
-import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 let passed = 0;
@@ -35,17 +34,33 @@ const region = src.slice(start, src.indexOf('});', end) + 3);
 
 // --- browser shims ------------------------------------------------------------------------
 const writes = [];
+/** @type {{ pagehide: (() => void)[], visibilitychange: (() => void)[] }} */
 const listeners = { pagehide: [], visibilitychange: [] };
 
-// Bare identifiers used by the extracted region.
-globalThis.localStorage = {
+// Bare identifiers used by the extracted region. These are deliberately PARTIAL shims — only the
+// members the code under test touches — so they are installed with defineProperty instead of
+// assignment, which is how a test double replaces a global without claiming to be a complete
+// Storage/Window/Document. (The checker rejects claiming those full types, and it should.)
+const storageShim = {
   setItem(k, v) {
     writes.push({ k, v });
   },
   getItem: () => null,
 };
-globalThis.window = { addEventListener: (ev, fn) => listeners[ev].push(fn) };
-globalThis.document = { addEventListener: (ev, fn) => listeners[ev].push(fn), visibilityState: 'visible' };
+const windowShim = { addEventListener: (ev, fn) => listeners[ev].push(fn) };
+const documentShim = {
+  addEventListener: (ev, fn) => listeners[ev].push(fn),
+  visibilityState: 'visible',
+};
+/** @type {[string, object][]} */
+const shims = [
+  ['localStorage', storageShim],
+  ['window', windowShim],
+  ['document', documentShim],
+];
+for (const [name, shim] of shims) {
+  Object.defineProperty(globalThis, name, { value: shim, configurable: true, writable: true });
+}
 
 // The region references key/project/saveTimer; key and project are app.js module scope, so the
 // test redefines them as globals via a tiny prelude before running the region verbatim.
@@ -91,7 +106,7 @@ ok(writes.length === before + 1, 'no duplicate write after the debounce would ha
 // --- 4. visibilitychange → hidden flushes too ------------------------------------------------
 api.save();
 ok(listeners.visibilitychange.length === 1, 'visibilitychange hook registered');
-globalThis.document.visibilityState = 'hidden';
+documentShim.visibilityState = 'hidden'; // the region's global `document` is this same object
 listeners.visibilitychange[0]();
 ok(writes.length === before + 2, 'hidden flushes the pending write', `writes=${writes.length}`);
 

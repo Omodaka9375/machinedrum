@@ -363,7 +363,7 @@ canvas {
 }
 .datahead {
   padding: 20px 25px 0;
-  justify-content: space-between;
+  justify-content: center;
 }
 .datahead h2 {
   margin-bottom: 8px;
@@ -504,8 +504,19 @@ canvas {
   /* Three buttons, three columns — always; each label then centers under its own button. */
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  align-content: center;
+  /* Both columns of .performance anchor their first row (the h2) to the shared 30px top
+     padding. align-content: center used to float the content, but once the titles were added
+     the taller column decided the row height and the shorter one parked its title mid-air. */
+  align-content: start;
   border-right: 1px solid #89917f;
+}
+.transport h2 {
+  /* "TRANSPORT" above the REC/PLAY/STOP buttons, mirroring PATTERN SELECTION / KIT. It spans
+     the button row; align-content: start on the container pins it to the top padding. */
+  grid-column: 1/-1;
+  text-align: center;
+  font-size: 8px;
+  margin-bottom: 13px;
 }
 .transport button {
   width: 100%;
@@ -519,21 +530,21 @@ canvas {
   padding: 30px 15px 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  align-content: center;
+  align-content: start;
   gap: 9px;
-  /* Top padding matches .transport's so the button rows start on the same line. */
+  /* Top padding matches .transport's so the title rows start on the same line. */
 }
 .kitactions h2 {
-  /* Visually the buttons lead (like REC/PLAY/STOP above the transport legend); the KIT
-     heading becomes the label row underneath them. */
-  order: 2;
+  /* KIT labels the STORE/RELOAD row above the buttons, mirroring TRANSPORT / PATTERN
+     SELECTION. order: 1 paints the heading first in the grid despite following in the DOM. */
+  order: 1;
   grid-column: 1/-1;
   text-align: center;
   font-size: 8px;
-  margin: 0;
+  margin: 0 0 13px;
 }
 .kitactions button {
-  order: 1;
+  order: 2;
   font-size: 8px;
   padding: 8px 3px;
   width: 100%;
@@ -1285,6 +1296,26 @@ canvas {
 #manual::backdrop {
   background: #0d1416b8;
 }
+/* Dialogs scroll with the OS-default scrollbar, which on Windows is a chunky grey bar that
+   fights the paper theme. Slim it and tint the thumb/track from the chrome's own palette. */
+#manual {
+  scrollbar-width: thin;
+  scrollbar-color: #8f9790 #d5d7cd;
+}
+#manual::-webkit-scrollbar {
+  width: 10px;
+}
+#manual::-webkit-scrollbar-track {
+  background: #d5d7cd;
+}
+#manual::-webkit-scrollbar-thumb {
+  background: #8f9790;
+  border-radius: 5px;
+  border: 1px solid #a2aa9b;
+}
+#manual::-webkit-scrollbar-thumb:hover {
+  background: #7d857e;
+}
 .manualTop {
   display: flex;
   justify-content: space-between;
@@ -1944,6 +1975,9 @@ canvas {
   .transport {
     padding: 6px;
     gap: 5px;
+  }
+  .transport h2 {
+    display: none;
   }
   .transport button {
     height: 28px;

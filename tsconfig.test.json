@@ -1,0 +1,15 @@
+{
+  // Typechecks the behavioural suites, which the root tsconfig deliberately leaves out.
+  //
+  // These files are Node scripts that stub browser globals, so they need @types/node (for
+  // node:assert / node:fs / process) and they legitimately assign partial shims to globals that
+  // the DOM lib declares as complete objects. Hence noUncheckedIndexedAccess off and the
+  // assignments kept readable rather than boxed in casts.
+  //
+  //   npx tsc -p tsconfig.test.json     (also run by `npm run check`)
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["*.test.mjs"]
+}

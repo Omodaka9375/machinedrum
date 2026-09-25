@@ -36,6 +36,21 @@
         <span class="portreset" aria-hidden="false"
           ><button id="demo" title="Factory reset: load the four demo patterns and default sounds">
             FACTORY RESET
+          </button>
+          <button
+            id="info"
+            aria-label="Field guide"
+            aria-expanded="false"
+            title="Field guide: shortcuts, live recording, FX, MIDI"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill-rule="evenodd"
+                d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z"
+              />
+              <rect x="11" y="10" width="2" height="7" />
+              <rect x="11" y="6.4" width="2" height="2" />
+            </svg>
           </button></span
         >
       </div>
@@ -102,7 +117,7 @@
         </div>
         <div class="data">
           <div class="maker">MACHINEDRUM<span>16 VOICE DIGITAL SYNTHESIS</span></div>
-          <div class="datahead"><h2>DATA ENTRY</h2></div>
+          <div class="datahead"><h2>PARAMETERS</h2></div>
           <div class="databody">
             <div class="tempo">
               <label>SWING %<input id="swing" type="number" min="0" max="60" value="8" /></label>
@@ -162,6 +177,7 @@
         </div>
         <div class="performance">
           <div class="transport">
+            <h2>TRANSPORT</h2>
             <button id="record" aria-label="Live record" title="R: toggle live recording">●</button
             ><button id="play" aria-label="Play">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3 21 12 7 21Z" /></svg></button

@@ -27,11 +27,24 @@
   // What this gate covers, and why:
   //
   //   - Included: files this project owns that stand alone (only node:* imports) — the static
-  //     server and the icon generator — plus vite.config.js.
-  //   - NOT included: the instrument (app.js, audio.js, drums.js, fx.js, info.js, lfo.js,
-  //     model.js). Forcing strict types through ~3,500 lines of plain-JS DOM code is a large
-  //     refactor with real risk to a working instrument; a narrow gate is the honest scope.
-  //     `npm run test` covers the behavioural suites by executing them.
+  //     server and the icon generator — plus vite.config.js, and the src modules that pass strict
+  //     as they stand: the synthesis/model layer (drums.js, lfo.js, fx.js, model.js, which need no
+  //     annotations at all) and the two whose DOM usage is small enough to type honestly
+  //     (midi.js — Web MIDI plus a declared slice of Web Bluetooth — and info.js, the manual).
+  //   - NOT included: app.js, audio.js. These are the DOM/sequencer glue, and forcing strict
+  //     through them is a large refactor with real risk to a working instrument; a narrow gate is
+  //     the honest scope. `npm run test` covers the behavioural suites by executing them, and
+  //     tsconfig.test.json typechecks the suites themselves.
   //   - index.html is not JS and is not affected by checkJs.
-  "include": ["vite.config.js", "serve.mjs", "scripts/make-icons.mjs"]
+  "include": [
+    "vite.config.js",
+    "serve.mjs",
+    "scripts/make-icons.mjs",
+    "src/model.js",
+    "src/lfo.js",
+    "src/fx.js",
+    "src/drums.js",
+    "src/midi.js",
+    "src/info.js"
+  ]
 }

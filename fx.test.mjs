@@ -7,7 +7,6 @@
 //
 //   node fx.test.mjs        (also runs as part of `npm test`)
 
-import assert from 'node:assert/strict';
 import { Effects, stepFx, defaultFx, migrateFx } from './src/fx.js';
 
 let passed = 0;
@@ -66,7 +65,13 @@ function stubCtx() {
   return ctx;
 }
 
+// @typedef for the step shape used across these stubs. Declared so the literal that follows has
+// a base to be checked against — fxLocks is a real field stepFx reads, and test 6 writes one.
+/**
+ * @typedef {{ on: boolean, locks: Record<string, number>, fxLocks?: Record<string, number> }} StubStep
+ */
 const project = () => {
+  /** @type {{ fx: ReturnType<typeof defaultFx>, tracks: { mute: boolean, send: { delay: number, reverb: number } }[], patterns: StubStep[][][] }} */
   const p = {
     fx: { ...defaultFx(), room: 1.5 },
     tracks: Array.from({ length: 16 }, () => ({ mute: false, send: { delay: 0, reverb: 0 } })),

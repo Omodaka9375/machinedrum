@@ -10,10 +10,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "typecheck-tests": "tsc -p tsconfig.test.json --noEmit",
     "icons": "node scripts/make-icons.mjs",
     "serve": "node serve.mjs",
-    "test": "node fx.test.mjs && node save.test.mjs && node jog.test.mjs && node wheel.test.mjs && node midi.test.mjs",
-    "check": "pnpm run typecheck && pnpm run test"
+    "test": "node fx.test.mjs && node shape.test.mjs && node save.test.mjs && node jog.test.mjs && node wheel.test.mjs && node midi.test.mjs",
+    "check": "pnpm run typecheck && pnpm run typecheck-tests && pnpm run test"
   },
   "devDependencies": {
     "@types/node": "^24",

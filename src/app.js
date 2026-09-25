@@ -10,6 +10,7 @@ import {
   storeKit,
   reloadKit,
   recordParameter,
+  validShapes,
 } from './model.js';
 import { Audio } from './audio.js';
 import { MidiEngine, BleMidi, TempoEstimator, trackFromNote, velocityScale } from './midi.js';
@@ -18,7 +19,7 @@ const $ = (s) => document.querySelector(s),
 let project = demo();
 try {
   const saved = JSON.parse(localStorage.getItem(key));
-  if (saved?.version === 1) project = saved;
+  if (saved?.version === 1 && validShapes(saved)) project = saved;
 } catch {}
 migrateFx(project);
 migrateLfo(project);

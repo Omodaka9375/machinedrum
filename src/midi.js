@@ -228,6 +228,26 @@ export class TempoEstimator {
   }
 }
 
+// Web Bluetooth is not in TypeScript's DOM lib, so the slice this client touches is declared
+// rather than cast to any at the call site. It is reached only through the
+// `'bluetooth' in navigator` guard in connect(), which narrows navigator.bluetooth to unknown.
+/**
+ * @typedef {{ startNotifications: () => Promise<void>,
+ *   addEventListener: (type: 'characteristicvaluechanged', fn: (e: { target: { value: DataView } }) => void) => void }}
+ *   BleCharacteristic
+ * @typedef {{ connected: boolean,
+ *   connect: () => Promise<{ getPrimaryService: (id: string) => Promise<{
+ *     getCharacteristic: (id: string) => Promise<BleCharacteristic> }>
+ *   }>,
+ *   disconnect: () => void }}
+ *   BleGatt
+ * @typedef {{ name?: string, gatt: BleGatt,
+ *   addEventListener: (type: 'gattserverdisconnected', fn: () => void) => void }}
+ *   BleDevice
+ * @typedef {{ requestDevice: (o: { filters: { services: string[] }[] }) => Promise<BleDevice> }}
+ *   BleApi
+ */
+
 /**
  * Web MIDI engine: navigator.requestMIDIAccess, listens to every input, dispatches parsed
  * events, and sends sequencer notes to the first output. No browser access happens at import
@@ -254,9 +274,12 @@ export class MidiEngine {
     if (!('requestMIDIAccess' in navigator)) throw new Error('Web MIDI is not supported here');
     this.access = await navigator.requestMIDIAccess({ sysex: false });
     this.outputs = [...this.access.outputs.values()];
+    // Bind the callback to the access object it was registered on: it re-reads the live input /
+    // output maps of that same MIDIAccess, and it keeps `access` narrowed for the checker.
+    const access = this.access;
     const rebind = () => {
-      this.outputs = [...this.access.outputs.values()];
-      this.onStatus('midi', this.connected, `${this.access.inputs.size} input(s)`);
+      this.outputs = [...access.outputs.values()];
+      this.onStatus('midi', this.connected, `${access.inputs.size} input(s)`);
     };
     this.access.onstatechange = rebind;
     for (const input of this.access.inputs.values()) {
@@ -308,7 +331,8 @@ export class BleMidi {
   }
   async connect() {
     if (!('bluetooth' in navigator)) throw new Error('Web Bluetooth is not supported here');
-    this.device = await navigator.bluetooth.requestDevice({
+    const bt = /** @type {BleApi} */ (navigator.bluetooth);
+    this.device = await bt.requestDevice({
       filters: [{ services: [BLE_MIDI_SERVICE] }],
     });
     this.device.addEventListener('gattserverdisconnected', () => {
@@ -325,7 +349,10 @@ export class BleMidi {
     return this.name;
   }
   disconnect() {
-    if (this.connected) this.device.gatt.disconnect();
+    // Read the device into a local rather than going through `this.connected`, whose boolean
+    // does not narrow `this.device` for the checker.
+    const device = this.device;
+    if (device?.gatt.connected) device.gatt.disconnect();
     this.characteristic = null;
   }
 }

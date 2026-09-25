@@ -121,6 +121,48 @@ export const soundInfo = {
   },
 };
 
+const isRecord = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
+
+/**
+ * Structural validation for a project read back from localStorage. Checking `version` alone is
+ * not enough: a save from another build can carry the same version number with a shorter or
+ * differently shaped tree, and the renderer dereferences `tracks[i].p` and `step.locks`
+ * unconditionally — so one missing entry becomes a throw on the first render and the user sees a
+ * blank panel instead of the instrument. Rejecting anything not fully formed makes a malformed
+ * payload fall back to the factory demo, which always renders.
+ *
+ * Fields that migrateFx()/migrateLfo() backfill (fx, send, lfo) and the genuinely optional ones
+ * (choke, fxLocks, offset) are deliberately NOT required — this only checks the skeleton.
+ */
+export function validShapes(project) {
+  if (!isRecord(project)) return false;
+  for (const field of ['bpm', 'swing', 'master']) {
+    if (typeof project[field] !== 'number' || !Number.isFinite(project[field])) return false;
+  }
+  if (!Array.isArray(project.tracks) || project.tracks.length !== names.length) return false;
+  for (const t of project.tracks) {
+    if (!isRecord(t) || !engines.includes(t.engine)) return false;
+    if (!isRecord(t.p)) return false;
+    for (const param of params) {
+      if (typeof t.p[param] !== 'number' || !Number.isFinite(t.p[param])) return false;
+    }
+  }
+  if (!Array.isArray(project.patterns) || project.patterns.length !== 4) return false;
+  for (const pattern of project.patterns) {
+    if (!Array.isArray(pattern) || pattern.length !== names.length) return false;
+    for (const steps of pattern) {
+      if (!Array.isArray(steps) || steps.length !== 16) return false;
+      for (const s of steps) {
+        if (!isRecord(s) || typeof s.on !== 'boolean') return false;
+        if (!isRecord(s.locks)) return false;
+        if (s.fxLocks !== undefined && !isRecord(s.fxLocks)) return false;
+        if (s.offset !== undefined && !Number.isFinite(s.offset)) return false;
+      }
+    }
+  }
+  return true;
+}
+
 export function storeKit(project) {
   project.savedKit = project.tracks.map(({ engine, choke, p, send, lfo }) => ({
     lfo: clone(lfo),

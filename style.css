@@ -326,7 +326,7 @@ canvas {
 .datahead {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  justify-content: center;
 }
 .datahead select {
   background: transparent;
