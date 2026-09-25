@@ -39,37 +39,31 @@ header b {
   padding-top: 4px;
 }
 /* MIDI/BT buttons live in the portline's middle cell where the A B INPUT legend was. They are
-   functional controls on a decorative strip, so they keep their own hit areas and a lit state
-   matching the panel's LCD-green highlight. */
+   printed as silkscreen labels in the same face as the port legends around them (the .portline
+   font/color cascade through), styled as text — no border, no button chrome — so they read as
+   part of the legend. Still real buttons: cursor, hit area, and an LCD-green lit state when a
+   transport is connected. */
 .portmidi {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 14px;
   padding-top: 2px;
 }
 .portmidi button {
-  width: 26px;
-  height: 26px;
-  padding: 0;
+  font: inherit;
+  letter-spacing: 0.3px;
+  line-height: 13px;
+  padding: 2px 4px;
   flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #171d1d;
-  border-radius: 4px;
-  background: linear-gradient(#394040, #222829);
-  color: #8e9689;
-}
-.portmidi button svg {
-  display: block;
-  width: 15px;
-  height: 15px;
-  fill: currentColor;
+  border: 0;
+  background: none;
+  color: #4d554a;
+  cursor: pointer;
 }
 .portmidi button.active {
   color: #c3cd9f;
-  box-shadow: inset 0 0 5px #a3d87366;
+  text-shadow: 0 0 5px #a3d87388;
 }
 .upper {
   grid-template-columns: 30% 30% 40%;
