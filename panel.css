@@ -45,11 +45,12 @@ header b {
    transport is connected. */
 .portmidi {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 14px;
-  /* Identical to .portline span's padding-top, so the labels share the legend's baseline
-     rather than the flex-center of the 38px row. */
+  /* Identical to .portline span's padding-top so the labels share the legend's first-line
+     baseline. align-items: flex-start, not center — the row is 38px tall and a centered
+     13px line would sit ~10px below the PHONES/label lines. */
   padding-top: 4px;
 }
 .portmidi button {
@@ -89,7 +90,7 @@ header b {
    overridden — factory reset never gets a "connected" state, but the guard keeps it consistent. */
 .portreset {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding-top: 4px;
 }
