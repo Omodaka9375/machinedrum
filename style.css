@@ -578,13 +578,6 @@ footer {
   font-size: 10px;
   color: #97a19b;
 }
-footer button {
-  background: none;
-  box-shadow: none;
-  color: #adb8ae;
-  border: 1px solid #566057;
-  padding: 7px 10px;
-}
 #status {
   color: #bfcaaf;
 }
