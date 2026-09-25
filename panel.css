@@ -22,7 +22,7 @@ header b {
   letter-spacing: 3px;
 }
 .machine {
-  padding: 12px 15px 26px;
+  padding: 9px 15px 26px;
   max-width: 1500px;
 }
 .portline {
@@ -31,9 +31,9 @@ header b {
   text-align: center;
   font-size: 8px;
   color: #4d554a;
-  height: 38px;
-  letter-spacing: 0.3px;
-  line-height: 13px;
+  height: 30px;
+  letter-spacing: 0.5px;
+
 }
 .portline span {
   padding-top: 4px;
@@ -179,7 +179,7 @@ header b {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 70px;
+  gap: 90px;
   margin: 24px 0 17px;
   min-width: 0;
 }
