@@ -13,18 +13,18 @@ manual.innerHTML = `<div class="manualTop"><div><small>FIELD GUIDE / 01</small><
 <section><h3>06 / MIDI in & out</h3><p>The two sockets where the A/B INPUT legend was are MIDI ports. <b>MIDI</b> connects over the Web MIDI API — every USB controller and any Bluetooth device your OS has already paired shows up at once. <b>BT</b> pairs a BLE MIDI device directly from the page over Web Bluetooth (Chrome or Edge, on HTTPS or localhost; the browser requires the pairing dialog to start from this click).</p><div class="manualLegend"><b>Playing it</b><span>GM drum map (36 kick · 38 snare · 42 closed hat · 46 open hat · 39 clap · 37 rim …), any other note maps chromatically C1–D#2 → tracks 1–16</span></div><p>Velocity scales the hit. While REC is armed and the transport runs, incoming notes are captured into the pattern exactly like pad hits. Incoming clock follows the source tempo after a moment of settling; start/stop/continue follow the controller. Program change 1–4 switches pattern A–D. Sequencer steps and auditions echo back out on channel 10 (GM drums) to the first available output. Not mapped, deliberately: CC, aftertouch, sysex.</p></section>\n<section><h3>07 / Shortcut reference</h3><div class="manualShortcuts"><span><kbd>SPACE</kbd>play / stop</span><span><kbd>ENTER</kbd>audition the current sound</span><span><kbd>← →</kbd>previous / next step</span><span><kbd>↑ ↓</kbd>SYNTH pitch / FX send A</span><span><kbd>L</kbd>per-step parameter lock</span><span><kbd>G</kbd>back to the step grid</span><span><kbd>ESC</kbd>exit the lock / close the manual</span></div><p>Knobs respond to vertical dragging and to the scroll wheel; when a knob has focus, the arrow keys trim it, HOME / END jump to minimum / maximum, and double-click auditions. While an input box is being edited, the performance shortcuts stay out of the way.</p><p class="manualNote">Editing is auto-saved to this browser. While the manual is open, the performance shortcuts pause and the music keeps playing. Close it with the × at the top right, a click outside, or ESC.</p></section></div>`;
 document.body.append(manual);
 
-// The info button in the portline utility cluster toggles the manual; its state reflects however
+// The GUIDE label at the portline's left edge toggles the manual; its state reflects however
 // the dialog got closed (the X, a click outside, or ESC). Guarded so the manual still mounts even
 // if the button is ever removed from the panel.
-const infoButton = /** @type {HTMLButtonElement | null} */ (document.querySelector('#info'));
+const guideButton = /** @type {HTMLButtonElement | null} */ (document.querySelector('#guide'));
 const syncInfoState = () => {
-  if (!infoButton) return;
+  if (!guideButton) return;
   const open = manual.open;
-  infoButton.setAttribute('aria-expanded', String(open));
-  infoButton.classList.toggle('active', open);
+  guideButton.setAttribute('aria-expanded', String(open));
+  guideButton.classList.toggle('active', open);
 };
-if (infoButton)
-  infoButton.onclick = () => {
+if (guideButton)
+  guideButton.onclick = () => {
     if (manual.open) manual.close();
     else manual.showModal();
   };

@@ -552,8 +552,7 @@ canvas {
    .step.held in panel.css — equal specificity, and panel.css loads later, so that rule is the one
    a drag actually shows; keep the two in step. */
 .step.selected {
-  outline: 2px solid #2f5622;
-  outline-offset: 3px;
+  outline: 2px solid #f16a50;
 }
 .step.current {
   background: #b14d3e;

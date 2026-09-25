@@ -252,6 +252,9 @@ function render() {
   $('#lock').setAttribute('aria-pressed', lock);
   $('#mute').classList.toggle('active', current().mute);
   $('#mute').setAttribute('aria-pressed', current().mute);
+  const allMuted = project.tracks.every((t) => t.mute);
+  $('#muteAll').classList.toggle('active', allMuted);
+  $('#muteAll').setAttribute('aria-pressed', allMuted);
   $('#unlock').disabled = !Object.keys(selected().locks).length;
   $('#choke').value = current().choke ?? 0;
   if (document.activeElement !== $('#lcdTempo')) $('#lcdTempo').value = project.bpm.toFixed(1);
@@ -455,6 +458,13 @@ $('#mute').onclick = () => {
   render();
   save();
 };
+$('#muteAll').onclick = () => {
+  const all = project.tracks.every((t) => t.mute);
+  for (const t of project.tracks) t.mute = !all;
+  render();
+  save();
+  status(all ? 'All tracks unmuted' : 'All tracks muted');
+};
 $('#audition').onclick = () => {
   flash($('#audition'));
   audition();
@@ -650,11 +660,12 @@ $('#reloadKit').onclick = () => {
   render();
   status('Kit sounds restored · patterns, parameter locks and mutes kept · playback continues');
 };
-$('#demo').onclick = () => {
+$('#demo').onclick = async () => {
+  // Same styled confirm dialog as the pattern actions — no native browser popup.
   if (
-    !confirm(
-      'Factory reset: load the four demo patterns and default sounds? Your current edits will be replaced.',
-    )
+    !(await confirmPattern(
+      'Factory reset: load the four demo patterns and default sounds?\nYour current edits will be replaced.',
+    ))
   )
     return;
   stop();
@@ -981,6 +992,9 @@ for (const b of document.querySelectorAll('[data-nav]'))
 $('#play').title = 'Space: play / stop';
 $('#audition').title = 'Enter: audition the current sound';
 $('#mute').title = 'U: mute the current track';
+$('#copyPattern').title = 'Copy the current pattern — the clipboard is shared with right-clicking a pattern slot';
+$('#pastePattern').title = 'Replace the current pattern with the copied one';
+$('#muteAll').title = 'Mute or unmute every track';
 $('#lock').title = 'L: toggle per-step parameter lock';
 $('#exitLock').title = 'Esc: exit parameter lock';
 
@@ -1172,7 +1186,9 @@ $('#undoClear').onclick = async () => {
 // probabilities follow a density curve (step 0 strongest, 6 and 10 - the classic pushes - high),
 // and a few tracks get a single parameter lock so the pattern isn't 16 identical hits. Any
 // track that already has notes is left alone - randomize seeds an empty pattern or fills
-// remaining space, it never bulldozes what you programmed.
+// remaining space, it never bulldozes what you programmed while there is still room to fill.
+// Once every track has notes there is nothing left to seed, so another click re-rolls the
+// whole pattern — a fully-lit grid plus a RANDOMIZE press can only mean "new groove".
 $('#randomPattern').onclick = () => {
   const target = pattern;
   releaseHold();
@@ -1192,33 +1208,43 @@ $('#randomPattern').onclick = () => {
     { tracks: [13], pool: [0, 8], p: 0.4 }, // SUB: reinforce the low
     { tracks: [14, 15], pool: [7, 11, 15], p: 0.3 }, // PERC/MET: tail chatter
   ];
-  let placed = 0;
-  for (const role of roles) {
-    for (const t of role.tracks) {
-      const existing = beats[t].some((s) => s.on);
-      if (existing) continue;
-      let any = false;
-      for (const stepIndex of role.pool) {
-        // Density curve: strongest at step 0, a lift at the 10 push, fade toward the end.
-        const curve = { 0: 1, 10: 0.9, 6: 0.7 }[stepIndex] ?? 0.55;
-        if (rng() < role.p * curve) {
-          const s = beats[t][stepIndex];
-          s.on = true;
-          s.locks = {};
-          any = true;
-          placed++;
-        }
-      }
-      // One parameter lock on a random hit for a third of the seeded tracks.
-      if (any && rng() < 0.33) {
-        const on = beats[t].filter((s) => s.on);
-        const pick = on[Math.floor(rng() * on.length)];
-        const params = ['pitch', 'decay', 'drive', 'tone'];
-        const param = params[Math.floor(rng() * params.length)];
-        pick.locks[param] = Math.round(40 + rng() * 55);
+  // Seed one track from its role pool. With force=false a track that already has notes is
+  // skipped (returns false, nothing placed); with force=true it is cleared and redrawn.
+  const seedTrack = (t, role, force) => {
+    if (!force && beats[t].some((s) => s.on)) return false;
+    beats[t].forEach((s) => {
+      s.on = false;
+      s.locks = {};
+    });
+    let any = false;
+    for (const stepIndex of role.pool) {
+      // Density curve: strongest at step 0, a lift at the 10 push, fade toward the end.
+      const curve = { 0: 1, 10: 0.9, 6: 0.7 }[stepIndex] ?? 0.55;
+      if (rng() < role.p * curve) {
+        const s = beats[t][stepIndex];
+        s.on = true;
+        s.locks = {};
+        any = true;
       }
     }
-  }
+    // One parameter lock on a random hit for a third of the seeded tracks.
+    if (any && rng() < 0.33) {
+      const on = beats[t].filter((s) => s.on);
+      const pick = on[Math.floor(rng() * on.length)];
+      const params = ['pitch', 'decay', 'drive', 'tone'];
+      const param = params[Math.floor(rng() * params.length)];
+      pick.locks[param] = Math.round(40 + rng() * 55);
+    }
+    return any;
+  };
+  let placed = 0;
+  const seedAll = (force) => {
+    placed = 0;
+    for (const role of roles)
+      for (const t of role.tracks) if (seedTrack(t, role, force)) placed++;
+  };
+  seedAll(false);
+  if (!placed) seedAll(true);
   save();
   render();
   status(placed ? `Pattern ${'ABCD'[target]} randomized` : 'Nothing to randomize');
@@ -1302,6 +1328,31 @@ document.addEventListener('pointerdown', (e) => {
 window.addEventListener('blur', closePatternMenu);
 window.addEventListener('resize', closePatternMenu);
 document.addEventListener('scroll', closePatternMenu, true);
+
+// The panel COPY / PASTE keys next to RANDOMIZE share the right-click menu's clipboard, so a
+// pattern grabbed either way can be pasted either way. Paste guards the same way the menu does:
+// a non-empty target asks before being replaced.
+$('#copyPattern').onclick = () => {
+  patternClipboard = structuredClone(project.patterns[pattern]);
+  $('#pastePattern').disabled = false;
+  status(`Pattern ${'ABCD'[pattern]} copied.`);
+};
+$('#pastePattern').onclick = async () => {
+  if (!patternClipboard) return;
+  const target = pattern;
+  const data = structuredClone(patternClipboard);
+  if (
+    project.patterns[target].some((t) =>
+      t.some((s) => s.on || Object.keys(s.locks).length || Object.keys(s.fxLocks ?? {}).length),
+    ) &&
+    !(await confirmPattern(`Replace Pattern ${'ABCD'[target]} with the copied pattern?`))
+  )
+    return;
+  project.patterns[target] = data;
+  save();
+  render();
+  status(`Pattern ${'ABCD'[target]} pasted.`);
+};
 
 function setTempo(value) {
   const number = Number(value);

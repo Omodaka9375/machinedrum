@@ -38,6 +38,15 @@ header b {
 .portline span {
   padding-top: 4px;
 }
+/* GUIDE occupies the first cell where the PHONES A/B legend sat. One button, so only the
+   baseline centering of .portmidi — no gap to distribute. */
+.portguide {
+  display: flex;
+  align-items: flex-start;
+  justify-content: left;
+  padding-top: 4px;
+  padding-left: 25px;
+}
 /* MIDI/BT buttons live in the portline's middle cell where the A B INPUT legend was. They are
    printed as silkscreen labels in the same face as the port legends around them (the .portline
    font/color cascade through), styled as text — no border, no button chrome — so they read as
@@ -50,10 +59,11 @@ header b {
   gap: 14px;
   /* Identical to .portline span's padding-top so the labels share the legend's first-line
      baseline. align-items: flex-start, not center — the row is 38px tall and a centered
-     13px line would sit ~10px below the PHONES/label lines. */
+     13px line would sit ~10px below the legend lines. */
   padding-top: 4px;
 }
-.portmidi button {
+.portmidi button,
+.portguide button {
   font: inherit;
   letter-spacing: 0.3px;
   line-height: 13px;
@@ -68,22 +78,44 @@ header b {
   color: #4d554a;
   cursor: pointer;
 }
+/* The bluetooth rune beside the BT label. Drawn as SVG, never typeset: this portline face
+   (PanelNarrow / local Arial Narrow) holds no U+16DA, so a text glyph would be font-linked to an
+   arbitrary machine face and render differently per system — the U+25C6 lock-diamond trap.
+   Sizing in em tracks the legend's 8px face (and its 6px mobile restatement) without a
+   breakpoint; fill: currentColor keeps the symbol tracking the label's unlit #4d554a and lit
+   #2f5622 states. */
+.portmidi button svg {
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  fill: currentColor;
+  vertical-align: middle;
+  margin-right: 2px;
+  pointer-events: none;
+}
 /* Printed labels take no focus ring either — the connection state is already reported in the
    status line, and these are supplementary controls, not primary ones. */
-.portmidi button:focus-visible {
+.portmidi button:focus-visible,
+.portguide button:focus-visible {
   outline: none;
 }
-.portmidi button:active {
+.portmidi button:active,
+.portguide button:active {
   transform: none;
   box-shadow: none;
 }
 /* Overrides the global button.active (red gradient + white text): a connected transport lights
-   the label, it does not become a lit physical button. */
-.portmidi button.active {
+   the label, it does not become a lit physical button. Not LCD green — the portline sits on the
+   light metal panel where #c3cd9f is ~1.2:1 and washed out to gray (the same trap that cost
+   .step.selected its color). Marker-dark olive is the established lit-marker hue on this panel,
+   6:1 on the light end — and a dark saturated green next to the unlit #4d554a gray reads as
+   "the printed label is now lit". */
+.portmidi button.active,
+.portguide button.active {
   background: none;
-  color: #c3cd9f;
+  color: #2f5622;
   box-shadow: none;
-  text-shadow: 0 0 5px #a3d87388;
+  text-shadow: none;
 }
 /* The POWER label became the FACTORY RESET control: printed in the same silkscreen face as
    the port legends, same flat-text treatment as the MIDI/BT labels. The red .active global is
@@ -117,9 +149,9 @@ header b {
 }
 .portreset button.active {
   background: none;
-  color: #c3cd9f;
+  color: #2f5622;
   box-shadow: none;
-  text-shadow: 0 0 5px #a3d87388;
+  text-shadow: none;
 }
 .upper {
   grid-template-columns: 30% 30% 40%;
@@ -167,33 +199,34 @@ header b {
 }
 /* The fader slot. `--travel` is the single source of truth shared with `.master input` below: the
    input is rotated, so its own `width` must equal the slot's `height` or the thumb runs past the
-   end of the slot. 15px wide = the skin's own `height: 15px` on `.master input` (bottom of file),
+   end of the slot. 22px wide = the skin's own `height: 22px` on `.master input` (bottom of file),
    which is the box that becomes the stroke once rotated.
    Length is tuned against the row's other member — #jog is clamp(115px,13vw,200px) — so the fader
-   reads as the wheel's companion and never outgrows it. */
+   stands the wheel's full height as its companion (label + travel ≈ the wheel's outer box) and
+   never outgrows it. */
 .master .fader {
-  --travel: clamp(70px, 8.5vw, 128px);
+  --travel: clamp(110px, 12vw, 185px);
   display: block;
   position: relative;
-  /* Matches the skin's own `height: 15px` on .master input, which is the box that becomes the
+  /* Matches the skin's own `height: 22px` on .master input, which is the box that becomes the
      stroke once rotated. Keep the two in step. */
-  width: 15px;
+  width: 22px;
   height: var(--travel);
   margin: 4px auto 0;
 }
 /* Rotated, not `writing-mode: vertical-rl` — that would re-flow the pseudo-element geometry the
    whole track/thumb skin below is hand-drawn around. The input keeps its horizontal box and only
    the rendering turns, which is why width/height are swapped here relative to the slot: pre-rotate
-   the box is travel-long and 16px thick, and rotate(270deg) about the box centre lands it as a
-   16px-wide column of `--travel`. 270deg puts min at the bottom, max at the top — fader direction.
+   the box is travel-long and 22px thick, and rotate(270deg) about the box centre lands it as a
+   22px-wide column of `--travel`. 270deg puts min at the bottom, max at the top — fader direction.
    Centered with translate+rotate rather than `margin: auto`: an absolutely positioned box has no
    auto margins available against the slot without all four offsets, and the rotation must compose
    with the centering in one transform. style.css's `margin: 14px auto` is zeroed so it cannot add
    its own offset under this transform. */
 .master input {
-  /* Pre-rotate the box is travel-long and 15px thick; the skin at the foot of this file owns that
-     thickness (height: 15px), so only the length is set here. rotate(270deg) about the box centre
-     lands it as a 15px-wide column of --travel. Centered with translate+rotate because an
+  /* Pre-rotate the box is travel-long and 22px thick; the skin at the foot of this file owns that
+     thickness (height: 22px), so only the length is set here. rotate(270deg) about the box centre
+     lands it as a 22px-wide column of --travel. Centered with translate+rotate because an
      absolutely positioned box gets no auto margins without all four offsets, and the rotation has
      to compose with the centering in one transform. style.css's `margin: 14px auto` is zeroed so
      it cannot contribute its own offset under this transform. */
@@ -214,8 +247,10 @@ header b {
   box-shadow: 0 0 3px #e72c26;
 }
 /* MUTE now sits in .chokeRow instead of the old utility rail, where it used to stretch to that
-   column's width via `.leftutility button`. Sizing is intrinsic again. */
-#mute {
+   column's width via `.leftutility button`. Sizing is intrinsic again. MUTE ALL sits beside it
+   and shares the sizing. */
+#mute,
+#muteAll {
   font-size: 8px;
   padding: 10px 13px;
 }
@@ -560,7 +595,8 @@ canvas {
 }
 .performance {
   display: grid;
-  grid-template-columns: 58% 42%;
+  /* KIT first, TRANSPORT second — widths follow the swapped order. */
+  grid-template-columns: 42% 58%;
 }
 .transport {
   padding: 30px 20px 16px;
@@ -572,7 +608,6 @@ canvas {
      padding. align-content: center used to float the content, but once the titles were added
      the taller column decided the row height and the shorter one parked its title mid-air. */
   align-content: start;
-  border-right: 1px solid #89917f;
 }
 .transport h2 {
   /* "TRANSPORT" above the REC/PLAY/STOP buttons, mirroring PATTERN SELECTION / KIT. It spans
@@ -596,7 +631,9 @@ canvas {
   grid-template-columns: 1fr 1fr;
   align-content: start;
   gap: 9px;
-  /* Top padding matches .transport's so the title rows start on the same line. */
+  /* Top padding matches .transport's so the title rows start on the same line.
+     Left column now, so the column separator rides its right edge. */
+  border-right: 1px solid #89917f;
 }
 .kitactions h2 {
   /* KIT labels the STORE/RELOAD row above the buttons, mirroring TRANSPORT / PATTERN
@@ -733,16 +770,14 @@ canvas {
   body {
     padding: 14px 8px;
   }
-  /* The portline's silkscreen legends go, but the MIDI/BT buttons inside it must stay
-     reachable: collapse the label spans instead of hiding the whole strip. */
+  /* The portline collapses to one column; every control in it (GUIDE, MIDI/BT, FACTORY RESET)
+     stays reachable — no decorative legends remain to hide. */
   .portline {
     grid-template-columns: 1fr;
     height: auto;
   }
-  .portline > span[aria-hidden='true'] {
-    display: none;
-  }
   .portmidi,
+  .portguide,
   .portreset {
     display: flex;
     height: 26px;
@@ -1323,30 +1358,6 @@ canvas {
   flex-shrink: 0;
 }
 
-#info {
-  flex-shrink: 0;
-  margin-left: 18px;
-}
-#info svg {
-  display: block;
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-  flex: none;
-}
-#info {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  flex: 0 0 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-#info.active {
-  color: #c7eaaa;
-  box-shadow: inset 0 0 5px #a3d87366;
-}
 #manual {
   width: min(920px, 94vw);
   max-height: 88vh;
@@ -1824,13 +1835,6 @@ canvas {
   touch-action: none;
 }
 
-#info {
-  padding: 8px;
-}
-#info.active {
-  color: #c7eaaa;
-  box-shadow: inset 0 0 5px #a3d87366;
-}
 @media (max-width: 700px) {
   body {
     padding: 6px;
@@ -1850,10 +1854,6 @@ canvas {
   }
   header small {
     display: none;
-  }
-  #info {
-    margin-left: 0;
-    padding: 6px;
   }
   .machine {
     padding: 6px 7px 14px;
@@ -1888,7 +1888,8 @@ canvas {
     display: block;
     margin-top: 8px;
   }
-  #mute {
+  #mute,
+  #muteAll {
     min-height: 25px;
     padding: 4px 8px;
   }
@@ -2129,28 +2130,6 @@ button.pressed {
     inset 0 2px 1px #ed8570,
     0 3px 0 #631a17;
 }
-#info {
-  font: 10px/1 monospace;
-  letter-spacing: 0;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  flex: 0 0 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-@media (max-width: 700px) {
-  #info {
-    width: 26px;
-    height: 26px;
-    flex-basis: 26px;
-  }
-  #info svg {
-    width: 13px;
-    height: 13px;
-  }
-}
 .display #lcdTempo {
   display: block;
   width: 100%;
@@ -2175,7 +2154,7 @@ button.pressed {
 .master input {
   appearance: none;
   -webkit-appearance: none;
-  height: 15px;
+  height: 22px;
   border: 1px solid #858d7f;
   border-radius: 3px;
   background: linear-gradient(#737c70, #c6ccbf);
@@ -2188,13 +2167,13 @@ button.pressed {
   cursor: ns-resize;
 }
 .master input::-webkit-slider-runnable-track {
-  height: 5px;
+  height: 7px;
   background: #263029;
   border-radius: 2px;
   box-shadow: 0 1px #e5ead088;
 }
 .master input::-moz-range-track {
-  height: 5px;
+  height: 7px;
   background: #263029;
   border-radius: 2px;
   box-shadow: 0 1px #e5ead088;
@@ -2202,9 +2181,9 @@ button.pressed {
 .master input::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 12px;
-  height: 11px;
-  /* Seats the 11px thumb on the 5px track: (track - thumb) / 2 = (5 - 11) / 2. The rotation does
+  width: 14px;
+  height: 13px;
+  /* Seats the 13px thumb on the 7px track: (track - thumb) / 2 = (7 - 13) / 2. The rotation does
      not change this. ::-webkit-slider-thumb is laid out in the input's own coordinate system and
      `transform` then rotates the finished composite, so a cross-axis offset here stays cross-axis —
      it simply stops being screen-vertical. Zeroing it here earlier, on the assumption that the axis
@@ -2219,8 +2198,8 @@ button.pressed {
     inset 0 1px #acb69b;
 }
 .master input::-moz-range-thumb {
-  width: 12px;
-  height: 11px;
+  width: 14px;
+  height: 13px;
   border-radius: 2px;
   border: 1px solid #202a23;
   background:
@@ -2228,23 +2207,6 @@ button.pressed {
   box-shadow:
     0 1px 2px #17221799,
     inset 0 1px #acb69b;
-}
-#info {
-  height: 32px;
-  font: 10px/1 monospace;
-  letter-spacing: 0;
-  border: 1px solid #171d1d;
-  border-radius: 4px;
-  background: linear-gradient(#394040, #222829);
-  color: #d1d3c9;
-  box-shadow:
-    inset 0 2px 1px #65706a,
-    0 3px 0 #1118;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  appearance: none;
-  -webkit-appearance: none;
 }
 .screw {
   font-size: 0;
@@ -2276,9 +2238,6 @@ button.pressed {
   height: 9px;
 }
 @media (max-width: 700px) {
-  #info {
-    height: 26px;
-  }
   .screw {
     display: none;
   }

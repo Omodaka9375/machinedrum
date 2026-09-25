@@ -15,7 +15,16 @@
       <span class="screw tl" aria-hidden="true"></span><span class="screw tr" aria-hidden="true"></span
       ><span class="screw bl" aria-hidden="true"></span><span class="screw br" aria-hidden="true"></span>
       <div class="portline">
-        <span aria-hidden="true">PHONES　　 A / LEFT　　B / RIGHT　</span>
+        <span class="portguide" aria-hidden="false"
+          ><button
+            id="guide"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-label="Field guide"
+            title="Field guide: shortcuts, live recording, FX, MIDI"
+          >GUIDE
+          </button></span
+        >
         <span class="portmidi" aria-hidden="false">
           <button
             id="midi"
@@ -29,28 +38,14 @@
             aria-pressed="false"
             aria-label="Pair a Bluetooth LE MIDI device"
             title="Pair BLE MIDI over Web Bluetooth (Chrome/Edge, HTTPS or localhost)"
-          >
-            BT
+          ><svg viewBox="0 0 24 24" aria-hidden="true"><path
+              d="M17.71 7.71 12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"
+            /></svg>BT
           </button></span
         >
         <span class="portreset" aria-hidden="false"
           ><button id="demo" title="Factory reset: load the four demo patterns and default sounds">
             FACTORY RESET
-          </button>
-          <button
-            id="info"
-            aria-label="Field guide"
-            aria-expanded="false"
-            title="Field guide: shortcuts, live recording, FX, MIDI"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                fill-rule="evenodd"
-                d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z"
-              />
-              <rect x="11" y="10" width="2" height="7" />
-              <rect x="11" y="6.4" width="2" height="2" />
-            </svg>
           </button></span
         >
       </div>
@@ -73,7 +68,7 @@
               </button>
             </div>
             <div class="chokeRow">
-              <button id="mute">MUTE</button>
+              <button id="mute">MUTE</button><button id="muteAll">MUTE ALL</button>
               <label class="choker">
                 CHOKE
                 <select id="choke" aria-label="Choke group">
@@ -150,6 +145,7 @@
           <div id="patterns"></div>
           <div class="clearActions">
             <button id="clearPattern">CLEAR PATTERN</button><button id="undoClear" disabled>UNDO CLEAR</button
+            ><button id="copyPattern">COPY</button><button id="pastePattern" disabled>PASTE</button
             ><button id="randomPattern">RANDOMIZE</button>
           </div>
         </div>
@@ -185,6 +181,10 @@
           </div>
         </div>
         <div class="performance">
+          <div class="kitactions">
+            <h2>KIT</h2>
+            <button id="saveKit">STORE</button><button id="reloadKit">RELOAD</button>
+          </div>
           <div class="transport">
             <h2>TRANSPORT</h2>
             <button id="record" aria-label="Live record" title="R: toggle live recording">●</button
@@ -193,10 +193,6 @@
             ><button id="stop" aria-label="Stop">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5Z" /></svg></button
             ><span>REC</span><span>PLAY</span><span>STOP</span>
-          </div>
-          <div class="kitactions">
-            <h2>KIT</h2>
-            <button id="saveKit">STORE</button><button id="reloadKit">RELOAD</button>
           </div>
         </div>
       </section>
