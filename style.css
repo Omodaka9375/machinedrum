@@ -541,8 +541,18 @@ canvas {
   background: #f5523e;
   box-shadow: 0 0 5px #e34223;
 }
+/* Cursor ring. Not var(--lcd): the ring draws on the machine's light metal panel (see .machine
+   — #d9d9cf → #b6b8b0), and #c3cd9f has almost the same luminance as that panel, so pale green on
+   pale metal washed out to a gray smudge. The same trap already cost #status its LCD green.
+   Not red either: on this grid red already carries two live meanings — the LED (this step plays)
+   and the .current fill (playhead) — and a third would blur them. Dark olive is the panel's own
+   hue taken to marker-dark: 6.0:1 on the light end of the panel gradient, 4.2:1 on the dark end —
+   and the only saturated green in the section (the other greens, #4c5649 captions and #686f62
+   rules, are near-gray), so it reads as a drawn cursor rather than a machine state. Mirrored by
+   .step.held in panel.css — equal specificity, and panel.css loads later, so that rule is the one
+   a drag actually shows; keep the two in step. */
 .step.selected {
-  outline: 2px solid #c3cd9f;
+  outline: 2px solid #2f5622;
   outline-offset: 3px;
 }
 .step.current {
@@ -560,11 +570,32 @@ canvas {
     10px 'Courier New',
     monospace;
   color: #4c5649;
+  margin-top: 3px;
 }
+/* The lock marker is drawn, not typeset. It used to be content: '\25C6' — a glyph requested from
+   PanelNarrow, and `@font-face { src: local('Arial Narrow') }` has no U+25C6. The browser then
+   font-links some other face on the machine and renders whatever it holds at that codepoint, which
+   is why locked steps showed a different mark per system. A rotated square is the same diamond with
+   no font dependency.
+
+   Dead centre of the button. It used to be content: '◆' at top-right with no offsets at all, which
+   put it on the corner; then top: 6px / right: 6px, which only moved it inside the same corner.
+   Both read as a stray pixel because the corner is where incidental things live, and this button
+   face has no other content to relate to — its only child, `small`, is absolutely positioned below
+   the cell. Centred, it reads as a mark ON the step: which is what a parameter lock is. The LED at
+   top: -16px stays a separate signal — lit = this step plays, diamond = this step has locks.
+   translate is first so the centring happens on unrotated axes; putting rotate() first would
+   translate along the rotated axes and push the box off centre. Size stays fixed here and only
+   shrinks in the ≤700px block. */
 .step.locked:after {
-  content: '◆';
-  color: #edb874;
-  font-size: 10px;
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: #edb874;
 }
 .seqfoot {
   margin-top: 34px;

@@ -1,6 +1,6 @@
 import { applyLfo } from './lfo.js';
 import { Effects, stepFx } from './fx.js';
-import { drumVoice } from './drums.js';
+import { drumVoice, holdAt } from './drums.js';
 import { resolved, duration, recordHit } from './model.js';
 const buffers = new WeakMap();
 export function voice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) {
@@ -96,7 +96,8 @@ export function voice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) {
     },
   };
   function envStop(at) {
-    amp.gain.cancelAndHoldAtTime(at);
+    // Same helper as drums.js: hold the envelope's real level, not the nominal peak.
+    holdAt(amp.gain, at, (p.level / 100) * 0.42);
     amp.gain.linearRampToValueAtTime(0, at + 0.003);
     for (const s of sources) s.stop(Math.min(time + length + 0.04, at + 0.004));
   }
@@ -140,7 +141,7 @@ export class Audio {
     // onAudition. Assigned from app.js; the class itself stays MIDI-agnostic.
     /** @type {((step: number, track: number, playing: boolean) => void) | null} */
     this.afterStep = null;
-    /** @type {((track: number, step: number) => void) | null} */
+    /** @type {((track: number) => void) | null} */
     this.onAudition = null;
   }
   async init() {
@@ -177,7 +178,10 @@ export class Audio {
         ),
       );
     this.trigger(track, step, this.ctx.currentTime + 0.005, velocity);
-    this.onAudition?.(this.get().tracks.indexOf(track), this.step);
+    // Only the track index is reported: this is the live-hit path, where the step index is
+    // whatever the last transport tick happened to leave on `this.step` — undefined before the
+    // first play(). The one consumer (app.js, MIDI note-out) only wants the note to send.
+    this.onAudition?.(this.get().tracks.indexOf(track));
   }
   trigger(track, step, at, velocity) {
     const group = track.choke ?? 0;

@@ -1,6 +1,25 @@
 import { applyLfo } from './lfo.js';
 const noiseCache = new WeakMap();
 
+/**
+ * Begin a choke / cut from the envelope's ACTUAL level at `at`, never its nominal peak — yanking a
+ * decaying tail back up to full level for one frame is an audible click. cancelAndHoldAtTime is the
+ * method that reads the current value, and it is absent on some implementations; where it is, fall
+ * back to cancel + setValueAtTime instead of throwing, which would leave the choked voice ringing
+ * for its whole decay. Shared with audio.js's own engines so one choke behaves identically on
+ * every voice in the kit — the two engines used to diverge here, and did not sound alike.
+ * @param {AudioParam} param
+ * @param {number} at
+ * @param {number} fallback level to hold when the implementation has no cancelAndHoldAtTime
+ */
+export function holdAt(param, at, fallback) {
+  if (typeof param.cancelAndHoldAtTime === 'function') param.cancelAndHoldAtTime(at);
+  else {
+    param.cancelScheduledValues(at);
+    param.setValueAtTime(fallback, at);
+  }
+}
+
 // Each layer has its own envelope; the final gain is reserved for choke events.
 export function drumVoice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) {
   const nodes = [],
@@ -143,8 +162,7 @@ export function drumVoice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) 
   return {
     length,
     stop(at) {
-      gain.gain.cancelScheduledValues(at);
-      gain.gain.setValueAtTime((p.level / 100) * 0.6, at);
+      holdAt(gain.gain, at, (p.level / 100) * 0.6);
       gain.gain.linearRampToValueAtTime(0, at + 0.003);
       for (const s of sources) s.node.stop(Math.min(s.end, at + 0.004));
     },

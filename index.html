@@ -56,33 +56,35 @@
       </div>
       <section class="upper">
         <div class="soundselect">
-          <div class="leftutility">
-            <label class="master"
-              >MASTER VOLUME<input id="volume" type="range" min="0" max="100" value="65"
-            /></label>
-            <button id="mute">MUTE</button
-            ><button id="lock" title="With it on, knobs change only the selected step">STEP LOCK</button>
-          </div>
           <div class="soundbank">
             <h2>SOUND SELECTION</h2>
             <div id="tracks"></div>
-            <button
-              id="jog"
-              aria-label="Track jog wheel — drag to rotate and select track, click to audition"
-              title="Drag to rotate · scroll wheel / arrow keys step · click to audition"
-            >
-              <span></span>
-            </button>
-            <label class="choker">
-              CHOKE
-              <select id="choke" aria-label="Choke group">
-                <option value="0">OFF</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select></label
-            >
+            <div class="jogrow">
+              <label class="master"
+                >MASTER<span class="fader"
+                  ><input id="volume" type="range" min="0" max="100" value="65" /></span
+              ></label>
+              <button
+                id="jog"
+                aria-label="Track jog wheel — drag to rotate and select track, click to audition"
+                title="Drag to rotate · scroll wheel / arrow keys step · click to audition"
+              >
+                <span></span>
+              </button>
+            </div>
+            <div class="chokeRow">
+              <button id="mute">MUTE</button>
+              <label class="choker">
+                CHOKE
+                <select id="choke" aria-label="Choke group">
+                  <option value="0">OFF</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </label>
+            </div>
           </div>
         </div>
         <div class="displaycase">
@@ -153,7 +155,14 @@
         </div>
         <div class="navigation">
           <div class="confirmkeys">
-            <button id="audition">TRIG / YES</button><button id="exitLock">EXIT / NO</button>
+            <button id="audition">TRIG / YES</button
+            ><button
+              id="lock"
+              title="L: knobs and wheel change only the selected step"
+            >
+              STEP LOCK
+            </button
+            ><button id="exitLock">EXIT / NO</button>
           </div>
           <div class="arrows">
             <button data-nav="up" aria-label="Pitch up">
@@ -195,10 +204,15 @@
         <div class="seqhead">
           <h2 id="gridTitle">TRIG SEQUENCER</h2>
           <div class="performModes">
-            <button id="padMode" title="P: toggle pad mode">PADS</button
+            <button
+              id="trigMode"
+              aria-pressed="true"
+              title="Step trigger editor — the default mode · G: return from PADS / MUTES"
+              >TRIGGERS</button
+            ><button id="padMode" title="P: toggle pad mode">PADS</button
             ><button id="muteMode" title="Shift+U: toggle mute performance">MUTES</button>
           </div>
-          <span>Hold a step + scroll wheel to lock params · R record · P pads · Shift+U mutes</span>
+          <span>Hold a step + scroll wheel to lock params · G triggers · P pads · Shift+U mutes · R record</span>
         </div>
         <div class="stepPages">
           <button id="stepPage0">KEYS 1–8</button><button id="stepPage1">KEYS 9–16</button

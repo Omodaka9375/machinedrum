@@ -129,29 +129,80 @@ header b {
 }
 .soundselect {
   display: grid;
-  grid-template-columns: 25% 75%;
-  padding: 25px 17px 15px 5px;
+  /* Single column. It used to be 25% 75% — a utility strip beside the sound bank — which pinned
+     the bank to 75% of this grid cell and left the jog wheel no room to grow past its clamp
+     floor. That strip is gone: MASTER is now a vertical fader that rides beside the wheel, and
+     MUTE/CHOKE share a row at the bottom, so the bank takes the full width and the wheel
+     reclaims the strip's share. minmax(0,1fr) not 1fr so nothing inside can push past the cell. */
+  grid-template-columns: minmax(0, 1fr);
+  padding: 25px 17px 15px 12px;
   border-right: 1px solid #89917f;
   gap: 0;
 }
-.leftutility {
+/* The jog wheel's row: the MASTER fader on the left, the wheel beside it. .soundbank is a
+   column-flow, so without this wrapper the fader would sit ABOVE the wheel — "next to" needs its
+   own row. flex-start, not center: the group's left edge lands on the same line as #tracks above
+   it, so the bank reads as one flush column instead of a floating island. */
+.jogrow {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 21px;
-  padding: 0 9px 0 0;
+  justify-content: flex-start;
+  gap: 70px;
+  margin: 24px 0 17px;
+  min-width: 0;
 }
+/* Outer spacing moved to .jogrow. Auto left/right margins here would defeat it outright — auto
+   margins on a flex item are resolved before justify-content gets a say. */
+.jogrow #jog {
+  margin: 0;
+}
+/* MASTER is a vertical fader now, so the label sits above the travel and needs neither flex nor
+   column-reverse. Its width is the label text, and the 16px-wide slot below is centered on it. */
 .master {
-  display: flex;
-  flex-direction: column-reverse;
+  display: block;
+  text-align: center;
   font-size: 8px;
   letter-spacing: 0;
   line-height: 1.6;
 }
+/* The fader slot. `--travel` is the single source of truth shared with `.master input` below: the
+   input is rotated, so its own `width` must equal the slot's `height` or the thumb runs past the
+   end of the slot. 15px wide = the skin's own `height: 15px` on `.master input` (bottom of file),
+   which is the box that becomes the stroke once rotated.
+   Length is tuned against the row's other member — #jog is clamp(115px,13vw,200px) — so the fader
+   reads as the wheel's companion and never outgrows it. */
+.master .fader {
+  --travel: clamp(70px, 8.5vw, 128px);
+  display: block;
+  position: relative;
+  /* Matches the skin's own `height: 15px` on .master input, which is the box that becomes the
+     stroke once rotated. Keep the two in step. */
+  width: 15px;
+  height: var(--travel);
+  margin: 4px auto 0;
+}
+/* Rotated, not `writing-mode: vertical-rl` — that would re-flow the pseudo-element geometry the
+   whole track/thumb skin below is hand-drawn around. The input keeps its horizontal box and only
+   the rendering turns, which is why width/height are swapped here relative to the slot: pre-rotate
+   the box is travel-long and 16px thick, and rotate(270deg) about the box centre lands it as a
+   16px-wide column of `--travel`. 270deg puts min at the bottom, max at the top — fader direction.
+   Centered with translate+rotate rather than `margin: auto`: an absolutely positioned box has no
+   auto margins available against the slot without all four offsets, and the rotation must compose
+   with the centering in one transform. style.css's `margin: 14px auto` is zeroed so it cannot add
+   its own offset under this transform. */
 .master input {
-  width: 65px;
-  margin: 18px auto;
-  height: 4px;
+  /* Pre-rotate the box is travel-long and 15px thick; the skin at the foot of this file owns that
+     thickness (height: 15px), so only the length is set here. rotate(270deg) about the box centre
+     lands it as a 15px-wide column of --travel. Centered with translate+rotate because an
+     absolutely positioned box gets no auto margins without all four offsets, and the rotation has
+     to compose with the centering in one transform. style.css's `margin: 14px auto` is zeroed so
+     it cannot contribute its own offset under this transform. */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--travel);
+  margin: 0;
+  transform: translate(-50%, -50%) rotate(270deg);
 }
 .datafoot i {
   display: inline-block;
@@ -162,16 +213,16 @@ header b {
   margin-right: 5px;
   box-shadow: 0 0 3px #e72c26;
 }
-.leftutility button {
+/* MUTE now sits in .chokeRow instead of the old utility rail, where it used to stretch to that
+   column's width via `.leftutility button`. Sizing is intrinsic again. */
+#mute {
   font-size: 8px;
-  padding: 10px 5px;
-  width: 100%;
+  padding: 10px 13px;
 }
-#lock {
-  margin-top: auto;
-  background: linear-gradient(#eeecdd, #bdc3b1);
-  color: #343e32;
-}
+/* STEP LOCK now lives in .confirmkeys and inherits that row's slim sizing and pale face, so only
+   the lit state has to be restated here — and it needs an id, not a class, because
+   `.confirmkeys button` would otherwise out-rank a bare class. The unlit look is now identical to
+   TRIG / YES and EXIT / NO by design: all three are momentary confirm-row keys. */
 #lock.active {
   background: linear-gradient(#ce5942, #a82d23);
   color: #fff;
@@ -184,9 +235,6 @@ header b {
 .soundbank h2 {
   font-size: 8px;
   text-align: center;
-  border-top: 1px solid #6f7867;
-  padding-top: 7px;
-  margin: 0 0 14px;
 }
 #tracks {
   grid-template-columns: repeat(8, 1fr);
@@ -241,8 +289,25 @@ header b {
     inset 1px 2px 3px #0009,
     0 1px 1px #929b7966;
 }
-.choker {
+/* MUTE on the left, CHOKE and its select on the right, on one line at the bottom of the bank.
+   `margin: auto 0 0` is the bottom-pinning that used to live on .choker while it was a direct
+   child of the .soundbank column — it has to sit on the row now, since the row is what reaches
+   that edge. flex-start on the cross axis, not stretch: the button and the label have different
+   natural heights and stretching both to the taller one would bloat MUTE. */
+.chokeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin: auto 0 0;
+}
+.choker {
+  /* Was `margin: auto 0 0` — moved up to .chokeRow. `auto` on the left/right of a flex child
+     would also center the select in whatever space MUTE leaves. flex: 1 so this label takes the
+     width MUTE doesn't, and its own `justify-content: right` from style.css pulls CHOKE + select
+     to the panel edge — that keeps them where they have always been. */
+  flex: 1;
+  margin: 0;
   font-size: 8px;
 }
 .displaycase {
@@ -469,7 +534,6 @@ canvas {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 13px;
 }
 .confirmkeys button {
   font-size: 8px;
@@ -554,9 +618,20 @@ canvas {
   padding: 18px 18px 0;
 }
 .seqhead {
+  /* Three items: h2 (title), .performModes (PADS / MUTES), hint span. The title text updates
+     live (TRIG SEQUENCER -> LIVE PADS -> TRACK MUTES) and what the hint says changes under it,
+     so a space-between layout re-distributes the free space and visibly shoves the buttons
+     around. Instead BOTH side items grow equally (flex: 1 1 0) while the buttons stay fixed
+     (flex: 0 0 auto): two equal tracks pin the cluster to the exact flex center whatever the
+     title or hint reflow to. */
+  justify-content: center;
   margin-bottom: 6px;
 }
 .seqhead h2 {
+  /* flex: 1 1 0 sizes this track to exactly half the free space around the buttons; the hint
+     track mirrors it. Text changes stay inside the track instead of pushing the middle. */
+  flex: 1 1 0;
+  text-align: left;
   font-size: 8px;
   margin: 0;
 }
@@ -599,16 +674,12 @@ canvas {
     padding-left: 0;
     padding-right: 9px;
   }
-  .leftutility {
-    padding-right: 5px;
+  .jogrow {
+    gap: 10px;
+    margin: 16px 0 12px;
   }
-  .leftutility button {
-    font-size: 7px;
-  }
-  .displaycase {
-    padding-left: 13px;
-    padding-right: 13px;
-  }
+  /* No .master sizing here: the fader's travel is the clamp() on .master .fader, and its stroke
+     thickness comes from the skin's height — neither needs a value per breakpoint. */
   .databody {
     padding-left: 10px;
     padding-right: 10px;
@@ -683,21 +754,12 @@ canvas {
   }
   .soundselect {
     padding: 24px 13px 16px 4px;
-    grid-template-columns: 25% 75%;
+    grid-template-columns: minmax(0, 1fr);
   }
   #tracks {
     grid-template-columns: repeat(4, 1fr);
   }
-  .leftutility {
-    gap: 14px;
-  }
-  .master input {
-    width: 42px;
-  }
   .master {
-    font-size: 7px;
-  }
-  .leftutility button {
     font-size: 7px;
   }
   .displaycase {
@@ -905,6 +967,8 @@ canvas {
 .performModes {
   display: flex;
   gap: 6px;
+  /* The only non-growing child of .seqhead, so the button row sits exactly at the center. */
+  flex: 0 0 auto;
 }
 .performModes button {
   font-size: 8px;
@@ -914,7 +978,10 @@ canvas {
   align-items: center;
 }
 .seqhead > span {
-  max-width: 42%;
+  flex: 1 1 0;
+  /* max-width: none overrides style.css's @media (max-width: 820px) 210px cap, which would
+     shrink this track and break the equal-growth centering. */
+  max-width: none;
   text-align: right;
 }
 .step {
@@ -922,7 +989,9 @@ canvas {
   user-select: none;
 }
 .step.held {
-  outline: 2px solid #c3cd9f;
+  /* Same cursor as .step.selected (style.css, where the color rationale lives) — equal
+     specificity, this file wins, so this value is the one a drag actually shows. */
+  outline: 2px solid #2f5622;
   outline-offset: 3px;
 }
 .step.padHit {
@@ -937,8 +1006,8 @@ canvas {
     flex-wrap: wrap;
   }
   .seqhead > span {
-    max-width: none;
-    width: 100%;
+    /* Full-width second row under the title + buttons. */
+    flex: 0 0 100%;
     text-align: left;
   }
   .transport {
@@ -1243,7 +1312,6 @@ canvas {
 }
 .display .lcdfoot {
   font-size: 12px;
-  line-height: 1;
   letter-spacing: 0;
 }
 .display #lcdEdit {
@@ -1798,19 +1866,16 @@ canvas {
   }
   .soundselect {
     padding: 6px 0;
-    grid-template-columns: 66px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
-  .leftutility {
-    padding: 0;
-    gap: 5px;
-  }
-  .master {
-    font-size: 7px;
-  }
-  .master input {
-    margin: 7px auto;
-    width: 52px;
+  /* Only the outer spacing tightens here. #jog is display:none at this width (just below), so the
+     fader is the row's sole member and inherits flex-start from the root rule — which is right
+     now that it is a narrow stroke rather than the old full-width utility rail.
+     No `.master input` override either: the horizontal slider's `width` used to be retuned per
+     breakpoint, but the vertical travel is the clamp() on .master .fader and needs none. */
+  .jogrow {
+    margin: 10px 0 8px;
   }
   .soundbank h2,
   #jog,
@@ -1823,12 +1888,9 @@ canvas {
     display: block;
     margin-top: 8px;
   }
-  .leftutility button {
+  #mute {
     min-height: 25px;
-    padding: 4px;
-  }
-  #lock {
-    margin-top: 0;
+    padding: 4px 8px;
   }
   #tracks {
     grid-template-columns: repeat(8, minmax(0, 1fr));
@@ -1846,7 +1908,9 @@ canvas {
     display: none;
   }
   .choker {
-    margin: 6px 0 0;
+    /* Keep the bottom gap, drop the top one — the row supplies both. `margin: 6px 0 0` here used
+       to pull CHOKE down off the wheel; as a flex child it would instead push it right. */
+    margin: 0;
     font-size: 7px;
   }
   .choker select {
@@ -2025,6 +2089,14 @@ canvas {
   .step:before {
     top: -10px;
   }
+  /* Only the box size changes here — the base rule centres via top/left 50% plus
+     translate(-50%, -50%), which is relative to the element's own size and so stays centred at any
+     size. Needed because 16 columns in a 360px viewport is ~16px per cell, and the desktop 6px
+     diamond would dominate it. */
+  .step.locked:after {
+    width: 4px;
+    height: 4px;
+  }
   .step small {
     top: calc(100% + 3px);
     font-size: 7px;
@@ -2045,6 +2117,17 @@ canvas {
   fill: currentColor;
   flex: none;
   pointer-events: none;
+}
+/* Momentary presses on TRIG/EXIT and the nav arrows: a short lit flash reusing the global
+   button.active red, since these buttons have no persistent state of their own. app.js drops
+   the class after 120ms. `button.pressed`, not `.pressed`: these sit in .confirmkeys, whose
+   0-1-1 pale-gradient rule out-ranks a bare class and would silently swallow the flash. */
+button.pressed {
+  background: linear-gradient(#cc5145, #9f3026);
+  color: #fff;
+  box-shadow:
+    inset 0 2px 1px #ed8570,
+    0 3px 0 #631a17;
 }
 #info {
   font: 10px/1 monospace;
@@ -2100,7 +2183,9 @@ canvas {
     0 1px #eff2e0,
     inset 0 1px 2px #27302399;
   padding: 2px;
-  cursor: ew-resize;
+  /* ns, not ew: transform rotates the rendering but not hit-testing or the cursor, so this is
+     still read against the screen, and the fader now travels vertically. */
+  cursor: ns-resize;
 }
 .master input::-webkit-slider-runnable-track {
   height: 5px;
@@ -2119,6 +2204,11 @@ canvas {
   -webkit-appearance: none;
   width: 12px;
   height: 11px;
+  /* Seats the 11px thumb on the 5px track: (track - thumb) / 2 = (5 - 11) / 2. The rotation does
+     not change this. ::-webkit-slider-thumb is laid out in the input's own coordinate system and
+     `transform` then rotates the finished composite, so a cross-axis offset here stays cross-axis —
+     it simply stops being screen-vertical. Zeroing it here earlier, on the assumption that the axis
+     would be reinterpreted, is what put the thumb off-centre. */
   margin-top: -3px;
   border-radius: 2px;
   border: 1px solid #202a23;

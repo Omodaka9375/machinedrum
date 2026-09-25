@@ -91,6 +91,18 @@ document.addEventListener('visibilitychange', () => {
 function status(text) {
   $('#status').textContent = text;
 }
+// Transient press feedback for the momentary panel buttons (TRIG/YES, EXIT/NO, the nav
+// arrows). They carry no state so there is no persistent .active to react to — unlike the pads,
+// which use .padHit, these get a short lit flash. The single timer resets on every press, so a
+// rapid repeat (arrow-key held) keeps the last press lit instead of flickering.
+let flashTimer = null;
+function flash(el) {
+  el.classList.add('pressed');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => {
+    document.querySelectorAll('.pressed').forEach((b) => b.classList.remove('pressed'));
+  }, 120);
+}
 function audition() {
   hit(track);
 }
@@ -188,8 +200,10 @@ function render() {
     );
     b.setAttribute('aria-pressed', seq ? s.on : gridMode === 'mutes' ? t.mute : i === track);
   });
+  $('#trigMode').classList.toggle('active', gridMode === 'sequence');
   $('#padMode').classList.toggle('active', gridMode === 'pads');
   $('#muteMode').classList.toggle('active', gridMode === 'mutes');
+  $('#trigMode').setAttribute('aria-pressed', gridMode === 'sequence');
   $('#padMode').setAttribute('aria-pressed', gridMode === 'pads');
   $('#muteMode').setAttribute('aria-pressed', gridMode === 'mutes');
   $('#record').classList.toggle('active', recording);
@@ -441,7 +455,10 @@ $('#mute').onclick = () => {
   render();
   save();
 };
-$('#audition').onclick = audition;
+$('#audition').onclick = () => {
+  flash($('#audition'));
+  audition();
+};
 for (const b of document.querySelectorAll('.knob')) {
   const p = b.dataset.param,
     value = () =>
@@ -582,9 +599,10 @@ document.addEventListener('keydown', (e) => {
   }
   const action = {
     Space: () => play(),
-    Enter: () => audition(),
+    Enter: () => $('#audition').click(), // same action, but flashes the TRIG button like Escape does EXIT
     KeyL: () => $('#lock').click(),
     KeyU: () => $(e.shiftKey ? '#muteMode' : '#mute').click(),
+    KeyG: () => $('#trigMode').click(), // G = back to the step grid from either performance mode
     KeyP: () => $('#padMode').click(),
     KeyR: () => $('#record').click(),
     Escape: () => $('#exitLock').click(),
@@ -861,9 +879,11 @@ requestAnimationFrame(frame);
 // step), so a slow full turn sweeps all 16 tracks and quick circular strokes rack up steps like
 // a real jog wheel. A plain click (no rotation) still auditions.
 const jog = $('#jog');
-const jogAngle = (e) => Math.atan2(e.clientY - jogCenter.y, e.clientX - jogCenter.x);
+// Declared before jogAngle, which reads it. Nothing calls jogAngle during module evaluation, so
+// the previous order happened to work — but a TDZ read only stays invisible until something does.
 let jogCenter = { x: 0, y: 0 };
 let jogDrag = null;
+const jogAngle = (e) => Math.atan2(e.clientY - jogCenter.y, e.clientX - jogCenter.x);
 jog.addEventListener(
   'wheel',
   (e) => {
@@ -932,11 +952,13 @@ jog.onkeydown = (e) => {
 // Rotate the notch to the restored/current track on load.
 jog.style.setProperty('--jog', `${(track * 360) / 16}deg`);
 $('#exitLock').onclick = () => {
+  flash($('#exitLock'));
   lock = false;
   render();
 };
 for (const b of document.querySelectorAll('[data-nav]'))
   b.onclick = () => {
+    flash(b);
     const direction = b.dataset.nav;
     if (direction === 'left' || direction === 'right') {
       if (held) return;
@@ -1039,18 +1061,15 @@ $('#bt').onclick = async () => {
   }
 };
 
-$('#padMode').onclick = () => {
+const setGridMode = (mode) => {
   if (recording) return;
   releaseHold();
-  gridMode = gridMode === 'pads' ? 'sequence' : 'pads';
+  gridMode = mode;
   render();
 };
-$('#muteMode').onclick = () => {
-  if (recording) return;
-  releaseHold();
-  gridMode = gridMode === 'mutes' ? 'sequence' : 'mutes';
-  render();
-};
+$('#trigMode').onclick = () => setGridMode('sequence');
+$('#padMode').onclick = () => setGridMode(gridMode === 'pads' ? 'sequence' : 'pads');
+$('#muteMode').onclick = () => setGridMode(gridMode === 'mutes' ? 'sequence' : 'mutes');
 $('#record').onclick = () => {
   const wasPlaying = audio.playing;
   if (recording) {
