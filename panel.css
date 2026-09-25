@@ -945,7 +945,7 @@ canvas {
 }
 
 .stepPages {
-  display: flex;
+  display: none;
   gap: 8px;
   align-items: center;
   margin: 6px 0;
