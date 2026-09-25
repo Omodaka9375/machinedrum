@@ -134,8 +134,14 @@ export class Audio {
     this.isRecording = null;
     /** @type {((n: number) => void) | null} */
     this.onCount = null;
-    /** @type {((position: number) => void) | null} */
+    /** @type {((position: any) => void) | null} */
     this.beforeStep = null;
+    // MIDI hooks: sequencer fires afterStep per triggered track; one-shot auditions fire
+    // onAudition. Assigned from app.js; the class itself stays MIDI-agnostic.
+    /** @type {((step: number, track: number, playing: boolean) => void) | null} */
+    this.afterStep = null;
+    /** @type {((track: number, step: number) => void) | null} */
+    this.onAudition = null;
   }
   async init() {
     if (!this.ctx) {
@@ -159,7 +165,7 @@ export class Audio {
     this.effects.update(this.get());
     this.master.gain.setTargetAtTime(this.get().master / 100, this.ctx.currentTime, 0.01);
   }
-  async audition(track, step) {
+  async audition(track, step, velocity) {
     await this.init();
     const p = this.get();
     if (!this.playing)
@@ -170,16 +176,23 @@ export class Audio {
           0,
         ),
       );
-    this.trigger(track, step, this.ctx.currentTime + 0.005);
+    this.trigger(track, step, this.ctx.currentTime + 0.005, velocity);
+    this.onAudition?.(this.get().tracks.indexOf(track), this.step);
   }
-  trigger(track, step, at) {
+  trigger(track, step, at, velocity) {
     const group = track.choke ?? 0;
     if (group) this.chokes.get(group)?.stop(at);
+    // Velocity (MIDI): a value in 0..1 scales the resolved level for this one hit.
+    const params = resolved(track, step);
+    const p =
+      velocity === undefined || !Number.isFinite(velocity) || velocity < 0 || velocity > 1
+        ? params
+        : { ...params, level: Math.max(0, Math.min(100, Math.round((params.level ?? 58) * velocity))) };
     const v = voice(
       this.ctx,
       this.effects.inputs[this.get().tracks.indexOf(track)].input,
       track.engine,
-      resolved(track, step),
+      p,
       at,
       track.lfo,
       this.get().bpm,
@@ -244,7 +257,7 @@ export class Audio {
       next,
     );
   }
-  liveHit(index) {
+  liveHit(index, velocity) {
     const p = this.get(),
       position = this.position(p.quantize !== false),
       s = recordHit(p, position, index),
@@ -255,7 +268,7 @@ export class Audio {
       position.voices?.[index]?.stop(now);
       this.skipHits.push({ time: position.time, index });
     }
-    if (!t.mute) this.trigger(t, s, now + 0.003);
+    if (!t.mute) this.trigger(t, s, now + 0.003, velocity);
     return position;
   }
   schedule() {
@@ -275,8 +288,10 @@ export class Audio {
           s.on &&
           !t.mute &&
           !this.skipHits.some((h) => h.index === i && Math.abs(h.time - this.next) < 0.000001)
-        )
+        ) {
           event.voices[i] = this.trigger(t, s, this.next + ((s.offset ?? 0) * 60) / p.bpm / 4);
+          this.afterStep?.(this.step, i, this.playing);
+        }
       });
       this.events.push(event);
       this.timeline.push(event);

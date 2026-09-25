@@ -12,6 +12,7 @@ import {
   recordParameter,
 } from './model.js';
 import { Audio } from './audio.js';
+import { MidiEngine, BleMidi, TempoEstimator, trackFromNote, velocityScale } from './midi.js';
 const $ = (s) => document.querySelector(s),
   key = 'ferro-study-v1';
 let project = demo();
@@ -92,16 +93,16 @@ function status(text) {
 function audition() {
   hit(track);
 }
-function hit(index) {
+function hit(index, velocity) {
   if (held) return;
   track = index;
   if (recording && audio.playing && !audio.counting) {
-    const pos = audio.liveHit(index);
+    const pos = audio.liveHit(index, velocity);
     save();
     status(`Recorded ${names[index]} /${'ABCD'[pos.pattern]}${String(pos.step + 1).padStart(2, '0')}`);
   } else
     audio
-      .audition(current(), isLocked() ? selected() : { locks: {} })
+      .audition(current(), isLocked() ? selected() : { locks: {} }, velocity)
       .catch(() => status('Audio is not running yet — tap TRIG again'));
   render();
   const b = document.querySelector(`[data-step="${index}"]`);
@@ -631,7 +632,11 @@ $('#reloadKit').onclick = () => {
   status('Kit sounds restored · patterns, parameter locks and mutes kept · playback continues');
 };
 $('#demo').onclick = () => {
-  if (!confirm('Factory reset: load the four demo patterns and default sounds? Your current edits will be replaced.'))
+  if (
+    !confirm(
+      'Factory reset: load the four demo patterns and default sounds? Your current edits will be replaced.',
+    )
+  )
     return;
   stop();
   project = demo();
@@ -955,6 +960,83 @@ $('#audition').title = 'Enter: audition the current sound';
 $('#mute').title = 'U: mute the current track';
 $('#lock').title = 'L: toggle per-step parameter lock';
 $('#exitLock').title = 'Esc: exit parameter lock';
+
+// ---------------------------------------------------------------------------
+// MIDI. Two transports feed one handler: Web MIDI (USB / OS-paired BT) and direct BLE pairing
+// over Web Bluetooth. Notes come in on the GM drum map (or chromatically C1..D#2) and hit
+// tracks with velocity; while recording they are captured into the pattern like pad hits.
+// Transport / continue / stop follow the incoming clock; program change 1-4 switches pattern.
+// Outbound: sequencer steps echo as notes on the first available output (channel 10, drums).
+const midiClock = new TempoEstimator();
+function midiEmit(type, detail) {
+  if (type === 'noteon') {
+    const t = trackFromNote(detail.note);
+    if (t === null) return;
+    hit(t, velocityScale(detail.velocity) ?? 1);
+  } else if (type === 'clock') {
+    const bpm = midiClock.tick();
+    if (bpm !== null && bpm !== project.bpm && bpm >= 40 && bpm <= 240) setTempo(bpm);
+  } else if (type === 'start' || type === 'continue') {
+    if (!audio.playing) play();
+  } else if (type === 'stop') {
+    if (audio.playing) stop();
+  } else if (type === 'program') {
+    const p = detail.value & 3; // 1-4 -> 0-3
+    if (p !== pattern) {
+      pattern = p;
+      if (audio.playing) audio.pending = p;
+      render();
+      status(`Pattern ${'ABCD'[pattern]} (MIDI program change)`);
+    }
+  }
+}
+const midiStatus = (label, connected, extra) => {
+  const btn = label === 'midi' ? $('#midi') : $('#bt');
+  if (!btn) return;
+  btn.setAttribute('aria-pressed', connected);
+  btn.classList.toggle('active', connected);
+  if (label === 'midi') status(connected ? `MIDI connected · ${extra ?? ''}` : 'MIDI disconnected');
+  else status(connected ? `Bluetooth MIDI: ${extra ?? ''}` : 'Bluetooth MIDI disconnected');
+};
+const midi = new MidiEngine(midiEmit, midiStatus);
+const ble = new BleMidi(midiEmit, midiStatus);
+// Sequencer echo: track -> GM drum note on channel 10. sendNote no-ops without an output.
+audio.afterStep = (stepIndex, trackIndex) => {
+  const t = project.tracks[trackIndex];
+  const s = project.patterns[pattern][trackIndex][stepIndex];
+  midi.sendNote(9, trackIndex + 36, resolved(t, s).level / 100);
+};
+audio.onAudition = (trackIndex) =>
+  midi.sendNote(9, trackIndex + 36, project.tracks[trackIndex].p.level / 100);
+$('#midi').onclick = async () => {
+  if (midi.connected) {
+    midi.disconnect();
+    midiStatus('midi', false);
+    return;
+  }
+  try {
+    await audio.init(); // unlock audio on the same gesture
+    const n = await midi.connect();
+    midiStatus('midi', true, `${n} input${n === 1 ? '' : 's'}`);
+  } catch (e) {
+    status(`MIDI: ${e.message}`);
+  }
+};
+$('#bt').onclick = async () => {
+  if (ble.connected) {
+    ble.disconnect();
+    midiStatus('ble', false);
+    return;
+  }
+  try {
+    await audio.init();
+    const name = await ble.connect();
+    midiStatus('ble', true, name);
+  } catch (e) {
+    // NotFoundError = user cancelled the chooser; not worth a scary message.
+    status(e.name === 'NotFoundError' ? 'Bluetooth pairing cancelled' : `Bluetooth MIDI: ${e.message}`);
+  }
+};
 
 $('#padMode').onclick = () => {
   if (recording) return;

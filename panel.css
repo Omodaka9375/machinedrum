@@ -38,6 +38,39 @@ header b {
 .portline span {
   padding-top: 4px;
 }
+/* MIDI/BT buttons live in the portline's middle cell where the A B INPUT legend was. They are
+   functional controls on a decorative strip, so they keep their own hit areas and a lit state
+   matching the panel's LCD-green highlight. */
+.portmidi {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 2px;
+}
+.portmidi button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #171d1d;
+  border-radius: 4px;
+  background: linear-gradient(#394040, #222829);
+  color: #8e9689;
+}
+.portmidi button svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+.portmidi button.active {
+  color: #c3cd9f;
+  box-shadow: inset 0 0 5px #a3d87366;
+}
 .upper {
   grid-template-columns: 30% 30% 40%;
   align-items: stretch;
@@ -576,8 +609,20 @@ footer {
   body {
     padding: 14px 8px;
   }
+  /* The portline's silkscreen legends go, but the MIDI/BT buttons inside it must stay
+     reachable: collapse the label spans instead of hiding the whole strip. */
   .portline {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .portline > span[aria-hidden='true'] {
     display: none;
+  }
+  .portmidi {
+    display: flex;
+    height: 26px;
+    justify-content: center;
+    padding: 0;
   }
   .upper {
     grid-template-columns: 1fr 1fr;
