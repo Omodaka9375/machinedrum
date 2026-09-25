@@ -1147,6 +1147,73 @@ $('#undoClear').onclick = async () => {
   status('Pattern restored.');
 };
 
+// RANDOMIZE fills the current pattern with a fresh groove. Not uniform noise: each track draws
+// from its role's step pool (BD/SD land on the classic grid, hats are dense, cymbals sparse),
+// probabilities follow a density curve (step 0 strongest, 6 and 10 - the classic pushes - high),
+// and a few tracks get a single parameter lock so the pattern isn't 16 identical hits. Any
+// track that already has notes is left alone - randomize seeds an empty pattern or fills
+// remaining space, it never bulldozes what you programmed.
+$('#randomPattern').onclick = () => {
+  const target = pattern;
+  releaseHold();
+  const beats = project.patterns[target];
+  const rng = mulberry32((Date.now() ^ (target << 4)) >>> 0);
+  // Role pools: [track indices] + per-step hit probability.
+  const roles = [
+    { tracks: [0], pool: [0, 4, 8, 10, 12], p: 0.75 }, // BD: the grid + the 10 push
+    { tracks: [1], pool: [4, 12, 7, 14, 11], p: 0.6 }, // SD: backbeat first, ghosts rare
+    { tracks: [2, 3], pool: [0, 2, 4, 6, 8, 10, 12, 14], p: 0.8 }, // hats: eighths
+    { tracks: [4], pool: [4, 12], p: 0.5 }, // CP: with the snare or off it
+    { tracks: [5, 6], pool: [7, 15, 6, 14], p: 0.35 }, // toms: fills
+    { tracks: [7], pool: [2, 10], p: 0.3 }, // RS: off-beat ticks
+    { tracks: [8, 9], pool: [3, 11, 6, 14], p: 0.4 }, // FM: syncopated color
+    { tracks: [10, 11], pool: [0, 8], p: 0.3 }, // cymbals: accents only
+    { tracks: [12], pool: [5, 13], p: 0.25 }, // NO: odd ticks
+    { tracks: [13], pool: [0, 8], p: 0.4 }, // SUB: reinforce the low
+    { tracks: [14, 15], pool: [7, 11, 15], p: 0.3 }, // PERC/MET: tail chatter
+  ];
+  let placed = 0;
+  for (const role of roles) {
+    for (const t of role.tracks) {
+      const existing = beats[t].some((s) => s.on);
+      if (existing) continue;
+      let any = false;
+      for (const stepIndex of role.pool) {
+        // Density curve: strongest at step 0, a lift at the 10 push, fade toward the end.
+        const curve = { 0: 1, 10: 0.9, 6: 0.7 }[stepIndex] ?? 0.55;
+        if (rng() < role.p * curve) {
+          const s = beats[t][stepIndex];
+          s.on = true;
+          s.locks = {};
+          any = true;
+          placed++;
+        }
+      }
+      // One parameter lock on a random hit for a third of the seeded tracks.
+      if (any && rng() < 0.33) {
+        const on = beats[t].filter((s) => s.on);
+        const pick = on[Math.floor(rng() * on.length)];
+        const params = ['pitch', 'decay', 'drive', 'tone'];
+        const param = params[Math.floor(rng() * params.length)];
+        pick.locks[param] = Math.round(40 + rng() * 55);
+      }
+    }
+  }
+  save();
+  render();
+  status(placed ? `Pattern ${'ABCD'[target]} randomized` : 'Nothing to randomize');
+};
+// Tiny deterministic PRNG - same seed, same pattern; seed varies per click and per pattern slot.
+function mulberry32(a) {
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 let patternClipboard = null,
   patternMenu = null;
 function closePatternMenu() {
