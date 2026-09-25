@@ -151,24 +151,13 @@ header b {
   margin: 18px auto;
   height: 4px;
 }
-.modelegend {
-  font-size: 8px;
-  line-height: 2.2;
-  text-align: left;
-  white-space: nowrap;
-}
-.modelegend i,
 .datafoot i {
   display: inline-block;
-  background: #5c2d25;
+  background: #fa4f38;
   width: 7px;
   height: 7px;
   border-radius: 50%;
   margin-right: 5px;
-}
-.modelegend i:first-child,
-.datafoot i {
-  background: #fa4f38;
   box-shadow: 0 0 3px #e72c26;
 }
 .leftutility button {
@@ -689,9 +678,6 @@ canvas {
   .master {
     font-size: 7px;
   }
-  .modelegend {
-    font-size: 6px;
-  }
   .leftutility button {
     font-size: 7px;
   }
@@ -818,7 +804,6 @@ canvas {
 }
 .machine h2,
 .portline,
-.modelegend,
 .datafoot,
 .knobcell small,
 .sublegend,
@@ -1789,7 +1774,6 @@ canvas {
     margin: 7px auto;
     width: 52px;
   }
-  .modelegend,
   .soundbank h2,
   #jog,
   .screenbrand,
