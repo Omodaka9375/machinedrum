@@ -48,13 +48,17 @@ header b {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  padding-top: 2px;
+  /* Identical to .portline span's padding-top, so the labels share the legend's baseline
+     rather than the flex-center of the 38px row. */
+  padding-top: 4px;
 }
 .portmidi button {
   font: inherit;
   letter-spacing: 0.3px;
   line-height: 13px;
-  padding: 2px 4px;
+  /* Horizontal-only padding: vertical padding would push the text off the legend baseline.
+     The hit area stays generous via line-height. */
+  padding: 0 4px;
   flex: none;
   border: 0;
   border-radius: 0;
