@@ -57,12 +57,27 @@ header b {
   padding: 2px 4px;
   flex: none;
   border: 0;
+  border-radius: 0;
   background: none;
+  box-shadow: none;
   color: #4d554a;
   cursor: pointer;
 }
+/* Printed labels take no focus ring either — the connection state is already reported in the
+   status line, and these are supplementary controls, not primary ones. */
+.portmidi button:focus-visible {
+  outline: none;
+}
+.portmidi button:active {
+  transform: none;
+  box-shadow: none;
+}
+/* Overrides the global button.active (red gradient + white text): a connected transport lights
+   the label, it does not become a lit physical button. */
 .portmidi button.active {
+  background: none;
   color: #c3cd9f;
+  box-shadow: none;
   text-shadow: 0 0 5px #a3d87388;
 }
 .upper {
