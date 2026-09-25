@@ -49,7 +49,11 @@
             BT
           </button></span
         >
-        <span aria-hidden="true">IN　　OUT　　THRU　　 DC IN　　 POWER</span>
+        <span class="portreset" aria-hidden="false"
+          ><button id="demo" title="Factory reset: load the four demo patterns and default sounds">
+            FACTORY RESET
+          </button></span
+        >
       </div>
       <section class="upper">
         <div class="soundselect">
@@ -211,8 +215,7 @@
       </section>
     </main>
     <footer>
-      <span id="status" role="status">Four built-in patterns · auto-saved in this browser</span
-      ><button id="demo">FACTORY RESET</button>
+      <span id="status" role="status">Four built-in patterns · auto-saved in this browser</span>
     </footer>
     <script type="module" src="src/app.js"></script>
     <script type="module" src="src/info.js"></script>

@@ -84,6 +84,41 @@ header b {
   box-shadow: none;
   text-shadow: 0 0 5px #a3d87388;
 }
+/* The POWER label became the FACTORY RESET control: printed in the same silkscreen face as
+   the port legends, same flat-text treatment as the MIDI/BT labels. The red .active global is
+   overridden — factory reset never gets a "connected" state, but the guard keeps it consistent. */
+.portreset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 4px;
+}
+.portreset button {
+  font: inherit;
+  letter-spacing: 0.3px;
+  line-height: 13px;
+  padding: 0 4px;
+  flex: none;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #4d554a;
+  cursor: pointer;
+}
+.portreset button:focus-visible {
+  outline: none;
+}
+.portreset button:active {
+  transform: none;
+  box-shadow: none;
+}
+.portreset button.active {
+  background: none;
+  color: #c3cd9f;
+  box-shadow: none;
+  text-shadow: 0 0 5px #a3d87388;
+}
 .upper {
   grid-template-columns: 30% 30% 40%;
   align-items: stretch;
@@ -631,7 +666,8 @@ footer {
   .portline > span[aria-hidden='true'] {
     display: none;
   }
-  .portmidi {
+  .portmidi,
+  .portreset {
     display: flex;
     height: 26px;
     justify-content: center;
