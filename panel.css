@@ -1,7 +1,7 @@
 /* The panel is an instrument faceplate: silkscreen labels (h2s, port legends, LCD readouts) are
    not copyable text, and drag-selecting them during performance is noise. Select everything OFF
    at the root, then re-enable exactly where text is the point: input fields (BPM, swing), the
-   field-guide dialog, and the footer note. */
+   field-guide dialog, the status line, and the pattern-confirm dialog. */
 body {
   padding: 24px 2.5vw;
   user-select: none;
@@ -581,9 +581,6 @@ canvas {
 }
 .seqfoot span:last-child {
   display: inline;
-}
-footer {
-  max-width: 1500px;
 }
 @media (max-width: 1000px) and (min-width: 701px) {
   .machine {
@@ -1799,6 +1796,11 @@ footer {
   .displaylabel {
     display: none;
   }
+  /* The label row goes on small screens but the status line lives under it and must stay. */
+  #status {
+    display: block;
+    margin-top: 8px;
+  }
   .leftutility button {
     min-height: 25px;
     padding: 4px;
@@ -2000,12 +2002,6 @@ footer {
   .step small {
     top: calc(100% + 3px);
     font-size: 7px;
-  }
-  footer {
-    margin: 7px 0;
-    font-size: 8px;
-    gap: 5px;
-    flex-wrap: wrap;
   }
 }
 

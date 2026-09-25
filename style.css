@@ -568,18 +568,14 @@ canvas {
 .seqfoot span:last-child {
   white-space: nowrap;
 }
-footer {
-  max-width: 1440px;
-  margin: 22px auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  font-size: 10px;
-  color: #97a19b;
-}
+/* Status line moved into the displaycase, under the SPS-1 plate: same small-print face as
+   the label row, muted green like the LCD readouts. */
 #status {
   color: #bfcaaf;
+  margin: 10px 0 0;
+  font-size: 8px;
+  letter-spacing: 0.4px;
+  text-align: left;
 }
 @media (min-width: 1500px) {
   body {
@@ -691,9 +687,6 @@ footer {
   }
   .seqfoot span:last-child {
     display: none;
-  }
-  footer {
-    flex-wrap: wrap;
   }
   header small {
     font-size: 8px;
