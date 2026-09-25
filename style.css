@@ -452,6 +452,18 @@ canvas {
   outline: none;
   box-shadow: inset 0 0 0 2px #5f6a5b;
 }
+/* AMOUNT is a number input; the default spin buttons render as an off-panel white picker.
+   They cannot be restyled cross-browser (Firefox exposes no pseudo-element for them), so
+   hide them instead — the keyboard up/down arrows still step the value natively. */
+.tempo input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.tempo input[type='number']::-webkit-inner-spin-button,
+.tempo input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .transport {
   display: flex;
   gap: 12px;
