@@ -24,7 +24,7 @@ body {
     sans-serif;
   min-height: 100vh;
   padding: 30px 3.5vw;
-  background: linear-gradient(gray);
+  background: linear-gradient(#352e2e);
 }
 header {
   display: flex;
