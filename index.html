@@ -116,11 +116,14 @@
           <div class="maker">MACHINEDRUM<span>16 VOICE DIGITAL SYNTHESIS</span></div>
           <div class="datahead"><h2>PARAMETERS</h2></div>
           <div class="databody">
-            <div class="tempo">
-              <label>SWING %<input id="swing" type="number" min="0" max="60" value="8" /></label>
-            </div>
             <div id="knobs"></div>
+          </div>
+          <div class="datafoot">
+            <span><i></i> SYNTHESIS</span>
             <div class="timingSwitches">
+              <button id="swingEnabled" aria-pressed="true" title="Enable or bypass Swing">
+                <span class="switchTrack" aria-hidden="true"><i></i></span><span>SWING</span>
+              </button>
               <button
                 id="quantize"
                 aria-pressed="true"
@@ -128,13 +131,7 @@
               >
                 <span class="switchTrack" aria-hidden="true"><i></i></span><span>QUANT</span>
               </button>
-              <button id="swingEnabled" aria-pressed="true" title="Enable or bypass Swing">
-                <span class="switchTrack" aria-hidden="true"><i></i></span><span>SWING</span>
-              </button>
             </div>
-          </div>
-          <div class="datafoot">
-            <span><i></i> SYNTHESIS</span>
             <button id="unlock" title="Remove every parameter lock on the current step">CLEAR LOCKS</button>
           </div>
         </div>
@@ -143,6 +140,11 @@
         <div class="patternsection">
           <h2>PATTERN SELECTION</h2>
           <div id="patterns"></div>
+          <div id="chain" hidden>
+            <span class="chainlabel">CHAIN</span>
+            <div id="chainSlots"></div>
+            <button id="chainClear" title="Clear the pattern chain">CLR</button>
+          </div>
           <div class="clearActions">
             <button id="clearPattern">CLEAR PATTERN</button><button id="undoClear" disabled>UNDO CLEAR</button
             ><button id="copyPattern">COPY</button><button id="pastePattern" disabled>PASTE</button

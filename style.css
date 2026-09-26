@@ -3,6 +3,14 @@
   --ink: #30332f;
   --lcd: #c3cd9f;
   --dark: #202526;
+  /* Pattern-chain accents. One per pattern slot A-D: outlines mark membership,
+     chip fills mark loop position, and the active button wears its pattern's
+     color instead of the global red. Keep all four clearly distinct hues at
+     similar weight so the chain reads as a sequence, not a ranking. */
+  --pat-a: #d8a13c;
+  --pat-b: #4f9db3;
+  --pat-c: #b0568b;
+  --pat-d: #7ba05a;
 }
 * {
   box-sizing: border-box;
@@ -338,10 +346,12 @@ canvas {
 }
 #knobs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 22px 16px;
   margin-top: 10px;
 }
+/* Global knobs sit in the flow: BPM first, SWING first of the second row (it swapped places
+   with the knob that used to start row 2), so swing always lands directly below BPM. */
 .knobcell {
   text-align: center;
   position: relative;
@@ -398,7 +408,7 @@ canvas {
   display: flex;
   gap: 10px;
   margin-top: 21px;
-  justify-content: center;
+  justify-content: space-between;
 }
 .datafoot button {
   font-size: 9px;
@@ -427,47 +437,124 @@ canvas {
   outline: 1px dashed #c3cd9f;
   outline-offset: 3px;
 }
-.tempo {
-  display: flex;
-  gap: 15px;
+/* --- Pattern chain -------------------------------------------------------
+   Shift+click A-D appends that pattern to the loop (the same pattern can be
+   queued several times; the xN badge counts passes). Color = identity: the
+   outline around a button says "in the chain", the chip below says where it
+   falls in the loop, and the lit button wears its pattern's accent instead of
+   the global red so the sounding pattern stays readable while the chain runs. */
+#patterns button {
+  position: relative;
 }
-/* "SWING %" reads as what it is, and the field is styled as an LCD readout cell (same
-   face as the LCD dials on the display) rather than a big white form input, which
-   looked like a second tempo field and gave no hint of its function. */
-.tempo label {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+#patterns .chainmult {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
   font-size: 8px;
-  letter-spacing: 1px;
-  color: #5b6556;
+  letter-spacing: 0;
+  color: #f2f0e4;
+  text-shadow: 0 1px 1px #000a;
+  pointer-events: none;
 }
-.tempo input {
-  background: #c3cd9f;
-  border: 1px solid #929a8c;
+#patterns button.chained {
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+#patterns button.patcol0.chained {
+  outline-color: var(--pat-a);
+}
+#patterns button.patcol1.chained {
+  outline-color: var(--pat-b);
+}
+#patterns button.patcol2.chained {
+  outline-color: var(--pat-c);
+}
+#patterns button.patcol3.chained {
+  outline-color: var(--pat-d);
+}
+#patterns button.patcol0.active {
+  background: linear-gradient(#d8a13c, #a8741e);
+  box-shadow:
+    inset 0 2px 1px #eec987,
+    0 3px 0 #6b4a14;
+  color: #241d0e;
+}
+#patterns button.patcol1.active {
+  background: linear-gradient(#4f9db3, #2e6f86);
+  box-shadow:
+    inset 0 2px 1px #93ccdc,
+    0 3px 0 #1e4a58;
+  color: #0d2027;
+}
+#patterns button.patcol2.active {
+  background: linear-gradient(#b0568b, #833a63);
+  box-shadow:
+    inset 0 2px 1px #d795ba,
+    0 3px 0 #52243e;
+  color: #26101c;
+}
+#patterns button.patcol3.active {
+  background: linear-gradient(#7ba05a, #5a7a3e);
+  box-shadow:
+    inset 0 2px 1px #b1cf92,
+    0 3px 0 #374b25;
+  color: #1c2610;
+}
+#chain {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+}
+/* display:flex would defeat the hidden attribute — restate it. */
+#chain[hidden] {
+  display: none;
+}
+.chainlabel {
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: #5c6358;
+}
+#chainSlots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.chainslot {
+  width: 24px;
+  height: 21px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
   border-radius: 3px;
-  padding: 5px 7px;
-  width: 54px;
-  font:
-    13px 'Courier New',
-    monospace;
-  color: #30332f;
+  color: #1d221a;
 }
-.tempo input:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px #5f6a5b;
+.chainslot.patcol0 {
+  background: var(--pat-a);
 }
-/* The number input's default spin buttons render as an off-panel white picker.
-   They cannot be restyled cross-browser (Firefox exposes no pseudo-element for them), so
-   hide them instead — the keyboard up/down arrows still step the value natively. */
-.tempo input[type='number'] {
-  appearance: textfield;
-  -moz-appearance: textfield;
+.chainslot.patcol1 {
+  background: var(--pat-b);
 }
-.tempo input[type='number']::-webkit-inner-spin-button,
-.tempo input[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.chainslot.patcol2 {
+  background: var(--pat-c);
+}
+.chainslot.patcol3 {
+  background: var(--pat-d);
+}
+/* The chip sounding this bar: the dark-olive ring the step grid already uses
+   for selection — a fixed color, drawn with a box, never a typeset glyph. */
+.chainslot.playing {
+  outline: 2px solid #2f5622;
+  outline-offset: 2px;
+}
+#chainClear {
+  font-size: 8px;
+  padding: 4px 7px;
+  letter-spacing: 1px;
 }
 .transport {
   display: flex;
@@ -688,7 +775,7 @@ canvas {
     gap: 30px;
   }
   #knobs {
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(10, 1fr);
     gap: 7px;
   }
   .datafoot {
@@ -757,7 +844,7 @@ canvas {
     padding-bottom: 15px;
   }
   #knobs {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 16px;
   }
   .topline strong {
@@ -771,9 +858,6 @@ canvas {
   }
   .transport button {
     width: 50px;
-  }
-  .tempo {
-    gap: 8px;
   }
   .middle {
     justify-content: center;

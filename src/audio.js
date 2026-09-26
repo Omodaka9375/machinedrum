@@ -278,9 +278,17 @@ export class Audio {
   schedule() {
     const p = this.get();
     while (this.next < this.ctx.currentTime + 0.07) {
-      if (this.step === 0 && this.pending !== null) {
-        this.pattern = this.pending;
-        this.pending = null;
+      if (this.step === 0) {
+        if (this.pending !== null) {
+          this.pattern = this.pending;
+          this.pending = null;
+        } else if (this.barPattern && !this.counting) {
+          // Pattern chain (app.js): the hook decides the upcoming bar's pattern. null keeps
+          // the current one. Suppressed during the count-in — start() already began with
+          // chain[0], and consuming a slot here would skip it.
+          const chained = this.barPattern();
+          if (chained !== null && chained !== undefined) this.pattern = chained;
+        }
       }
       if (this.isRecording?.() && this.step % 4 === 0) this.click(this.next, this.step === 0);
       const event = { time: this.next, step: this.step, pattern: this.pattern, voices: [] };

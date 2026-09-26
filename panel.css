@@ -1,6 +1,6 @@
 /* The panel is an instrument faceplate: silkscreen labels (h2s, port legends, LCD readouts) are
    not copyable text, and drag-selecting them during performance is noise. Select everything OFF
-   at the root, then re-enable exactly where text is the point: input fields (BPM, swing), the
+   at the root, then re-enable exactly where text is the point: the input field (BPM), the
    field-guide dialog, the status line, and the pattern-confirm dialog. */
 body {
   padding: 24px 2.5vw;
@@ -268,7 +268,7 @@ header b {
   align-items: stretch;
 }
 .soundbank h2 {
-  font-size: 8px;
+  font-size: 10px;
   text-align: center;
 }
 #tracks {
@@ -467,33 +467,19 @@ canvas {
 }
 .datahead h2 {
   margin-bottom: 8px;
-  font-size: 9px;
+  font-size: 10px;
 }
 .datahead select {
   font-size: 9px;
 }
 .databody {
   display: grid;
-  grid-template-columns: 19% 81%;
+  grid-template-columns: minmax(0, 1fr);
   padding: 8px 20px 0 16px;
   gap: 0;
 }
-.tempo {
-  flex-direction: column;
-  justify-content: space-around;
-  gap: 20px;
-  padding-right: 12px;
-}
-.tempo label {
-  font-size: 8px;
-}
-.tempo input {
-  width: 100%;
-  font-size: 14px;
-  padding: 6px 2px;
-}
 #knobs {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px 9px;
   margin: 0;
 }
@@ -518,7 +504,7 @@ canvas {
 .datafoot {
   margin: auto 0 0;
   padding: 15px 20px;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   font-size: 8px;
 }
@@ -539,7 +525,7 @@ canvas {
 }
 .patternsection h2 {
   padding-top: 7px;
-  font-size: 8px;
+  font-size: 10px;
   text-align: center;
   margin-bottom: 16px;
 }
@@ -550,6 +536,17 @@ canvas {
 #patterns button {
   width: 100%;
   height: 32px;
+}
+#chain {
+  margin-top: 9px;
+}
+.chainslot {
+  width: 21px;
+  height: 18px;
+  font-size: 9px;
+}
+#chainClear {
+  padding: 3px 6px;
 }
 .sublegend {
   font-size: 8px;
@@ -614,7 +611,7 @@ canvas {
      the button row; align-content: start on the container pins it to the top padding. */
   grid-column: 1/-1;
   text-align: center;
-  font-size: 8px;
+  font-size: 10px;
   margin-bottom: 13px;
 }
 .transport button {
@@ -641,7 +638,7 @@ canvas {
   order: 1;
   grid-column: 1/-1;
   text-align: center;
-  font-size: 8px;
+  font-size: 10px;
   margin: 0 0 13px;
 }
 .kitactions button {
@@ -834,11 +831,11 @@ canvas {
     padding-top: 15px;
   }
   .databody {
-    grid-template-columns: 16% 84%;
+    grid-template-columns: minmax(0, 1fr);
     padding-bottom: 5px;
   }
   #knobs {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 17px 8px;
   }
   .knob {
@@ -1632,10 +1629,6 @@ canvas {
   padding: 5px 2px;
   letter-spacing: 0;
 }
-.tempo {
-  gap: 10px;
-}
-
 .timingSwitches {
   gap: 12px;
 }
@@ -1710,6 +1703,7 @@ canvas {
   gap: 18px;
   align-items: center;
   margin-top: 14px;
+  padding-left: 28px;
 }
 .displaylabel img {
   display: block;
@@ -1952,19 +1946,7 @@ canvas {
   }
   .databody {
     padding: 5px 2px 0;
-    grid-template-columns: 52px minmax(0, 1fr);
-  }
-  .tempo {
-    gap: 5px;
-    padding-right: 6px;
-  }
-  .tempo label {
-    gap: 2px;
-    font-size: 7px;
-  }
-  .tempo input {
-    font-size: 12px;
-    padding: 3px 1px;
+    grid-template-columns: minmax(0, 1fr);
   }
   #knobs {
     gap: 6px 5px;
@@ -2018,6 +2000,18 @@ canvas {
   .clearActions button {
     font-size: 7px;
     padding: 5px 3px;
+  }
+  #chain {
+    margin-top: 5px;
+    gap: 5px;
+  }
+  .chainslot {
+    width: 17px;
+    height: 15px;
+    font-size: 8px;
+  }
+  .chainlabel {
+    letter-spacing: 2px;
   }
   .navigation {
     padding: 6px;

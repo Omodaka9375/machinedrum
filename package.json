@@ -13,7 +13,7 @@
     "typecheck-tests": "tsc -p tsconfig.test.json --noEmit",
     "icons": "node scripts/make-icons.mjs",
     "serve": "node serve.mjs",
-    "test": "node fx.test.mjs && node shape.test.mjs && node save.test.mjs && node jog.test.mjs && node wheel.test.mjs && node midi.test.mjs",
+    "test": "node fx.test.mjs && node shape.test.mjs && node save.test.mjs && node jog.test.mjs && node wheel.test.mjs && node midi.test.mjs && node chain.test.mjs",
     "check": "pnpm run typecheck && pnpm run typecheck-tests && pnpm run test"
   },
   "devDependencies": {

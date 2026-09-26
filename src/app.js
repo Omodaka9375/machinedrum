@@ -38,12 +38,18 @@ let track = 0,
   gridMode = 'sequence',
   held = null,
   suppressClick = null,
-  gesture = null;
+  gesture = null,
+  chain = [],
+  chainPos = 0,
+  chainPlaying = -1;
 const recordedValues = {};
 const isLocked = () => lock || !!held;
 const audio = new Audio(
   () => project,
   ({ step: s, pattern: p }) => {
+    // While the chain plays, the sounding slot is whatever barPattern last queued; if the
+    // event's pattern no longer matches it (a manual switch took the next bar), none is.
+    if (chain.length && p !== chain[chainPlaying]) chainPlaying = -1;
     document
       .querySelectorAll('.step')
       .forEach((b, i) =>
@@ -144,21 +150,46 @@ $('#steps').innerHTML = Array.from(
 $('#patterns').innerHTML = ['A', 'B', 'C', 'D']
   .map(
     (n, i) =>
-      `<button data-pattern="${i}" aria-label="Pattern ${n}" aria-keyshortcuts="Control+Shift+${i + 1}" title="Control+Shift+${i + 1}: Pattern ${n}">${n}</button>`,
+      `<button class="patcol${i}" data-pattern="${i}" aria-label="Pattern ${n}" aria-keyshortcuts="Control+Shift+${i + 1}" title="Control+Shift+${i + 1}: Pattern ${n} · Shift+click: add to the pattern chain">${n}<span class="chainmult" hidden></span></button>`,
   )
   .join('');
-$('#knobs').innerHTML = params
-  .map(
-    (p, i) =>
-      `<div class="knobcell"><button class="knob" role="slider" aria-label="${labels[i]}" aria-valuemin="0" aria-valuemax="100" data-param="${p}" title="Drag up / down · scroll wheel · arrow keys; double-click to audition"></button><small>${String.fromCharCode(65 + i)} / ${labels[i]}</small><output></output></div>`,
-  )
-  .join('');
+$('#knobs').innerHTML =
+  `<div class="knobcell"><button class="knob" role="slider" aria-label="Tempo BPM" aria-valuemin="40" aria-valuemax="240" data-global="bpm" title="Drag up / down · scroll wheel · arrow keys · SHIFT for 0.1 steps; double-click resets to 124.0"></button><small>BPM</small><output></output></div>` +
+  params
+    .slice(0, 4)
+    .map(
+      (p, i) =>
+        `<div class="knobcell"><button class="knob" role="slider" aria-label="${labels[i]}" aria-valuemin="0" aria-valuemax="100" data-param="${p}" title="Drag up / down · scroll wheel · arrow keys; double-click to audition"></button><small>${String.fromCharCode(65 + i)} / ${labels[i]}</small><output></output></div>`,
+    )
+    .join('') +
+  `<div class="knobcell"><button class="knob" role="slider" aria-label="Swing amount" aria-valuemin="0" aria-valuemax="60" data-global="swing" title="Drag up / down · scroll wheel · arrow keys · SHIFT for 0.1 steps; double-click resets to 8%"></button><small>SWING %</small><output></output></div>` +
+  params
+    .slice(4)
+    .map(
+      (p, i) =>
+        `<div class="knobcell"><button class="knob" role="slider" aria-label="${labels[i + 4]}" aria-valuemin="0" aria-valuemax="100" data-param="${p}" title="Drag up / down · scroll wheel · arrow keys; double-click to audition"></button><small>${String.fromCharCode(65 + i + 4)} / ${labels[i + 4]}</small><output></output></div>`,
+    )
+    .join('');
 function renderPatterns() {
+  // While the chain drives playback, the button holding the NEXT bar's pattern shows the same
+  // dashed "switches at the next bar" cue a manually queued switch gets.
+  const chainNext =
+    audio.playing && audio.pending === null && chain.length > 0 ? chain[chainPos] : -1;
   document.querySelectorAll('[data-pattern]').forEach((b, i) => {
     b.classList.toggle('active', i === pattern);
-    b.classList.toggle('pending', audio.playing && audio.pending === i);
+    const times = chain.filter((p) => p === i).length;
+    b.classList.toggle('chained', times > 0);
+    b.classList.toggle('pending', audio.playing && (audio.pending === i || chainNext === i));
+    const mult = b.querySelector('.chainmult');
+    mult.hidden = times < 2;
+    mult.textContent = 'x' + times;
     b.setAttribute('aria-pressed', i === pattern);
+    b.setAttribute('aria-label', `Pattern ${'ABCD'[i]}${times ? ` · in chain x${times}` : ''}`);
   });
+  $('#chain').hidden = chain.length === 0;
+  document
+    .querySelectorAll('.chainslot')
+    .forEach((c, i) => c.classList.toggle('playing', i === chainPlaying));
 }
 function render() {
   for (const id of ['quantize', 'swingEnabled']) {
@@ -232,6 +263,15 @@ function render() {
     b.parentElement.classList.toggle('locked', isLocked() && p in selected().locks);
     b.parentElement.querySelector('output').textContent = String(v).padStart(3, '0');
   });
+  // Global knobs are fixed across pages: always tempo and swing — never locked, never
+  // remapped by the FX / LFO pages, never part of the LCD dial row.
+  document.querySelectorAll('[data-global]').forEach((b) => {
+    const spec = globalKnob[b.dataset.global],
+      v = spec.read();
+    b.style.setProperty('--angle', `${spec.norm(v) * 2.7 - 135}deg`);
+    b.setAttribute('aria-valuenow', v);
+    b.parentElement.querySelector('output').textContent = spec.text(v);
+  });
   $('#lcdValues').innerHTML = params
     .map((p, i) => lcdDial(titles[i].slice(0, 4), values[p], values[p]))
     .join('');
@@ -258,7 +298,6 @@ function render() {
   $('#unlock').disabled = !Object.keys(selected().locks).length;
   $('#choke').value = current().choke ?? 0;
   if (document.activeElement !== $('#lcdTempo')) $('#lcdTempo').value = project.bpm.toFixed(1);
-  $('#swing').value = project.swing;
   $('#volume').value = project.master;
   renderPatterns();
   renderFx();
@@ -424,15 +463,56 @@ $('#steps').oncontextmenu = (e) => {
   lock = true;
   render();
 };
+// PATTERN CHAIN — hold Shift and click A-D to queue patterns into a loop; every press appends,
+// so the same pattern can fill several slots. While playing, the scheduler takes each new bar's
+// pattern from the chain (audio.barPattern below); a plain click still switches patterns and
+// the chain resumes after that one bar. The chain is performance state: never saved, cleared by
+// CLR and by a factory reset, kept when playback stops.
+function renderChain() {
+  $('#chainSlots').innerHTML = chain
+    .map((p) => `<span class="chainslot patcol${p}">${'ABCD'[p]}</span>`)
+    .join('');
+}
+// Consulted by the scheduler at every bar boundary (audio.js, step 0). Returns the pattern for
+// the upcoming bar, or null to keep the current one. The first call after start() re-plays
+// chain[0] — the pattern start() already began with — so bar 1 is unaffected. A manually queued
+// switch (audio.pending) always wins over the chain for that bar.
+audio.barPattern = () => {
+  if (!chain.length || audio.pending !== null) return null;
+  chainPlaying = chainPos;
+  const queued = chain[chainPos];
+  chainPos = (chainPos + 1) % chain.length;
+  return queued;
+};
 $('#patterns').onclick = (e) => {
   const b = e.target.closest('[data-pattern]');
   if (!b || held) return;
   gesture = null;
+  if (e.shiftKey) {
+    chain.push(+b.dataset.pattern);
+    chainPos = chain.length - 1;
+    if (!audio.playing) chainPlaying = -1;
+    renderChain();
+    renderPatterns();
+    status(`Chain ${chain.map((p) => 'ABCD'[p]).join(' ')} · loops while playing`);
+    return;
+  }
   pattern = +b.dataset.pattern;
   if (audio.playing) audio.pending = pattern;
   document.querySelectorAll('.current').forEach((b) => b.classList.remove('current'));
   render();
   status(audio.playing ? 'Pattern will switch at the next bar' : 'Editing Pattern ' + 'ABCD'[pattern]);
+};
+$('#chainClear').onclick = async () => {
+  if (!chain.length) return;
+  if (!(await confirmPattern('Clear the pattern chain? Playback continues with the current pattern.')))
+    return;
+  chain = [];
+  chainPos = 0;
+  chainPlaying = -1;
+  renderChain();
+  render();
+  status('Pattern chain cleared');
 };
 $('#lock').onclick = () => {
   lock = !lock;
@@ -469,7 +549,7 @@ $('#audition').onclick = () => {
   flash($('#audition'));
   audition();
 };
-for (const b of document.querySelectorAll('.knob')) {
+for (const b of document.querySelectorAll('[data-param]')) {
   const p = b.dataset.param,
     value = () =>
       editPage === 'lfo'
@@ -524,6 +604,86 @@ for (const b of document.querySelectorAll('.knob')) {
   };
   b.ondblclick = audition;
 }
+
+// GLOBAL KNOBS — BPM sits left of PITCH, SWING % ends the bottom row. Same knob skin as the
+// page knobs, but these are global transport parameters: no per-step locks, no FX/LFO remap,
+// no recording capture — the same two controls on every page. SHIFT steps in 0.1s (the same
+// fine step the tempo field's wheel uses); double-click returns the factory default.
+const globalKnob = {
+  bpm: {
+    min: 40,
+    max: 240,
+    def: 124,
+    read: () => project.bpm,
+    norm: (v) => ((v - 40) / 200) * 100,
+    denorm: (n) => 40 + n * 2,
+    text: (v) => v.toFixed(1),
+  },
+  swing: {
+    min: 0,
+    max: 60,
+    def: 8,
+    read: () => project.swing,
+    norm: (v) => (v / 60) * 100,
+    denorm: (n) => n * 0.6,
+    text: (v) => String(v).padStart(3, '0'),
+  },
+};
+function setGlobal(g, v) {
+  if (g === 'bpm') setTempo(Math.round(v * 10) / 10);
+  else {
+    project.swing = Math.round(v * 10) / 10;
+    save();
+  }
+  render();
+}
+for (const b of document.querySelectorAll('[data-global]')) {
+  const g = b.dataset.global,
+    spec = globalKnob[g],
+    apply = (v) => setGlobal(g, Math.max(spec.min, Math.min(spec.max, v)));
+  let drag = null;
+  b.onpointerdown = (e) => {
+    if (e.button !== 0) return;
+    drag = { y: e.clientY, n: spec.norm(spec.read()) };
+    b.setPointerCapture(e.pointerId);
+  };
+  b.onpointermove = (e) => {
+    if (drag) apply(spec.denorm(drag.n + (drag.y - e.clientY) * (e.shiftKey ? 0.15 : 0.6)));
+  };
+  b.onpointerup = () => {
+    drag = null;
+  };
+  b.onpointercancel = () => {
+    drag = null;
+  };
+  b.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      apply(spec.read() + (e.deltaY < 0 ? 1 : -1) * (e.shiftKey ? 0.1 : 1));
+    },
+    { passive: false },
+  );
+  b.onkeydown = (e) => {
+    if (['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'].includes(e.key)) {
+      e.preventDefault();
+      apply(spec.read() + (['ArrowUp', 'ArrowRight'].includes(e.key) ? 1 : -1) * (e.shiftKey ? 0.1 : 1));
+    }
+    if (e.key === 'Home') {
+      e.preventDefault();
+      apply(spec.min);
+    }
+    if (e.key === 'End') {
+      e.preventDefault();
+      apply(spec.max);
+    }
+  };
+  b.ondblclick = () => {
+    apply(spec.def);
+    status(g === 'bpm' ? 'Tempo back to the factory 124.0' : 'Swing back to the factory 8%');
+  };
+}
+
 async function play() {
   if (starting) return;
   if (audio.playing) {
@@ -532,11 +692,19 @@ async function play() {
   }
   starting = true;
   try {
-    await audio.start(pattern, recording);
+    if (chain.length) {
+      chainPos = 0;
+      chainPlaying = 0;
+    }
+    await audio.start(chain.length ? chain[0] : pattern, recording);
     $('#play').innerHTML =
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h5v16H5zM14 4h5v16h-5z"/></svg>';
     $('#play').setAttribute('aria-label', 'Pause');
-    status('Playing · turn a knob, or select a step to lock it');
+    status(
+      chain.length
+        ? `Playing chain ${chain.map((p) => 'ABCD'[p]).join(' ')} · Shift+click a pattern button to extend it`
+        : 'Playing · turn a knob, or select a step to lock it',
+    );
   } catch {
     status('Cannot start audio — try again');
   } finally {
@@ -547,6 +715,7 @@ function stop() {
   recording = false;
   gridMode = 'sequence';
   gesture = null;
+  chainPlaying = -1;
   Object.keys(recordedValues).forEach((k) => delete recordedValues[k]);
   audio.stop();
   render();
@@ -632,13 +801,6 @@ for (const id of ['quantize', 'swingEnabled'])
     save();
     render();
   };
-for (const id of ['swing'])
-  $('#' + id).onchange = (e) => {
-    const v = Number(e.target.value);
-    project[id] = Math.max(+e.target.min, Math.min(+e.target.max, Number.isFinite(v) ? v : 124));
-    save();
-    render();
-  };
 $('#volume').oninput = (e) => {
   project.master = +e.target.value;
   if (audio.ctx) audio.master.gain.setTargetAtTime(project.master / 100, audio.ctx.currentTime, 0.01);
@@ -677,6 +839,9 @@ $('#demo').onclick = async () => {
   track = 0;
   step = 0;
   lock = false;
+  chain = [];
+  chainPos = 0;
+  chainPlaying = -1;
   save();
   render();
   status('Factory reset done');
