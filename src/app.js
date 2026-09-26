@@ -34,6 +34,9 @@ project.tracks.forEach((t, i) => {
   t.choke ??= i === 2 || i === 3 ? 1 : 0;
 });
 if (!project.savedKit) storeKit(project);
+// Phosphor face: UW blue is the default; the brand silkscreen still toggles it any time.
+// Persisted per browser so the choice survives a refresh, like every other preference.
+if (localStorage.getItem('ferro-phosphor') !== 'classic') document.body.classList.add('alt');
 let stepPage = 0,
   editPage = 'synth';
 let track = 0,
@@ -1196,7 +1199,7 @@ const canvas = $('#scope'),
   wave = new Uint8Array(512);
 let last = 0;
 // The scope ink tracks the phosphor color so the trace stays legible on either face.
-let scopeInk = '#394c30';
+let scopeInk = document.body.classList.contains('alt') ? '#b9c6ff' : '#394c30';
 function frame(now) {
   audio.tick();
   if (now - last > 33) {
@@ -1231,12 +1234,13 @@ requestAnimationFrame(frame);
 const brand = $('.screenbrand');
 brand.setAttribute('role', 'button');
 brand.setAttribute('tabindex', '0');
-brand.setAttribute('aria-pressed', 'false');
+brand.setAttribute('aria-pressed', String(document.body.classList.contains('alt')));
 brand.title = 'Click to change the screen phosphor';
 function flipPhosphor() {
   // The toggle class lives on <body>: the followers are in two sections — the LCD (inside
   // .display) and the step grid (.sequencer) — and body.alt is the ancestor of both.
   const alt = document.body.classList.toggle('alt');
+  localStorage.setItem('ferro-phosphor', alt ? 'uw' : 'classic');
   scopeInk = alt ? '#b9c6ff' : '#394c30';
   brand.setAttribute('aria-pressed', String(alt));
   status(alt ? 'UW phosphor' : 'Classic phosphor');

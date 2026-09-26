@@ -83,43 +83,199 @@ export const emptyPattern = () =>
   Array.from({ length: 16 }, () => Array.from({ length: 16 }, () => ({ on: false, locks: {} })));
 export function demo() {
   const patterns = Array.from({ length: 8 }, emptyPattern);
-  for (let p = 0; p < 8; p++) {
-    const beats = [
-      [0, 4, 8, 10, 12],
-      [4, 12],
-      [0, 2, 4, 6, 8, 10, 12, 14],
-      [7, 15],
-      [12],
-      [14],
-      [],
-      [3, 11],
-      [1, 6, 9, 14],
-      [7, 15],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ];
-    beats.forEach((a, t) => a.forEach((s) => (patterns[p][t][s].on = true)));
-    if (p % 2) {
-      patterns[p][0][10].on = false;
-      patterns[p][1][15].on = true;
-      patterns[p][8][3].on = true;
-    }
-    if (p > 1) {
-      patterns[p][5][6].on = true;
-      patterns[p][6][15].on = true;
-    }
-    if (p > 3) {
-      // The E–H slots add their own tier so the second half is not a carbon copy of the first.
-      patterns[p][14][7].on = true;
-      patterns[p][12][8].on = true;
-    }
-    patterns[p][8][6].locks = { pitch: 74 + p * 2, decay: 45, fm: 86 };
-    patterns[p][8][14].locks = { pitch: 47, decay: 60, drive: 65 };
-    patterns[p][0][10].locks = { pitch: 47, decay: 15 };
+  // Eight hand-crafted starting grooves — each slot is a distinct feel, not a variation of
+  // the last. Track order: 0 BD · 1 SD · 2 CH · 3 OH · 4 CP · 5 LT · 6 HT · 7 RS ·
+  // 8 FM1 · 9 FM2 · 10 CB · 11 CY · 12 NO · 13 SUB · 14 PERC · 15 MET.
+  const grooves = [
+    {
+      // A — the four-on-the-floor starter every manual example builds on.
+      name: 'A',
+      beats: [
+        [0, 4, 8, 12], // BD straight quarters
+        [4, 12], // SD backbeat
+        [0, 2, 4, 6, 8, 10, 12, 14], // CH eighths
+        [7, 15], // OH off-beat stabs
+        [12], // CP tail
+        [14],
+        [],
+        [3, 11],
+        [1, 6, 9, 14],
+        [7, 15],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ],
+      locks: { 8: { 6: { pitch: 76, decay: 45, fm: 86 }, 14: { pitch: 47, decay: 60, drive: 65 } }, 0: { 10: { pitch: 47, decay: 15 } } },
+    },
+    {
+      // B — broken-beat house: the kick dodges the grid, hats swing the off-eighths.
+      name: 'B',
+      beats: [
+        [0, 3, 6, 10, 11], // BD skips — the broken pocket
+        [4, 12], // SD backbeat
+        [2, 6, 10, 14], // CH off-eighths
+        [7], // OH gasp
+        [12],
+        [],
+        [],
+        [5, 13],
+        [3, 11],
+        [],
+        [],
+        [],
+        [8],
+        [],
+        [7, 15],
+        [],
+      ],
+      locks: { 8: { 3: { pitch: 64, decay: 38, fm: 72 } }, 0: { 6: { pitch: 45, decay: 22 } } },
+    },
+    {
+      // C — half-time trap skeleton: slow head-nod, rolls on the hats.
+      name: 'C',
+      beats: [
+        [0, 10], // BD sparse
+        [8], // SD single half-time crack
+        [0, 2, 4, 6, 8, 10, 12, 14], // CH steady
+        [12], // OH after the crack
+        [],
+        [6], // LT roll
+        [7], // HT roll
+        [11],
+        [],
+        [4, 13],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ],
+      locks: { 2: { 5: { prob: 55 }, 13: { prob: 55 } }, 8: { 6: { pitch: 69, decay: 30, fm: 90 } } },
+    },
+    {
+      // D — electro / Miami: tight machine-gun hats, syncopated FM bass.
+      name: 'D',
+      beats: [
+        [0, 8], // BD two anchors
+        [4, 12], // SD claps
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // CH full sixteenths
+        [14], // OH release
+        [4, 12],
+        [],
+        [],
+        [2, 6, 10, 14],
+        [3, 7, 11, 15], // FM1 sixteen-syncopation
+        [6, 14],
+        [],
+        [],
+        [],
+        [],
+        [5, 13],
+        [],
+      ],
+      locks: { 8: { 3: { pitch: 70, decay: 50, fm: 88 }, 7: { pitch: 58, decay: 44, fm: 76 } }, 2: { 5: { prob: 45 } } },
+    },
+    {
+      // E — dub / steppers: space, rim shots, one-deep bass.
+      name: 'E',
+      beats: [
+        [0, 4, 8, 12], // BD steppers
+        [7], // SD off
+        [0, 4, 8, 12], // CH on the quarters
+        [],
+        [],
+        [10],
+        [],
+        [2, 6, 10, 14], // RS skank
+        [],
+        [14],
+        [],
+        [],
+        [5, 11], // NO wash
+        [0, 8], // SUB
+        [],
+        [],
+      ],
+      locks: { 2: { 8: { prob: 40 } }, 12: { 5: { prob: 60 } }, 8: { 6: { pitch: 40, decay: 70 } } },
+    },
+    {
+      // F — jungle: half-time snare over tangled breakbeat kick.
+      name: 'F',
+      beats: [
+        [0, 5, 10, 13], // BD tangle
+        [4, 12], // SD layer
+        [2, 6, 10, 14], // CH
+        [7, 15],
+        [8],
+        [3, 11], // LT
+        [9], // HT
+        [1, 13],
+        [4, 12],
+        [7],
+        [],
+        [],
+        [6],
+        [0],
+        [11],
+        [],
+      ],
+      locks: { 2: { 10: { prob: 50 }, 14: { prob: 60 } }, 8: { 4: { pitch: 72, decay: 26, fm: 80 } } },
+    },
+    {
+      // G — industrial four: driving, metronomic, walls of NO.
+      name: 'G',
+      beats: [
+        [0, 2, 4, 6, 8, 10, 12, 14], // BD pumping eighths
+        [4, 12],
+        [0, 4, 8, 12],
+        [],
+        [4, 12], // CP doubled
+        [],
+        [],
+        [],
+        [2, 10],
+        [6, 14],
+        [],
+        [],
+        [0, 4, 8, 12], // NO on the quarters
+        [0, 8],
+        [],
+        [4, 12], // MET hammer
+      ],
+      locks: { 8: { 2: { pitch: 66, decay: 34, drive: 70 } }, 12: { 8: { prob: 65 } } },
+    },
+    {
+      // H — ambient sketch: no drums, only the noise/perc texture to build on.
+      name: 'H',
+      beats: [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [4, 12],
+        [],
+        [],
+        [0, 8],
+        [],
+        [0, 6, 10, 14],
+        [],
+        [2, 9],
+        [],
+      ],
+      locks: { 12: { 6: { prob: 35 }, 14: { prob: 45 } }, 8: { 6: { pitch: 52, decay: 85, fm: 40 } } },
+    },
+  ];
+  for (const g of grooves) {
+    g.beats.forEach((a, t) => a.forEach((s) => (patterns[grooves.indexOf(g)][t][s].on = true)));
+    for (const [t, steps] of Object.entries(g.locks ?? {}))
+      for (const [s, l] of Object.entries(steps)) Object.assign(patterns[grooves.indexOf(g)][+t][+s], l);
   }
   return { version: 1, bpm: 124, swing: 8, master: 65, tracks: kit(), patterns };
 }
