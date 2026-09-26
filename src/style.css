@@ -17,13 +17,11 @@
 }
 body {
   margin: 0;
-  background: #222729;
   color: #ddd;
   font:
     12px 'Segoe UI',
     'Microsoft Yahei',
     sans-serif;
-  background-image: radial-gradient(ellipse at 50% 20%, #485151, transparent 70%);
   min-height: 100vh;
   padding: 30px 3.5vw;
 }
