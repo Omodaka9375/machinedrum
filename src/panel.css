@@ -471,7 +471,7 @@ canvas {
   justify-content: center;
 }
 .datahead h2 {
-  margin-bottom: 8px;
+  margin-bottom: 15px;
   font-size: 10px;
 }
 .datahead select {
@@ -889,6 +889,11 @@ canvas {
   #knobs {
     grid-template-columns: repeat(5, 1fr);
     gap: 17px 8px;
+  }
+  /* Five columns again (this band loads after style.css's 10-column 820px band): the
+     globals form the left column once more, so the divider returns with them. */
+  .knobcell.globalcell {
+    border-right: 1px solid #89917f;
   }
   .knob {
     width: 42px;

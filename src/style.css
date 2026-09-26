@@ -349,6 +349,14 @@ body.alt .performModes button.active {
 body.alt .step.keyPage {
   border-bottom-color: #3351c4;
 }
+/* UW face: the global-column labels take the blue family instead of olive, and the
+   divider cools to the navy blue used for outlines on this face. */
+body.alt .knobcell.globalcell small {
+  color: #3351c4;
+}
+body.alt .knobcell.globalcell {
+  border-right-color: #3351c4;
+}
 /* The caption LED follows the face too: the lit diode next to SYNTHESIS / EFFECTS / LFO
    swaps its red for the UW blue family (the step LED's lit pairing). Child-combinator
    scoped: a bare `.datafoot i` also matched the timing-switch thumbs (they live inside
@@ -437,6 +445,15 @@ canvas {
   grid-template-columns: repeat(5, 1fr);
   gap: 22px 16px;
   margin-top: 10px;
+}
+/* The GLOBAL column: BPM and SWING % are transport parameters — identical on every page,
+   never written into step locks, never recorded. The hairline + olive labels fence the
+   column off from the eight A–H parameter knobs, which are the per-track / per-step ones. */
+.knobcell.globalcell {
+  border-right: 1px solid #89917f;
+}
+.knobcell.globalcell small {
+  color: #2f5622;
 }
 /* Global knobs sit in the flow: BPM first, SWING first of the second row (it swapped places
    with the knob that used to start row 2), so swing always lands directly below BPM. */
@@ -531,7 +548,7 @@ body.alt .knobcell.selected .knob {
   padding: 8px;
 }
 #patterns button.pending {
-  outline: 1px dashed #c3cd9f;
+  outline: 1px #c3cd9f;
   outline-offset:1px;
 }
 /* --- Pattern chain -------------------------------------------------------
@@ -873,6 +890,11 @@ body.alt .knobcell.selected .knob {
   #knobs {
     grid-template-columns: repeat(10, 1fr);
     gap: 7px;
+  }
+  /* One row of ten: the globals are no longer a column (BPM 1st, SWING 6th), so the column
+     divider would draw a stray line mid-row. The olive labels keep the distinction here. */
+  .knobcell.globalcell {
+    border-right: none;
   }
   .datafoot {
     margin-top: 16px;

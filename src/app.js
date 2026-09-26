@@ -156,7 +156,7 @@ $('#patterns').innerHTML = ['A', 'B', 'C', 'D']
   )
   .join('');
 $('#knobs').innerHTML =
-  `<div class="knobcell"><button class="knob" role="slider" aria-label="Tempo BPM" aria-valuemin="40" aria-valuemax="240" data-global="bpm" title="Drag up / down · scroll wheel · arrow keys · SHIFT for 0.1 steps; double-click resets to 124.0"></button><small>BPM</small><output></output></div>` +
+  `<div class="knobcell globalcell"><button class="knob" role="slider" aria-label="Tempo BPM" aria-valuemin="40" aria-valuemax="240" data-global="bpm" title="Drag up / down · scroll wheel · arrow keys · SHIFT for 0.1 steps; double-click resets to 124.0"></button><small>BPM</small><output></output></div>` +
   params
     .slice(0, 4)
     .map(
@@ -164,7 +164,7 @@ $('#knobs').innerHTML =
         `<div class="knobcell"><button class="knob" role="slider" aria-label="${labels[i]}" aria-valuemin="0" aria-valuemax="100" data-param="${p}" title="Drag up / down · scroll wheel · arrow keys; double-click to audition"></button><small>${String.fromCharCode(65 + i)} / ${labels[i]}</small><output></output></div>`,
     )
     .join('') +
-  `<div class="knobcell"><button class="knob" role="slider" aria-label="Swing amount" aria-valuemin="0" aria-valuemax="60" data-global="swing" title="Drag up / down · scroll wheel · arrow keys · SHIFT for 0.1 steps; double-click resets to 8%"></button><small>SWING %</small><output></output></div>` +
+  `<div class="knobcell globalcell"><button class="knob" role="slider" aria-label="Swing amount" aria-valuemin="0" aria-valuemax="60" data-global="swing" title="Drag up / down · scroll wheel · arrow keys · SHIFT for 0.1 steps; double-click resets to 8%"></button><small>SWING %</small><output></output></div>` +
   params
     .slice(4)
     .map(
