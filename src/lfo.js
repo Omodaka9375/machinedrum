@@ -32,19 +32,32 @@ export function applyLfo(nodes, level, l, bpm, time, length, epoch = 0) {
   const rate = lfoRate(l, bpm),
     phase = l.phase / 100 + (l.reset ? 0 : (time - epoch) * rate),
     depth = l.depth / 100;
+  // Resolve the destination BEFORE rendering the curve: the PAN curve needs the panner's
+  // static pan as its base (the swing happens around wherever the channel is panned), and
+  // a pan destination without a panner in the voice is a silent no-op rather than a throw.
+  let targets;
+  if (l.target === 1) targets = [level.gain];
+  else if (l.target === 3) {
+    const panner = nodes.find((n) => n.pan);
+    if (!panner) return;
+    targets = [panner.pan];
+  } else
+    targets = nodes
+      .filter(
+        (n) =>
+          n.detune && (l.target === 0 ? typeof n.start === 'function' : typeof n.start !== 'function'),
+      )
+      .map((n) => n.detune);
   const size = Math.max(2, Math.ceil(length * 160) + 1),
     curve = Float32Array.from({ length: size }, (_, i) => {
       const v = waveAt(phase + (i / (size - 1)) * length * rate, l.wave);
-      return l.target === 1 ? 1 - depth * 0.5 + v * depth * 0.5 : v * depth * (l.target === 0 ? 1200 : 2400);
+      if (l.target === 1) return 1 - depth * 0.5 + v * depth * 0.5;
+      if (l.target === 3) {
+        // Pan is ±1; the curve is the static pan plus the swing, clamped to the param's range.
+        const base = targets[0].value;
+        return Math.max(-1, Math.min(1, base + v * depth));
+      }
+      return v * depth * (l.target === 0 ? 1200 : 2400);
     });
-  const targets =
-    l.target === 1
-      ? [level.gain]
-      : nodes
-          .filter(
-            (n) =>
-              n.detune && (l.target === 0 ? typeof n.start === 'function' : typeof n.start !== 'function'),
-          )
-          .map((n) => n.detune);
   for (const p of targets) p.setValueCurveAtTime(curve, time, length);
 }

@@ -3,9 +3,9 @@ import { Effects, stepFx } from './fx.js';
 import { drumVoice, holdAt } from './drums.js';
 import { resolved, duration, recordHit } from './model.js';
 const buffers = new WeakMap();
-export function voice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) {
+export function voice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0, pan = 0) {
   if (['kick', 'snare', 'hat', 'fm'].includes(engine))
-    return drumVoice(ctx, out, engine, p, time, lfo, bpm, epoch);
+    return drumVoice(ctx, out, engine, p, time, lfo, bpm, epoch, pan);
   const f = 440 * 2 ** ((p.pitch - 69) / 12),
     length = 0.025 + (p.decay / 100) ** 2 * 1.8;
   const amp = ctx.createGain(),
@@ -26,8 +26,13 @@ export function voice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) {
   shape.connect(amp);
   const lfoGain = ctx.createGain();
   amp.connect(lfoGain);
-  lfoGain.connect(out);
-  const nodes = [filter, shape, amp, lfoGain],
+  // Per-voice panner: PAN (fxSpec H) and the LFO's PAN destination both write panner.pan —
+  // in the nodes list so applyLfo can find it and cleanup disconnects it.
+  const panner = ctx.createStereoPanner();
+  panner.pan.value = Math.max(-1, Math.min(1, pan / 100));
+  lfoGain.connect(panner);
+  panner.connect(out);
+  const nodes = [filter, shape, amp, lfoGain, panner],
     sources = [];
   function tone(freq, level, type = 'sine', bend = 0, fm = 0) {
     const o = ctx.createOscillator(),
@@ -192,6 +197,8 @@ export class Audio {
       velocity === undefined || !Number.isFinite(velocity) || velocity < 0 || velocity > 1
         ? params
         : { ...params, level: Math.max(0, Math.min(100, Math.round((params.level ?? 58) * velocity))) };
+    // PAN resolves per hit like the synth params do: the step's FX lock wins, else the track.
+    const pan = step?.fxLocks?.pan ?? track.pan ?? 0;
     const v = voice(
       this.ctx,
       this.effects.inputs[this.get().tracks.indexOf(track)].input,
@@ -201,6 +208,7 @@ export class Audio {
       track.lfo,
       this.get().bpm,
       this.lfoEpoch ?? 0,
+      pan,
     );
     if (group) this.chokes.set(group, v);
     return v;

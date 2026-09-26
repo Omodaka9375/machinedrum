@@ -6,10 +6,12 @@ export function migrateFx(p) {
   p.fx = { ...defaultFx(), ...p.fx };
   p.tracks.forEach((t) => {
     t.send = { delay: 0, reverb: 0, ...t.send };
+    t.pan ??= 0;
   });
   if (p.savedKit) {
     p.savedKit.forEach((t) => {
       t.send = { delay: 0, reverb: 0, ...t.send };
+      t.pan ??= 0;
     });
     p.savedFx ??= { ...p.fx };
   }

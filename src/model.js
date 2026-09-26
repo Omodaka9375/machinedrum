@@ -40,6 +40,28 @@ export function kit() {
     'fm',
   ];
   const pitches = [35, 53, 82, 74, 57, 43, 55, 74, 59, 66, 79, 91, 60, 23, 63, 86];
+  // Factory FX routing: sends tuned so the wet path is audible the moment play starts.
+  // Echo on the hats, rim and sparse percussion; room on the snare, clap, cymbal and noise.
+  // Kick and SUB stay dry on purpose — low end drowned in reverb loses its punch.
+  const sends = [
+    //      BD  SD  CH  OH  CP  LT  HT  RS FM1 FM2  CB  CY  NO SUB PERC MET
+    { delay: 0, reverb: 0 }, //   BD
+    { delay: 0, reverb: 32 }, //  SD
+    { delay: 16, reverb: 0 }, //  CH
+    { delay: 22, reverb: 0 }, //  OH
+    { delay: 0, reverb: 26 }, //  CP
+    { delay: 0, reverb: 0 }, //   LT
+    { delay: 0, reverb: 0 }, //   HT
+    { delay: 30, reverb: 18 }, // RS
+    { delay: 18, reverb: 0 }, //  FM1
+    { delay: 0, reverb: 20 }, //  FM2
+    { delay: 0, reverb: 0 }, //   CB
+    { delay: 0, reverb: 38 }, //  CY
+    { delay: 0, reverb: 28 }, //  NO
+    { delay: 0, reverb: 0 }, //   SUB
+    { delay: 34, reverb: 22 }, // PERC
+    { delay: 24, reverb: 0 }, //  MET
+  ];
   return kinds.map((engine, i) => ({
     engine,
     mute: false,
@@ -54,6 +76,7 @@ export function kit() {
       drive: 18,
       level: i < 2 ? 86 : 58,
     },
+    send: sends[i],
   }));
 }
 export function demo() {
@@ -164,12 +187,13 @@ export function validShapes(project) {
 }
 
 export function storeKit(project) {
-  project.savedKit = project.tracks.map(({ engine, choke, p, send, lfo }) => ({
+  project.savedKit = project.tracks.map(({ engine, choke, p, send, lfo, pan }) => ({
     lfo: clone(lfo),
     engine,
     choke: choke ?? 0,
     p: clone(p),
     send: clone(send ?? { delay: 0, reverb: 0 }),
+    pan: pan ?? 0,
   }));
   project.savedFx = clone(project.fx);
 }

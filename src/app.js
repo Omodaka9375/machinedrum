@@ -562,12 +562,22 @@ for (const b of document.querySelectorAll('[data-param]')) {
   let drag = null;
   b.onpointerdown = (e) => {
     if (e.button !== 0) return;
-    drag = { y: e.clientY, v: value() };
+    // PAN is bipolar: a vertical drag inverts the metaphor on the left half of its sweep —
+    // grabbing the pointer there and dragging up to keep turning counterclockwise reads as
+    // "more", which pans RIGHT. It alone drags horizontally instead: left is left, right is
+    // right, from any grab point. (The same button is the NOISE knob on the synth page, which
+    // keeps the vertical drag — the shape is chosen per press, not per knob.)
+    drag =
+      editPage === 'fx' && fxSpec[params.indexOf(p)]?.[0] === 'pan'
+        ? { x: e.clientX, v: value(), horiz: true }
+        : { y: e.clientY, v: value() };
     gesture = editPage === 'synth' ? { track, param: p, value: value() } : null;
     b.setPointerCapture(e.pointerId);
   };
   b.onpointermove = (e) => {
-    if (drag) change(p, drag.v + (drag.y - e.clientY) * (e.shiftKey ? 0.15 : 0.6));
+    if (!drag) return;
+    const fine = e.shiftKey ? 0.15 : 0.6;
+    change(p, drag.horiz ? drag.v + (e.clientX - drag.x) * fine : drag.v + (drag.y - e.clientY) * fine);
   };
   b.onpointerup = () => {
     if (drag) {
@@ -848,7 +858,7 @@ $('#demo').onclick = async () => {
 };
 const lfoSpec = [
   ['wave', 'WAVE', 0, 3, 1],
-  ['target', 'DEST', 0, 2, 1],
+  ['target', 'DEST', 0, 3, 1],
   ['speed', 'SPEED', 0, 100, 1],
   ['depth', 'DEPTH', 0, 100, 1],
   ['phase', 'PHASE', 0, 100, 1],
@@ -871,7 +881,7 @@ function lfoText(id) {
   return id === 'wave'
     ? ['SINE', 'TRI', 'SQR', 'SAW'][l.wave]
     : id === 'target'
-      ? ['PITCH', 'LEVEL', 'FILTER'][l.target]
+      ? ['PITCH', 'LEVEL', 'FILTER', 'PAN'][l.target]
       : id === 'sync'
         ? ['FREE', '1/16', '1/8', '1/4', '1/2', '1BAR', '2BAR'][l.sync]
         : id === 'reset'
@@ -890,7 +900,7 @@ function renderLfo() {
   $('#lcdName').textContent = 'LFO / ' + names[track];
   $('#lcdEdit').textContent = 'TRACK ' + String(track + 1).padStart(2, '0') + ' / MODULATION';
   document.querySelector('.datafoot span').innerHTML = '<i></i> LFO';
-  $('#hint').textContent = 'A per-track LFO · PITCH / LEVEL / FILTER · changes apply from the next trigger';
+  $('#hint').textContent = 'A per-track LFO · PITCH / LEVEL / FILTER / PAN · changes apply from the next trigger';
   $('#lcdValues').innerHTML = lfoSpec
     .map(([id, label], i) => lcdDial(label, lfoValue(params[i]), lfoText(id)))
     .join('');
@@ -914,6 +924,10 @@ const fxSpec = [
   ['delay', 'D.RET', 0, 80, 1],
   ['room', 'DECAY', 0.2, 4, 0.1],
   ['reverb', 'R.RET', 0, 80, 1],
+  // PAN is the 8th FX knob (H): per-track stereo position −100 (L) … +100 (R), read per hit
+  // by trigger() so a step's FX lock can place one hit somewhere else. Not part of the master
+  // fx bus — it resolves from the track like the sends do, not from project.fx.
+  ['pan', 'PAN', -100, 100, 1],
 ];
 function fxActual(id) {
   if (isLocked() && id in (selected().fxLocks ?? {})) return selected().fxLocks[id];
@@ -921,7 +935,14 @@ function fxActual(id) {
     ? current().send.delay
     : id === 'sendReverb'
       ? current().send.reverb
-      : project.fx[id];
+      : id === 'pan'
+        ? current().pan
+        : project.fx[id];
+}
+// −100…100 → L50 / C / R35, the way a mixer channel strip labels its pan pot.
+function panText(v) {
+  const n = Math.round(v);
+  return n === 0 ? 'C' : (n < 0 ? 'L' : 'R') + Math.abs(n);
 }
 function increment(p) {
   const spec =
@@ -951,6 +972,7 @@ function changeFx(p, v) {
   }
   if (id === 'sendDelay') current().send.delay = n;
   else if (id === 'sendReverb') current().send.reverb = n;
+  else if (id === 'pan') current().pan = n;
   else project.fx[id] = n;
   if (audio.ctx) audio.effects.update(project);
   save();
@@ -975,6 +997,8 @@ function renderFx() {
   document.querySelector('.datafoot span').innerHTML = '<i></i> ' + (on ? 'EFFECTS' : 'SYNTHESIS');
   document.querySelectorAll('[data-param]').forEach((b, i) => {
     b.disabled = editPage === 'fx' && (i >= fxSpec.length || (isLocked() && fxSpec[i]?.[0] === 'room'));
+    // The pan knob drags horizontally — say so with the cursor.
+    b.style.cursor = editPage === 'fx' && fxSpec[i]?.[0] === 'pan' ? 'ew-resize' : '';
   });
   if (editPage === 'lfo') {
     renderLfo();
@@ -984,14 +1008,22 @@ function renderFx() {
   $('#lcdName').textContent = 'FX / ' + names[track];
   $('#lcdEdit').textContent = isLocked()
     ? 'FX LOCK / STEP ' + String(step + 1).padStart(2, '0')
-    : 'A–B TRACK · C–G MASTER';
+    : 'A–B TRACK · C–H MASTER+PAN';
   $('#hint').textContent =
-    'STEP LOCK: lock sends, delay and returns per step; DECAY is the global reverb length. On a clash in the same step, the higher-numbered track wins.';
+    'STEP LOCK: lock sends, delay, returns and PAN per step; DECAY is the global reverb length. On a clash in the same step, the higher-numbered track wins.';
   $('#lcdValues').innerHTML = params
     .map((p, i) => {
       const spec = fxSpec[i];
       return spec
-        ? lcdDial(spec[1], fxValue(p), fxActual(spec[0]) + (spec[0] === 'room' ? 's' : ''))
+        ? lcdDial(
+            spec[1],
+            fxValue(p),
+            spec[0] === 'room'
+              ? fxActual('room') + 's'
+              : spec[0] === 'pan'
+                ? panText(fxActual('pan'))
+                : fxActual(spec[0]),
+          )
         : '<span class="fxDial empty">—</span>';
     })
     .join('');
@@ -1000,11 +1032,18 @@ function renderFx() {
       n = fxValue(params[i]);
     b.setAttribute('aria-label', spec?.[1] ?? 'UNUSED');
     b.setAttribute('aria-valuenow', n);
-    b.setAttribute('aria-valuetext', spec ? String(fxActual(spec[0])) : '');
+    b.setAttribute(
+      'aria-valuetext',
+      spec ? (spec[0] === 'pan' ? panText(fxActual('pan')) : String(fxActual(spec[0]))) : '',
+    );
     b.style.setProperty('--angle', `${n * 2.7 - 135}deg`);
     b.parentElement.querySelector('small').textContent =
       String.fromCharCode(65 + i) + ' / ' + (spec?.[1] ?? '—');
-    b.parentElement.querySelector('output').textContent = spec ? fxActual(spec[0]) : '—';
+    b.parentElement.querySelector('output').textContent = spec
+      ? spec[0] === 'pan'
+        ? panText(fxActual('pan'))
+        : fxActual(spec[0])
+      : '—';
     b.parentElement.classList.toggle('locked', isLocked() && !!spec && spec[0] in (selected().fxLocks ?? {}));
   });
 }

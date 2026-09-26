@@ -21,7 +21,7 @@ export function holdAt(param, at, fallback) {
 }
 
 // Each layer has its own envelope; the final gain is reserved for choke events.
-export function drumVoice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) {
+export function drumVoice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0, pan = 0) {
   const nodes = [],
     sources = [];
   const make = (type) => {
@@ -47,7 +47,12 @@ export function drumVoice(ctx, out, engine, p, time, lfo, bpm = 120, epoch = 0) 
   dc.connect(gain);
   const lfoGain = make('createGain');
   gain.connect(lfoGain);
-  lfoGain.connect(out);
+  // Per-voice panner, mirroring audio.js's voice(): PAN (fxSpec H) and the LFO's PAN
+  // destination both write panner.pan; in the nodes list so applyLfo finds it + cleanup.
+  const panner = make('createStereoPanner');
+  panner.pan.value = Math.max(-1, Math.min(1, pan / 100));
+  lfoGain.connect(panner);
+  panner.connect(out);
   const hz = 440 * 2 ** ((p.pitch - 69) / 12),
     d = p.decay / 100;
   function envelope(destination, level, length, attack = 0.001) {

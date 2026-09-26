@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck-tests": "tsc -p tsconfig.test.json --noEmit",
     "icons": "node scripts/make-icons.mjs",
-    "test": "node tests/fx.test.mjs && node tests/shape.test.mjs && node tests/save.test.mjs && node tests/jog.test.mjs && node tests/wheel.test.mjs && node tests/midi.test.mjs && node tests/chain.test.mjs",
+    "test": "node tests/fx.test.mjs && node tests/shape.test.mjs && node tests/save.test.mjs && node tests/jog.test.mjs && node tests/wheel.test.mjs && node tests/midi.test.mjs && node tests/chain.test.mjs && node tests/pan.test.mjs",
     "check": "pnpm run typecheck && pnpm run typecheck-tests && pnpm run test"
   },
   "devDependencies": {

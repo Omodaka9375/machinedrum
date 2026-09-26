@@ -666,7 +666,7 @@ canvas {
      track mirrors it. Text changes stay inside the track instead of pushing the middle. */
   flex: 1 1 0;
   text-align: left;
-  font-size: 8px;
+  font-size: 10px;
   margin: 0;
 }
 .seqhead span {
