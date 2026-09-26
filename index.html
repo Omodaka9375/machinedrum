@@ -13,10 +13,7 @@
          The image is the UW-blue panel — the default face, matching what a visitor sees. -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="MACHINEDRUM — SPS-D" />
-    <meta
-      property="og:description"
-      content="Sixteen-voice digital drum synthesizer and step sequencer. Synthesised in real time, runs offline."
-    />
+    <meta property="og:description" content="Sixteen-voice digital drum synthesizer and step sequencer. Synthesised in real time, runs offline." />
     <meta property="og:url" content="https://omodaka9375.github.io/machinedrum/" />
     <meta property="og:site_name" content="MACHINEDRUM" />
     <meta property="og:image" content="https://omodaka9375.github.io/machinedrum/md-blue.png" />
@@ -25,10 +22,7 @@
     <meta property="og:image:alt" content="The MACHINEDRUM web instrument panel" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MACHINEDRUM — SPS-D" />
-    <meta
-      name="twitter:description"
-      content="Sixteen-voice digital drum synthesizer and step sequencer. Synthesised in real time, runs offline."
-    />
+    <meta name="twitter:description" content="Sixteen-voice digital drum synthesizer and step sequencer. Synthesised in real time, runs offline." />
     <meta name="twitter:image" content="https://omodaka9375.github.io/machinedrum/md-blue.png" />
     <title>MACHINEDRUM</title>
     <link rel="stylesheet" href="src/style.css" />
@@ -36,42 +30,16 @@
   </head>
   <body>
     <main class="machine">
-      <span class="screw tl" aria-hidden="true"></span><span class="screw tr" aria-hidden="true"></span
-      ><span class="screw bl" aria-hidden="true"></span><span class="screw br" aria-hidden="true"></span>
+      <span class="screw tl" aria-hidden="true"></span><span class="screw tr" aria-hidden="true"></span><span class="screw bl" aria-hidden="true"></span><span class="screw br" aria-hidden="true"></span>
       <div class="portline">
-        <span class="portguide" aria-hidden="false"
-          ><button
-            id="guide"
-            aria-haspopup="dialog"
-            aria-expanded="false"
-            aria-label="Field guide"
-            title="Field guide: shortcuts, live recording, FX, MIDI"
-          >START HERE!
-          </button>
-        </span>
+        <span class="portguide" aria-hidden="false"><button id="guide" aria-haspopup="dialog" aria-expanded="false" aria-label="Field guide" title="Field guide: shortcuts, live recording, FX, MIDI">START HERE!</button> </span>
         <span class="portmidi" aria-hidden="false">
-          <button
-            id="midi"
-            aria-pressed="false"
-            aria-label="MIDI in/out (Web MIDI)"
-            title="MIDI in/out via Web MIDI (USB or OS-paired Bluetooth)"
-          >MIDI
-          </button>
-          <button
-            id="bt"
-            aria-pressed="false"
-            aria-label="Pair a Bluetooth LE MIDI device"
-            title="Pair BLE MIDI over Web Bluetooth (Chrome/Edge, HTTPS or localhost)"
-          ><svg viewBox="0 0 24 24" aria-hidden="true"><path
-              d="M17.71 7.71 12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"
-            /></svg>BT
-          </button></span
-        >
-        <span class="portreset" aria-hidden="false"
-          ><button id="demo" title="Factory reset: load the eight demo patterns and default sounds">
-            FACTORY RESET
-          </button></span
-        >
+          <button id="midi" aria-pressed="false" aria-label="MIDI in/out (Web MIDI)" title="MIDI in/out via Web MIDI (USB or OS-paired Bluetooth)">MIDI</button>
+          <button id="bt" aria-pressed="false" aria-label="Pair a Bluetooth LE MIDI device" title="Pair BLE MIDI over Web Bluetooth (Chrome/Edge, HTTPS or localhost)">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.71 7.71 12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z" /></svg>BT
+          </button></span>
+        <span class="portreset" aria-hidden="false"><button id="demo" title="Factory reset: load the eight demo patterns and default sounds">FACTORY RESET</button></span>
       </div>
       <section class="upper">
         <div class="soundselect">
@@ -79,15 +47,8 @@
             <h2>TRACKS</h2>
             <div id="tracks"></div>
             <div class="jogrow">
-              <label class="master"
-                >MASTER<span class="fader"
-                  ><input id="volume" type="range" min="0" max="100" value="65" /></span
-              ></label>
-              <button
-                id="jog"
-                aria-label="Track jog wheel — drag to rotate and select track, click to audition"
-                title="Drag to rotate · scroll wheel / arrow keys step · click to audition"
-              >
+              <label class="master">MASTER<span class="fader"><input id="volume" type="range" min="0" max="100" value="65" /></span></label>
+              <button id="jog" aria-label="Track jog wheel — drag to rotate and select track, click to audition" title="Drag to rotate · scroll wheel / arrow keys step · click to audition">
                 <span></span>
               </button>
             </div>
@@ -111,25 +72,13 @@
           <div class="display">
             <div class="lcdhead">
               <span id="lcdPattern">A01</span><span id="lcdState">READY</span>
-              <input
-                id="lcdTempo"
-                aria-label="Tempo BPM"
-                inputmode="decimal"
-                value="124.0"
-                autocomplete="off"
-                spellcheck="false"
-              />
+              <input id="lcdTempo" aria-label="Tempo BPM" inputmode="decimal" value="124.0" autocomplete="off" spellcheck="false" />
             </div>
             <h1 id="lcdName">BD / KICK</h1>
             <canvas id="scope" width="420" height="90"></canvas>
             <div id="lcdValues"></div>
-            <div class="lcdPages">
-              <button data-edit-page="synth">SYNTH</button><button data-edit-page="fx">FX</button
-              ><button data-edit-page="lfo">LFO</button>
-            </div>
-            <div class="lcdfoot">
-              <span id="lcdEdit">KIT / SYNTHESIS</span><span id="lcdStep">— / 16</span>
-            </div>
+            <div class="lcdPages"><button data-edit-page="synth">SYNTH</button><button data-edit-page="fx">FX</button><button data-edit-page="lfo">LFO</button></div>
+            <div class="lcdfoot"><span id="lcdEdit">KIT / SYNTHESIS</span><span id="lcdStep">— / 16</span></div>
           </div>
           <div class="displaylabel">
             <img src="assets/sps-1-label.svg" alt="SPS-1" width="203" height="51" />
@@ -144,19 +93,10 @@
           </div>
           <div class="datafoot">
             <div class="timingSwitches">
-              <button
-                id="quantize"
-                aria-pressed="true"
-                title="Quantize recording to the steps; off keeps the exact hit offset"
-              >
+              <button id="quantize" aria-pressed="true" title="Quantize recording to the steps; off keeps the exact hit offset">
                 <span class="switchTrack" aria-hidden="true"><i></i></span><span>QUANTIZE</span>
               </button>
-              <label class="probrow" title="Chance the SELECTED step plays on each pass — hold a step + Shift+wheel also trims it"
-                >PROB<input id="prob" type="range" min="0" max="100" step="5" value="100" aria-label="Step play probability" /><output
-                  id="probOut"
-                  >100%</output
-                ></label
-              >
+              <label class="probrow" title="Chance the SELECTED step plays on each pass — hold a step + Shift+wheel also trims it">PROB<input id="prob" type="range" min="0" max="100" step="5" value="100" aria-label="Step play probability" /><output id="probOut">100%</output></label>
             </div>
             <button id="unlock" title="Remove every parameter lock on the current step">CLEAR LOCKS</button>
           </div>
@@ -172,37 +112,23 @@
             <button id="chainClear" title="Clear the pattern chain">CLR</button>
           </div>
           <div class="clearActions">
-            <button id="clearPattern" title="Clear all notes and locks in this pattern">CLEAR</button><button id="undoClear" disabled title="Undo the last clear">UNDO</button
-            ><button id="copyPattern" title="Copy the current pattern — shared with right-clicking a pattern slot">COPY</button><button id="pastePattern" disabled title="Replace the current pattern with the copied one">PASTE</button
-            ><button id="randomPattern">RANDOMIZE</button>
+            <button id="clearPattern" title="Clear all notes and locks in this pattern">CLEAR</button><button id="undoClear" disabled title="Undo the last clear">UNDO</button><button id="copyPattern" title="Copy the current pattern — shared with right-clicking a pattern slot">COPY</button><button id="pastePattern" disabled title="Replace the current pattern with the copied one">PASTE</button><button id="randomPattern">RANDOMIZE</button>
           </div>
         </div>
         <div class="navigation">
           <h2>STEP EDIT</h2>
-          <div class="confirmkeys">
-            <button id="audition">TRIG / YES</button
-            ><button
-              id="lock"
-              title="L: knobs and wheel change only the selected step"
-            >
-              STEP LOCK
-            </button
-            ><button id="exitLock">EXIT / NO</button>
-          </div>
+          <div class="confirmkeys"><button id="audition">TRIG / YES</button><button id="lock" title="L: knobs and wheel change only the selected step">STEP LOCK</button><button id="exitLock">EXIT / NO</button></div>
           <div class="arrows">
             <button data-nav="up" aria-label="Pitch up">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 4 21 20H3Z" transform="rotate(0 12 12)" />
-              </svg></button
-            ><button data-nav="left" aria-label="Previous step">
+              </svg></button><button data-nav="left" aria-label="Previous step">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 4 21 20H3Z" transform="rotate(270 12 12)" />
-              </svg></button
-            ><button data-nav="down" aria-label="Pitch down">
+              </svg></button><button data-nav="down" aria-label="Pitch down">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 4 21 20H3Z" transform="rotate(180 12 12)" />
-              </svg></button
-            ><button data-nav="right" aria-label="Next step">
+              </svg></button><button data-nav="right" aria-label="Next step">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 4 21 20H3Z" transform="rotate(90 12 12)" />
               </svg>
@@ -213,21 +139,14 @@
           <div class="transport">
             <h2>TRANSPORT</h2>
             <div class="transportkeys">
-              <button id="record" aria-label="Live record" title="R: toggle live recording">●</button
-              ><button id="play" aria-label="Play">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3 21 12 7 21Z" /></svg></button
-              ><button id="stop" aria-label="Stop">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5Z" /></svg></button
-              ><span>REC</span><span>PLAY</span><span>STOP</span>
+              <button id="record" aria-label="Live record" title="R: toggle live recording">●</button><button id="play" aria-label="Play">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3 21 12 7 21Z" /></svg></button><button id="stop" aria-label="Stop">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5Z" /></svg></button><span>REC</span><span>PLAY</span><span>STOP</span>
             </div>
           </div>
           <div class="kitactions">
             <h2>KIT</h2>
-            <div class="kitkeys">
-              <button id="saveKit">STORE</button><button id="reloadKit">RELOAD</button
-              ><button id="downloadKit" title="Save the current kit (16 sounds + FX) as a JSON file">DOWNLOAD</button
-              ><button id="uploadKit" title="Load a kit file downloaded from this panel">UPLOAD</button>
-            </div>
+            <div class="kitkeys"><button id="saveKit">STORE</button><button id="reloadKit">RELOAD</button><button id="downloadKit" title="Save the current kit (16 sounds + FX) as a JSON file">DOWNLOAD</button><button id="uploadKit" title="Load a kit file downloaded from this panel">UPLOAD</button></div>
             <input id="kitFile" type="file" accept=".json,application/json" hidden />
           </div>
         </div>
@@ -235,29 +154,12 @@
       <section class="sequencer">
         <div class="seqhead">
           <h2 id="gridTitle">SEQUENCER</h2>
-          <div class="performModes">
-            <button
-              id="trigMode"
-              aria-pressed="true"
-              title="Step trigger editor — the default mode · G: return from PADS / MUTES"
-              >TRIGGERS</button
-            ><button id="padMode" title="P: toggle pad mode">PADS</button
-            ><button id="muteMode" title="Shift+U: toggle mute performance">MUTES</button>
-          </div>
+          <div class="performModes"><button id="trigMode" aria-pressed="true" title="Step trigger editor — the default mode · G: return from PADS / MUTES">TRIGGERS</button><button id="padMode" title="P: toggle pad mode">PADS</button><button id="muteMode" title="Shift+U: toggle mute performance">MUTES</button></div>
           <span>Hold a step + scroll wheel to lock params · G triggers · P pads · Shift+U mutes · R record</span>
         </div>
-        <div class="stepPages">
-          <button id="stepPage0">KEYS 1–8</button><button id="stepPage1">KEYS 9–16</button
-          ><small
-            >Z X C V B N M , toggle steps · TAB flips 1–8 / 9–16 · SHIFT + key plays the current track</small
-          >
-        </div>
+        <div class="stepPages"><button id="stepPage0">KEYS 1–8</button><button id="stepPage1">KEYS 9–16</button><small>Z X C V B N M , toggle steps · TAB flips 1–8 / 9–16 · SHIFT + key plays the current track</small></div>
         <div id="steps"></div>
-        <div class="seqfoot">
-          <span id="hint"
-            >Knobs edit the whole track. Turn on STEP LOCK to give every step its own sound.</span
-          ><span>1/16 · 16 STEPS</span>
-        </div>
+        <div class="seqfoot"><span id="hint">Knobs edit the whole track. Turn on STEP LOCK to give every step its own sound.</span><span>1/16 · 16 STEPS</span></div>
       </section>
     </main>
     <footer class="sitefoot">
