@@ -3,12 +3,15 @@
    at the root, then re-enable exactly where text is the point: the input field (BPM), the
    field-guide dialog, the status line, and the pattern-confirm dialog. */
 body {
-  /* Flex, not block: .machine's `margin: auto` (style.css) then centers it on BOTH axes —
-     in block layout auto margins only center horizontally, which is why the machine rode
-     the top of the page. min-height stays, so when the machine is TALLER than the viewport
-     the free space is zero, the auto margins collapse, and everything scrolls normally
-     (the classic justify-content:center clipping trap never happens). */
+  /* Flex COLUMN, not block: .machine's `margin: auto` (style.css) then centers it on BOTH
+     axes — in block layout auto margins only center horizontally, which is why the machine
+     rode the top of the page. min-height stays, so when the machine is TALLER than the
+     viewport the free space is zero, the auto margins collapse, and everything scrolls
+     normally (the classic justify-content:center clipping trap never happens). Column
+     direction stacks the site footer BELOW the machine instead of beside it. */
   display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 24px 2.5vw;
   user-select: none;
   -webkit-user-select: none;

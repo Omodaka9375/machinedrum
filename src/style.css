@@ -1267,3 +1267,36 @@ button {
     margin: 13px 0 0;
   }
 }
+
+/* Site footer: sits below the machine, never scrolls under it. Anchored to the BODY box
+   (position:relative) rather than the viewport — dialogs live in the top layer and the
+   pattern menu is position:fixed, so nothing else depends on the body's box. */
+body {
+  position: relative;
+}
+.sitefoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  /* body is a flex row (the centering layout): this must not shrink, and it owns the
+     remaining width after .machine's max-width — so the rule line spans the page. */
+  flex: none;
+  width: 100%;
+  margin-top: 18px;
+  padding: 10px 4px 6px;
+  border-top: 1px solid #444a48;
+  color: #97a3a3;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+}
+.sitefoot a {
+  color: #97a3a3;
+  text-decoration: none;
+  border-bottom: 1px dotted #97a3a3;
+}
+.sitefoot a:hover,
+.sitefoot a:focus-visible {
+  color: #e1e3dd;
+  border-bottom-color: #e1e3dd;
+}
