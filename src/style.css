@@ -357,6 +357,12 @@ body.alt .knobcell.globalcell small {
 body.alt .knobcell.globalcell {
   border-right-color: #3351c4;
 }
+/* Section titles (SOUND SELECTION, PARAMETERS, PATTERN SELECTION, NAVIGATION, KIT,
+   TRANSPORT, the grid title) trade the classic rust for the UW violet. Scoped to the
+   panel: .machine is the instrument root, so dialogs keep their own heading colors. */
+body.alt .machine h2 {
+  color: #473784;
+}
 /* The caption LED follows the face too: the lit diode next to SYNTHESIS / EFFECTS / LFO
    swaps its red for the UW blue family (the step LED's lit pairing). Child-combinator
    scoped: a bare `.datafoot i` also matched the timing-switch thumbs (they live inside
