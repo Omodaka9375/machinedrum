@@ -104,4 +104,4 @@ Chrome and Edge offer the install icon right in the address bar (or ⋮ → *Cas
 
 ## License
 
-Released under the [MIT License](LICENSE). Built as a study of the classic hardware — an original tribute, not an emulation. All synthesis, sequencing and UI code in this repository is original work.
+Released under the [MIT License](LICENSE). Built as a study of the classic hardware — an original tribute, not an emulation.
