@@ -888,9 +888,10 @@ $('#saveKit').onclick = () => {
 };
 // DOWNLOAD / UPLOAD: the kit as a small JSON file — the browser's own save/open dialogs, no
 // server. DOWNLOAD snapshots the CURRENT sounds + FX (like STORE would capture) into a file
-// named after the kit's first track, so two kits on disk stay distinguishable. UPLOAD applies
-// a file after the same validShapes-style skeleton check the localStorage restore uses — a
-// malformed file is refused with a status line, never a broken panel.
+// stamped with today's date, so kits saved on different days stay distinguishable on disk —
+// the old name (after the first track) always read "bd" and implied a single-track file.
+// UPLOAD applies a file after the same validShapes-style skeleton check the localStorage
+// restore uses — a malformed file is refused with a status line, never a broken panel.
 $('#downloadKit').onclick = () => {
   const payload = {
     kind: 'machinedrum-kit',
@@ -909,7 +910,9 @@ $('#downloadKit').onclick = () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `machinedrum-kit-${names[0].toLowerCase()}.json`;
+  const d = new Date();
+  const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  a.download = `machinedrum-kit-${stamp}.json`;
   a.click();
   URL.revokeObjectURL(url);
   status('Kit downloaded — UPLOAD on any machine (or after a cache wipe) restores it');
