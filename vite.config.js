@@ -35,7 +35,7 @@ export default defineConfig({
         id: './',
         scope: './',
         start_url: './',
-        name: 'MACHINEDRUM — Drum Study',
+        name: 'MACHINEDRUM',
         short_name: 'MACHINEDRUM',
         description:
           'Sixteen-voice digital drum synthesizer and step sequencer. Synthesised in real time, runs offline.',
