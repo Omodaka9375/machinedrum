@@ -504,6 +504,16 @@ $('#patterns').onclick = (e) => {
     return;
   }
   pattern = +b.dataset.pattern;
+  // While a chain drives playback it owns every upcoming bar: a plain click only picks
+  // which pattern to EDIT — no pending switch, so the loop is never hijacked. (Shift+click
+  // appends to the chain, CLR empties it, and with the transport stopped or no chain the
+  // plain click queues the switch at the next bar as always.)
+  if (audio.playing && chain.length) {
+    document.querySelectorAll('.current').forEach((b) => b.classList.remove('current'));
+    render();
+    status('Editing Pattern ' + 'ABCD'[pattern] + ' · the chain keeps playing');
+    return;
+  }
   if (audio.playing) audio.pending = pattern;
   document.querySelectorAll('.current').forEach((b) => b.classList.remove('current'));
   render();

@@ -532,7 +532,7 @@ body.alt .knobcell.selected .knob {
 }
 #patterns button.pending {
   outline: 1px dashed #c3cd9f;
-  outline-offset: 3px;
+  outline-offset:1px;
 }
 /* --- Pattern chain -------------------------------------------------------
    Shift+click A-D appends that pattern to the loop (the same pattern can be

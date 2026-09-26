@@ -217,16 +217,35 @@ ok(click.statuses.some((t) => t.includes('A A')), 'status reads the loop order: 
   ok(click.statuses.some((t) => t.includes('A C')), 'status reads the loop order: A C', click.statuses.at(-1));
 }
 
-// --- 7. plain click still switches patterns -----------------------------------------------------
+// --- 7. plain click: chain playing = edit-only, no chain = queue the switch ----------------------
 currents.forEach((c) => c.set.add('current'));
 {
+  // Chain owns the bars: the click changes the EDIT view, never the playback order.
   const audio = audioShim(true);
   click = buildHandler(audio, [0], 0, 0, 0);
   clickPattern(click.holder.onclick, 1, false);
-  ok(click.ctx.pattern === 1, 'plain click selects the pattern for editing');
-  ok(audio.pending === 1, 'plain click queues the switch at the next bar');
-  ok(click.ctx.chain.length === 1, 'plain click leaves the chain alone');
+  ok(click.ctx.pattern === 1, 'chain playing: plain click still selects the pattern for editing');
+  ok(audio.pending === null, 'chain playing: plain click does not queue a manual switch');
+  ok(click.ctx.chain.length === 1, 'chain playing: plain click leaves the chain alone');
   ok(currents.every((c) => !c.set.has('current')), 'plain click clears the playhead markers');
+  ok(click.statuses.some((t) => t.includes('keeps playing')), 'status says the chain keeps playing', click.statuses.at(-1));
+}
+{
+  // No chain: the classic behavior — plain click queues the switch at the next bar.
+  const audio = audioShim(true);
+  click = buildHandler(audio, [], 0, 0, 0);
+  clickPattern(click.holder.onclick, 1, false);
+  ok(click.ctx.pattern === 1, 'no chain: plain click selects the pattern for editing');
+  ok(audio.pending === 1, 'no chain: plain click queues the switch at the next bar');
+}
+{
+  // Chain exists but transport stopped: editing target changes, nothing is queued.
+  const audio = audioShim(false);
+  click = buildHandler(audio, [0, 2], 0, 0, 0);
+  clickPattern(click.holder.onclick, 3, false);
+  ok(click.ctx.pattern === 3, 'chain stopped: plain click selects the pattern for editing');
+  ok(audio.pending === null, 'chain stopped: nothing is queued');
+  ok(click.ctx.chain.length === 2, 'chain stopped: plain click leaves the chain alone');
 }
 
 // --- 8. regions stay character-identical to what shipped ----------------------------------------
