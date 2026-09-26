@@ -30,6 +30,11 @@ header b {
 .machine {
   padding: 9px 15px 26px;
   max-width: 1500px;
+  /* The body is a flex container (centering), which makes this box shrink-to-fit its content —
+     so every edit-page switch (LCD dials, labels, hint lengths all change width) visibly
+     grew/shrank the whole machine. width:100% restores the block behavior of filling the
+     available row (capped by max-width above); margin:auto still centers on both axes. */
+  width: 100%;
 }
 .portline {
   display: grid;
