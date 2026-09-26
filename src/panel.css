@@ -509,9 +509,21 @@ canvas {
 .datafoot {
   margin: auto 0 0;
   padding: 15px 20px;
-  justify-content: space-between;
+  /* Grid, not the base flex space-between: the caption text (SYNTHESIS / EFFECTS / LFO) has a
+     different width on every edit page, and space-between seats the middle child off-center
+     by half the width difference — the SWING / QUANT toggles visibly jumped on each page
+     switch. 1fr auto 1fr pins the toggles to the exact horizontal center whatever the side
+     texts are, with the caption left-aligned and CLEAR LOCKS right-aligned in equal cells. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  column-gap: 10px;
   align-items: center;
   font-size: 8px;
+}
+.datafoot > button {
+  /* Grid items stretch to their cell by default; the button keeps its own width at the
+     right edge. (The toggles are the auto middle cell, the caption stretches harmlessly.) */
+  justify-self: end;
 }
 .datafoot button {
   font-size: 8px;
@@ -563,6 +575,13 @@ canvas {
 .navigation {
   display: grid;
   grid-template-columns: 33% 67%;
+  /* auto 1fr, NOT implicit auto rows: the section stretches to the pattern column's height,
+     and a tall chain adds a lot of it. With two auto rows, grid's default stretch
+     distributes the surplus across BOTH rows — the title row balloons with dead space and
+     the centered keys land far below the middle. auto 1fr pins the title to its content
+     and gives the controls row everything else to center in (verified in a headless-grid
+     replica: keys center 297→237 vs section center 220). */
+  grid-template-rows: auto 1fr;
   gap: 10px;
   padding: 15px 20px;
   border-right: 1px solid #89917f;
@@ -1090,8 +1109,10 @@ canvas {
   margin-top: 12px;
 }
 .clearActions button {
-  font-size: 9px;
-  padding: 5px 7px;
+  font-size: 8px;
+  /* Slim single-line keys: no vertical padding, height set by the line box only. */
+  padding: 0 7px;
+  line-height: 20px;
   letter-spacing: 0;
 }
 
@@ -2041,7 +2062,8 @@ body.alt .timingSwitches button.active {
   }
   .clearActions button {
     font-size: 7px;
-    padding: 5px 3px;
+    padding: 0 3px;
+    line-height: 16px;
   }
   #chain {
     margin-top: 5px;

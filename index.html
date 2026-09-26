@@ -150,7 +150,7 @@
                 aria-pressed="true"
                 title="Quantize recording to the steps; off keeps the exact hit offset"
               >
-                <span class="switchTrack" aria-hidden="true"><i></i></span><span>QUANT</span>
+                <span class="switchTrack" aria-hidden="true"><i></i></span><span>QUANTIZE</span>
               </button>
             </div>
             <button id="unlock" title="Remove every parameter lock on the current step">CLEAR LOCKS</button>
@@ -167,8 +167,8 @@
             <button id="chainClear" title="Clear the pattern chain">CLR</button>
           </div>
           <div class="clearActions">
-            <button id="clearPattern">CLEAR PATTERN</button><button id="undoClear" disabled>UNDO CLEAR</button
-            ><button id="copyPattern">COPY</button><button id="pastePattern" disabled>PASTE</button
+            <button id="clearPattern" title="Clear all notes and locks in this pattern">CLEAR</button><button id="undoClear" disabled title="Undo the last clear">UNDO</button
+            ><button id="copyPattern" title="Copy the current pattern — shared with right-clicking a pattern slot">COPY</button><button id="pastePattern" disabled title="Replace the current pattern with the copied one">PASTE</button
             ><button id="randomPattern">RANDOMIZE</button>
           </div>
         </div>
