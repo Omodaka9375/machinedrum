@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="public/md-blue.jpg" alt="MACHINEDRUM — the blue UW face" title="The UW face — click the MACHINEDRUM name on the panel to flip the phosphor">
+  <img src="public/md-blue.png" alt="MACHINEDRUM — the blue UW face" title="The UW face — click the MACHINEDRUM name on the panel to flip the phosphor">
 </p>
 
 <p align="center">
@@ -43,7 +43,7 @@ A single screen, modeled after the classic hardware grooveboxes — with everyth
 Want a head start? Press **RANDOMIZE**: every empty track draws a groove from its role — the kick/snare backbone stays solid, while hats, toms and percussion get maybe-hits so the pattern never repeats exactly.
 
 <p align="center">
-  <img src="public/md.jpg" alt="MACHINEDRUM — the classic green face" title="The classic phosphor face">
+  <img src="public/md.png" alt="MACHINEDRUM — the classic green face" title="The classic phosphor face">
 </p>
 
 ## The three knob pages
