@@ -8,6 +8,7 @@
 //   node tests/fx.test.mjs        (also runs as part of `npm test`)
 
 import { Effects, stepFx, defaultFx, migrateFx } from '../src/fx.js';
+import { kit, factoryPans } from '../src/model.js';
 
 let passed = 0;
 let failed = 0;
@@ -179,6 +180,34 @@ const project = () => {
   ok(tracks[4].send.delay === 80, 'stepFx applies per-step sendDelay lock', `send=${tracks[4].send.delay}`);
   const idle = stepFx(p, 0, 8);
   ok(idle.fx.time === 300 && idle.tracks[4].send.delay === 40, 'other steps keep base values');
+}
+
+// ---- 7. migrateFx pan adoption (factory stereo field) -------------------------------------
+// The kit ships spread (factoryPans); an untouched all-center legacy kit adopts it, a
+// kit the user ever panned freezes as-is. All-or-nothing by design.
+{
+  /** @typedef {{ engine: string, mute: boolean, choke: number, p: object, send: object, pan?: number }} PanTrack */
+  /** @type {{ tracks: PanTrack[], savedKit?: PanTrack[] }} */
+  let p = { tracks: kit().map((t) => structuredClone(t)) };
+  migrateFx(p);
+  ok(p.tracks[2].pan === factoryPans[2] && p.tracks[13].pan === 0, 'fresh kit keeps factory pans', `CH=${p.tracks[2].pan}`);
+  // absent pan -> factory value
+  p = { tracks: kit().map(({ engine, mute, choke, p: prm, send }) => ({ engine, mute, choke, p: prm, send })) };
+  migrateFx(p);
+  ok(p.tracks[10].pan === factoryPans[10], 'absent pan adopts the factory field', `CB=${p.tracks[10].pan}`);
+  // untouched all-zero legacy kit adopts the whole field
+  p = { tracks: kit().map((t) => ({ ...structuredClone(t), pan: 0 })) };
+  migrateFx(p);
+  ok(p.tracks.every((t, i) => t.pan === factoryPans[i]), 'all-center legacy kit adopts the factory spread');
+  // user-touched kit frozen exactly as it was
+  p = { tracks: kit().map((t, i) => ({ ...structuredClone(t), pan: i === 5 ? -70 : 0 })) };
+  migrateFx(p);
+  ok(p.tracks[5].pan === -70 && p.tracks[2].pan === 0, 'user-touched pan kit frozen as-is');
+  // savedKit mirror adopts too
+  p = { tracks: kit().map((t) => structuredClone(t)), savedKit: kit().map((t) => ({ ...structuredClone(t), pan: 0 })) };
+  migrateFx(p);
+  const saved = p.savedKit ?? [];
+  ok(saved.every((t, i) => t.pan === factoryPans[i]), 'savedKit adopts the factory spread');
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

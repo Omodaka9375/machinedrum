@@ -1,18 +1,36 @@
+import { factoryPans } from './model.js';
+
 export const defaultFx = () => ({ time: 300, feedback: 35, delay: 30, room: 1.5, reverb: 25 });
 
 // Trailing debounce for reverb IR regeneration — see Effects.update().
 const IR_DEBOUNCE_MS = 120;
+// Pan defaulting. Absent pan -> the factory stereo field (not center: the kit ships spread).
+// An UNTouched all-center kit — every save made before the field shipped — adopts it on
+// upgrade; any track the user ever panned (explicit value ≠ 0... indistinguishable from
+// the old default) freezes the whole kit exactly as it was. Deliberately all-or-nothing:
+// half-migrating would splice the factory spread onto a mix the user already shaped.
+const adoptFactoryPans = (tracks) => {
+  if (!Array.isArray(tracks)) return;
+  tracks.forEach((t, i) => {
+    t.pan ??= factoryPans[i] ?? 0;
+  });
+  if (tracks.length === factoryPans.length && tracks.every((t) => t.pan === 0)) {
+    tracks.forEach((t, i) => {
+      t.pan = factoryPans[i];
+    });
+  }
+};
 export function migrateFx(p) {
   p.fx = { ...defaultFx(), ...p.fx };
   p.tracks.forEach((t) => {
     t.send = { delay: 0, reverb: 0, ...t.send };
-    t.pan ??= 0;
   });
+  adoptFactoryPans(p.tracks);
   if (p.savedKit) {
     p.savedKit.forEach((t) => {
       t.send = { delay: 0, reverb: 0, ...t.send };
-      t.pan ??= 0;
     });
+    adoptFactoryPans(p.savedKit);
     p.savedFx ??= { ...p.fx };
   }
 }

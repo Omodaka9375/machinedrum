@@ -20,6 +20,17 @@ export const engines = ['kick', 'snare', 'hat', 'clap', 'tom', 'rim', 'fm', 'noi
 export const params = ['pitch', 'decay', 'tone', 'sweep', 'noise', 'fm', 'drive', 'level'];
 export const labels = ['PITCH', 'DECAY', 'TONE', 'SWEEP', 'NOISE', 'FM', 'DRIVE', 'LEVEL'];
 export const clone = (x) => structuredClone(x);
+// Factory stereo field (−100…100, 0 = center): the kit ships spread so the machine sounds
+// three-dimensional from the first beat. Practice, not gimmick — the low-end anchors (BD,
+// SUB) and the snare stay CENTER (mono low end keeps its punch; the BD/SD backbone reads
+// straight down the middle), while everything else answers across the sides: hats pair
+// left/right, the tom rack spreads like a real kit, and the chatter (CB, NO, PERC, MET)
+// lives out on the edges where it can sparkle without crowding the center. The LFO's PAN
+// destination sweeps AROUND wherever this places a voice.
+export const factoryPans = [
+  //  BD  SD  CH  OH  CP  LT  HT  RS FM1 FM2  CB  CY  NO SUB PERC MET
+  0, 0, -18, 22, 10, -38, 38, -26, 18, -14, 44, -34, 40, 0, -46, 30,
+];
 export function kit() {
   const kinds = [
     'kick',
@@ -77,6 +88,7 @@ export function kit() {
       level: i < 2 ? 86 : 58,
     },
     send: sends[i],
+    pan: factoryPans[i],
   }));
 }
 export const emptyPattern = () =>
