@@ -6,27 +6,30 @@
     <meta name="theme-color" content="#222729" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <!-- Open Graph / Twitter card. The image stays relative on purpose: scrapers resolve
-         content URLs against the page URL, and the deploy target is a GitHub Pages project
-         site whose absolute prefix is unknown at build time — same reasoning as base: './'
-         in vite.config.js. Dimensions match public/md.jpg (1490×941). -->
+    <!-- Open Graph / Twitter card. og:image MUST be absolute: Facebook resolves relative
+         URLs, but Twitter/X, Discord and Slack silently drop them — shares render with no
+         preview. The Pages URL is known and stable, so it is hardcoded here (unlike the
+         manifest, which stays relative because the browser resolves it, not a scraper).
+         The image is the UW-blue panel — the default face, matching what a visitor sees. -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="MACHINEDRUM — Drum Study" />
+    <meta property="og:title" content="MACHINEDRUM — SPS-D" />
     <meta
       property="og:description"
       content="Sixteen-voice digital drum synthesizer and step sequencer. Synthesised in real time, runs offline."
     />
-    <meta property="og:image" content="md.jpg" />
-    <meta property="og:image:width" content="1490" />
-    <meta property="og:image:height" content="941" />
+    <meta property="og:url" content="https://omodaka9375.github.io/machinedrum/" />
+    <meta property="og:site_name" content="MACHINEDRUM" />
+    <meta property="og:image" content="https://omodaka9375.github.io/machinedrum/md-blue.jpg" />
+    <meta property="og:image:width" content="1351" />
+    <meta property="og:image:height" content="928" />
     <meta property="og:image:alt" content="The MACHINEDRUM web instrument panel" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MACHINEDRUM — Drum Study" />
+    <meta name="twitter:title" content="MACHINEDRUM — SPS-D" />
     <meta
       name="twitter:description"
       content="Sixteen-voice digital drum synthesizer and step sequencer. Synthesised in real time, runs offline."
     />
-    <meta name="twitter:image" content="md.jpg" />
+    <meta name="twitter:image" content="https://omodaka9375.github.io/machinedrum/md-blue.jpg" />
     <title>MACHINEDRUM</title>
     <link rel="stylesheet" href="src/style.css" />
     <link rel="stylesheet" href="src/panel.css" />

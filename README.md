@@ -3,7 +3,7 @@
 **A 16-voice digital drum machine that lives in your browser.** Synthesised in real time — no samples, no plugins, no install. Open the page and it keeps working even after you go offline.
 
 <p align="center">
-  <a href="https://omodaka9375.github.io/d-machinedrum/"><strong>▸ OPEN THE MACHINE</strong></a>
+  <a href="https://omodaka9375.github.io/machinedrum/"><strong>▸ OPEN THE MACHINE</strong></a>
 </p>
 
 <p align="center">
