@@ -173,7 +173,7 @@ export function parseMidiMessage(data) {
  * timestamps would be dishonest without a full timing model.
  * Same event shapes as parseMidiMessage.
  */
-export function parseBlePacket(dv) {
+export function parseBlePacket(dv, state) {
   if (!dv || dv.byteLength < 3) return [];
   const events = [];
   const byte = (k) => (k < dv.byteLength ? dv.getUint8(k) : undefined);
@@ -181,8 +181,11 @@ export function parseBlePacket(dv) {
     const type = REALTIME_TYPES.get(b);
     if (type) events.push({ type });
   };
+  // Running status carries ACROSS the packets of one connection — the BLE stream is one
+  // continuous MIDI stream — so pass a { status } object to keep it between packets. Without
+  // state, each packet parses standalone (the legacy behavior the original tests encode).
+  let status = state?.status ?? null;
   let i = 1; // header consumed
-  let status = null;
   while (i < dv.byteLength) {
     const ts = byte(i);
     if (ts === undefined || !(ts & 0x80)) {
@@ -190,13 +193,23 @@ export function parseBlePacket(dv) {
       continue;
     }
     if (ts >= 0xf8) {
-      // Realtime where a timestamp was expected: either a sender omitted the realtime's own
-      // timestamp, or it is a genuine timestamp byte whose 7-bit value lands in 0xF8-0xFF —
-      // indistinguishable on the wire. Dispatching as realtime is the safer misread: one
-      // lost/spurious clock pulse in a median window beats a corrupted note message.
-      realtime(ts);
-      i++;
-      continue;
+      // A byte 0xF8-0xFF in the timestamp slot is genuinely ambiguous: a spec-compliant
+      // sender's TIMESTAMP can be any 0x80-0xFF byte (its 7-bit value 120-127 lands here),
+      // while a non-compliant sender may emit bare realtime with no timestamp of its own.
+      // Both readings produce legal streams, so the tie goes by cost: misreading a bare
+      // REALTIME as a timestamp costs one clock pulse, which the tempo median absorbs;
+      // misreading a TIMESTAMP as realtime corrupts or drops the note it belongs to. Read it
+      // as a timestamp ONLY when data bytes follow directly (running status — a bare realtime
+      // would have separated them); anything else, treat as realtime and let the next
+      // event's own timestamp resync the stream.
+      const next = byte(i + 1);
+      const dataFollows = next !== undefined && !(next & 0x80);
+      if (!dataFollows) {
+        realtime(ts);
+        i++;
+        continue;
+      }
+      // fall through: running-status data follows, so ts was this event's timestamp
     }
     i++;
     const s = byte(i);
@@ -262,6 +275,7 @@ export function parseBlePacket(dv) {
       events.push({ type: 'program', value: bytes[0], channel });
     }
   }
+  if (state) state.status = status;
   return events;
 }
 
@@ -317,7 +331,7 @@ export class TempoEstimator {
  *   disconnect: () => void }}
  *   BleGatt
  * @typedef {{ name?: string, gatt: BleGatt,
- *   addEventListener: (type: 'gattserverdisconnected', fn: () => void) => void }}
+ *   addEventListener: (type: 'gattserverdisconnected', fn: (e: { target: unknown }) => void) => void }}
  *   BleDevice
  * @typedef {{ requestDevice: (o: { filters: { services: string[] }[] }) => Promise<BleDevice> }}
  *   BleApi
@@ -338,6 +352,8 @@ export class MidiEngine {
     this.onStatus = onStatus;
     this.access = null;
     this.outputs = [];
+    /** In-flight connect promise: double-clicks reuse it instead of racing a second access. */
+    this.connecting = /** @type {Promise<number> | null} */ (null);
   }
   get connected() {
     return !!this.access;
@@ -346,6 +362,18 @@ export class MidiEngine {
     return this.access ? this.access.inputs.size : 0;
   }
   async connect() {
+    // Double-click guard: reusing the in-flight connect prevents a second MIDIAccess whose
+    // orphaned statechange handler would keep pushing stale input counts to the status line.
+    if (this.connecting) return this.connecting;
+    const attempt = this.open();
+    this.connecting = attempt;
+    try {
+      return await attempt;
+    } finally {
+      if (this.connecting === attempt) this.connecting = null;
+    }
+  }
+  async open() {
     if (!('requestMIDIAccess' in navigator)) throw new Error('Web MIDI is not supported here');
     this.access = await navigator.requestMIDIAccess({ sysex: false });
     this.outputs = [...this.access.outputs.values()];
@@ -404,6 +432,10 @@ export class BleMidi {
     this.onStatus = onStatus;
     this.device = null;
     this.characteristic = null;
+    /** Per-connection BLE parse state (running status across packets). */
+    this.parseState = null;
+    /** In-flight connect promise: double-clicks reuse it instead of two choosers. */
+    this.connecting = /** @type {Promise<string> | null} */ (null);
   }
   get connected() {
     return !!this.device?.gatt?.connected;
@@ -412,13 +444,30 @@ export class BleMidi {
     return this.device?.name || 'BLE MIDI device';
   }
   async connect() {
+    // Same double-click guard as MidiEngine; a second requestDevice chooser while the first
+    // is open would just be rejected by the browser, but this also covers fast re-clicks.
+    if (this.connecting) return this.connecting;
+    const attempt = this.open();
+    this.connecting = attempt;
+    try {
+      return await attempt;
+    } finally {
+      if (this.connecting === attempt) this.connecting = null;
+    }
+  }
+  async open() {
     if (!('bluetooth' in navigator)) throw new Error('Web Bluetooth is not supported here');
     const bt = /** @type {BleApi} */ (navigator.bluetooth);
     this.device = await bt.requestDevice({
       filters: [{ services: [BLE_MIDI_SERVICE] }],
     });
-    this.device.addEventListener('gattserverdisconnected', () => {
+    // Fresh stream, fresh running status.
+    this.parseState = { status: null };
+    this.device.addEventListener('gattserverdisconnected', (e) => {
+      // A previous pairing's late event must not null the CURRENT connection's state.
+      if (this.device !== e.target) return;
       this.characteristic = null;
+      this.parseState = null;
       this.onStatus('ble', false);
     });
     const server = await this.device.gatt.connect();
@@ -426,7 +475,8 @@ export class BleMidi {
     this.characteristic = await service.getCharacteristic(BLE_MIDI_CHARACTERISTIC);
     await this.characteristic.startNotifications();
     this.characteristic.addEventListener('characteristicvaluechanged', (e) => {
-      for (const event of parseBlePacket(e.target.value)) this.emit(event.type, event);
+      for (const event of parseBlePacket(e.target.value, this.parseState ?? undefined))
+        this.emit(event.type, event);
     });
     return this.name;
   }
@@ -436,5 +486,6 @@ export class BleMidi {
     const device = this.device;
     if (device?.gatt.connected) device.gatt.disconnect();
     this.characteristic = null;
+    this.parseState = null;
   }
 }

@@ -259,6 +259,76 @@ ok(velocityScale(200) === 1, 'oversized velocity clamps to 1');
   );
 }
 
+// ---- BLE timestamp vs realtime disambiguation ----------------------------------------------
+
+// A byte 0xF8-0xFF in the timestamp slot is AMBIGUOUS: a spec-compliant timestamp can be any
+// 0x80-0xFF byte, and a non-compliant sender can emit bare realtime with no timestamp. The
+// streams are genuinely undecidable in the general case, so the parser's POLICY is a cost
+// tiebreak: prefer the REALTIME reading unless data follows directly (running status),
+// because a misread clock costs one median-absorbed pulse while a misread timestamp costs a
+// note. These tests pin that policy.
+{
+  // [ts=0xF9][data][data] under running status: data follows directly -> timestamp reading.
+  const state = { status: null };
+  parseBlePacket(dv([0x80, 0x81, 0x90, 60, 100]), state);
+  const events = parseBlePacket(dv([0x80, 0xf9, 62, 64]), state);
+  ok(
+    events.length === 1 && events[0].type === 'noteon' && events[0].note === 62 && events[0].velocity === 64,
+    'BLE: timestamp 0xF9 with running-status data is a timestamp, note preserved',
+    JSON.stringify(events),
+  );
+}
+{
+  // [0xF8][status][data] with NO running status: undecidable pair -> realtime reading wins
+  // (the note is re-sent by the sender's next event; a lost clock pulse is median-absorbed).
+  const events = parseBlePacket(dv([0x80, 0xf8, 0x90, 60, 100]));
+  ok(
+    events.length === 1 && events[0].type === 'clock',
+    'BLE: 0xF8 before a fresh status reads as realtime (cost tiebreak: clock, not note)',
+    JSON.stringify(events),
+  );
+}
+{
+  // A bare realtime trailing the packet (no following bytes): dispatched as realtime.
+  const events = parseBlePacket(dv([0x80, 0x81, 0x90, 60, 100, 0xf8]));
+  ok(
+    events.length === 2 && events[0].type === 'noteon' && events[1].type === 'clock',
+    'BLE: bare trailing realtime still dispatches',
+    JSON.stringify(events),
+  );
+}
+{
+  // Bare realtime followed by a timestamped event: realtime, then the note via its own ts.
+  const events = parseBlePacket(dv([0x80, 0xf8, 0x81, 0x90, 60, 100]));
+  ok(
+    events.length === 2 && events[0].type === 'clock' && events[1].type === 'noteon' && events[1].note === 60,
+    'BLE: realtime followed by a timestamped note dispatches both',
+    JSON.stringify(events),
+  );
+}
+
+// ---- BLE running status across packets -------------------------------------------------------
+
+{
+  const state = { status: null };
+  const first = parseBlePacket(dv([0x80, 0x81, 0x90, 36, 120]), state);
+  const second = parseBlePacket(dv([0x80, 0x82, 38, 90]), state);
+  ok(
+    first.length === 1 &&
+      first[0].note === 36 &&
+      second.length === 1 &&
+      second[0].note === 38 &&
+      second[0].channel === 0,
+    'BLE: running status carries across packets via the state object',
+    JSON.stringify(second),
+  );
+}
+{
+  // Without state, packets parse standalone (legacy contract).
+  const second = parseBlePacket(dv([0x80, 0x82, 38, 90]));
+  ok(second.length === 0, 'BLE: without state, running status does not leak across packets');
+}
+
 // ---- TempoEstimator --------------------------------------------------------------------
 
 {
