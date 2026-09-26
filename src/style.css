@@ -862,8 +862,8 @@ body.alt .knobcell.selected .knob {
   margin-top: 34px;
   font-size: 9px;
 }
-/* The PROB control: the selected step's play chance. Sits between the hint and the grid
-   size caption; hidden on very small screens where the footer collapses (see bands). */
+/* The PROB control: the selected step's play chance. Lives in the PARAMETERS footer row
+   between the QUANTIZE toggle and CLEAR LOCKS. The skin itself is scoped in panel.css. */
 .probrow {
   display: flex;
   align-items: center;
@@ -874,7 +874,7 @@ body.alt .knobcell.selected .knob {
   white-space: nowrap;
 }
 .probrow input {
-  width: 90px;
+  width: 76px;
 }
 .probrow output {
   font:

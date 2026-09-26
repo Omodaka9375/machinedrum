@@ -1678,7 +1678,13 @@ canvas {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+  align-items: center;
   gap: 5px;
+}
+/* The PROB slider shares this row now (between QUANTIZE and CLEAR LOCKS): a touch shorter
+   than its seqfoot origin so the footer stays a single slim line. */
+.datafoot .probrow input {
+  height: 16px;
 }
 .timingSwitches button {
   font-size: 8px;

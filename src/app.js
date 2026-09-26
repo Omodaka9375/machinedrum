@@ -27,6 +27,9 @@ try {
 if (project.patterns.length === 4) project.patterns.push(emptyPattern(), emptyPattern(), emptyPattern(), emptyPattern());
 migrateFx(project);
 migrateLfo(project);
+// The swing-bypass toggle was retired with its button: swing depth is now the only swing
+// control. Old saves carrying swingEnabled: false simply drop it here.
+delete project.swingEnabled;
 project.tracks.forEach((t, i) => {
   t.choke ??= i === 2 || i === 3 ? 1 : 0;
 });
@@ -198,10 +201,11 @@ function renderPatterns() {
     .forEach((c, i) => c.classList.toggle('playing', i === chainPlaying));
 }
 function render() {
-  for (const id of ['quantize', 'swingEnabled']) {
-    $('#' + id).setAttribute('aria-pressed', project[id] !== false);
-    $('#' + id).classList.toggle('active', project[id] !== false);
-  }
+  // The swing BYPASS toggle is retired: the SWING % knob is the only swing control and is
+  // always active. The field is dropped at boot; audio.js reads absence as "enabled".
+  const quantizeBtn = $('#quantize');
+  quantizeBtn.setAttribute('aria-pressed', project.quantize !== false);
+  quantizeBtn.classList.toggle('active', project.quantize !== false);
   if (audio.ctx) audio.metronome.gain.setValueAtTime(recording ? 1 : 0, audio.ctx.currentTime);
   for (let i = 0; i < 2; i++) {
     $('#stepPage' + i).classList.toggle('active', stepPage === i);
@@ -863,7 +867,7 @@ document.addEventListener('keyup', (e) => {
   if (!e.shiftKey) document.body.classList.remove('shift-bank');
 });
 window.addEventListener('blur', () => document.body.classList.remove('shift-bank'));
-for (const id of ['quantize', 'swingEnabled'])
+for (const id of ['quantize'])
   $('#' + id).onclick = () => {
     project[id] = project[id] === false;
     save();

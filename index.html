@@ -141,9 +141,6 @@
           </div>
           <div class="datafoot">
             <div class="timingSwitches">
-              <button id="swingEnabled" aria-pressed="true" title="Enable or bypass Swing">
-                <span class="switchTrack" aria-hidden="true"><i></i></span><span>SWING</span>
-              </button>
               <button
                 id="quantize"
                 aria-pressed="true"
@@ -151,6 +148,12 @@
               >
                 <span class="switchTrack" aria-hidden="true"><i></i></span><span>QUANTIZE</span>
               </button>
+              <label class="probrow" title="Chance the SELECTED step plays on each pass — hold a step + Shift+wheel also trims it"
+                >PROB<input id="prob" type="range" min="0" max="100" step="5" value="100" aria-label="Step play probability" /><output
+                  id="probOut"
+                  >100%</output
+                ></label
+              >
             </div>
             <button id="unlock" title="Remove every parameter lock on the current step">CLEAR LOCKS</button>
           </div>
@@ -250,11 +253,6 @@
         <div class="seqfoot">
           <span id="hint"
             >Knobs edit the whole track. Turn on STEP LOCK to give every step its own sound.</span
-          ><label class="probrow" title="Chance the SELECTED step plays on each pass — hold a step + Shift+wheel also trims it"
-            >PROB<input id="prob" type="range" min="0" max="100" step="5" value="100" aria-label="Step play probability" /><output
-              id="probOut"
-              >100%</output
-            ></label
           ><span>1/16 · 16 STEPS</span>
         </div>
       </section>
