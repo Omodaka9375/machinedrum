@@ -1024,12 +1024,14 @@ const canvas = $('#scope'),
   g = canvas.getContext('2d'),
   wave = new Uint8Array(512);
 let last = 0;
+// The scope ink tracks the phosphor color so the trace stays legible on either face.
+let scopeInk = '#394c30';
 function frame(now) {
   audio.tick();
   if (now - last > 33) {
     last = now;
     g.clearRect(0, 0, 420, 90);
-    g.strokeStyle = '#394c30';
+    g.strokeStyle = scopeInk;
     g.lineWidth = 1.5;
     g.beginPath();
     if (audio.ctx) {
@@ -1049,6 +1051,32 @@ function frame(now) {
 }
 render();
 requestAnimationFrame(frame);
+
+// ---------------------------------------------------------------------------
+// Easter egg: the MACHINEDRUM silkscreen above the screen is a (keyboard-reachable) button
+// that flips the LCD phosphor between the classic pale green and the blue of the hardware's
+// "UW" face. Text, the head divider and the bezel glow follow via .display.alt; the scope
+// trace ink follows so the screen reads as one unit. Pure presentation — never saved.
+const brand = $('.screenbrand');
+brand.setAttribute('role', 'button');
+brand.setAttribute('tabindex', '0');
+brand.setAttribute('aria-pressed', 'false');
+brand.title = 'Click to change the screen phosphor';
+function flipPhosphor() {
+  // The toggle class lives on <body>: the followers are in two sections — the LCD (inside
+  // .display) and the step grid (.sequencer) — and body.alt is the ancestor of both.
+  const alt = document.body.classList.toggle('alt');
+  scopeInk = alt ? '#b9c6ff' : '#394c30';
+  brand.setAttribute('aria-pressed', String(alt));
+  status(alt ? 'UW phosphor' : 'Classic phosphor');
+}
+brand.onclick = flipPhosphor;
+brand.onkeydown = (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    flipPhosphor();
+  }
+};
 
 // Jog wheel: drag to rotate. A step fires when the pointer crosses the midpoint between two
 // notch positions (22.5° per track, threshold at ±11.25° of accumulated travel since the last
@@ -1179,9 +1207,13 @@ function midiEmit(type, detail) {
     const bpm = midiClock.tick();
     if (bpm !== null && bpm !== project.bpm && bpm >= 40 && bpm <= 240) setTempo(bpm);
   } else if (type === 'start' || type === 'continue') {
+    // Forget intervals from before the transport (re)started: the median must describe the
+    // run that is beginning, not whatever tempo the last one ended at.
+    midiClock.reset();
     if (!audio.playing) play();
   } else if (type === 'stop') {
     if (audio.playing) stop();
+    midiClock.reset();
   } else if (type === 'program') {
     const p = detail.value & 3; // 1-4 -> 0-3
     if (p !== pattern) {

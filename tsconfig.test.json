@@ -11,5 +11,5 @@
   "compilerOptions": {
     "types": ["node"]
   },
-  "include": ["*.test.mjs"]
+  "include": ["tests/*.test.mjs"]
 }

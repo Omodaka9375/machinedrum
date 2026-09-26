@@ -1,7 +1,7 @@
 // Unit tests for the pure MIDI helpers in src/midi.js (parser, BLE codec, note map, tempo).
 // These functions are navigator-free by design — that's what makes them testable here.
 //
-//   node midi.test.mjs        (also runs as part of `pnpm test`)
+//   node tests/midi.test.mjs        (also runs as part of `pnpm test`)
 
 import {
   parseMidiMessage,
@@ -10,7 +10,7 @@ import {
   velocityScale,
   TempoEstimator,
   BLE_MIDI_SERVICE,
-} from './src/midi.js';
+} from '../src/midi.js';
 
 let passed = 0;
 let failed = 0;
@@ -143,6 +143,122 @@ ok(velocityScale(0) === null, 'velocity 0 is not a playable hit');
 ok(velocityScale(-5) === null, 'negative velocity is null');
 ok(velocityScale(200) === 1, 'oversized velocity clamps to 1');
 
+// ---- Realtime interleaving (transport must survive mid-message clock pulses) ------------
+
+// USB: clock pulse between the note-on status and its data bytes. The clock dispatches at
+// its position, so it lands BEFORE the completed note-on in the event list.
+{
+  const events = parseMidiMessage([0x90, 0xf8, 60, 100]);
+  ok(
+    events.length === 2 &&
+      events[0].type === 'clock' &&
+      events[1].type === 'noteon' &&
+      events[1].note === 60 &&
+      events[1].velocity === 100,
+    'USB: clock inside a note-on does not lose the note',
+    JSON.stringify(events),
+  );
+}
+// USB: clock pulse between the note and its velocity
+{
+  const events = parseMidiMessage([0x90, 60, 0xf8, 100]);
+  ok(
+    events.length === 2 && events[0].type === 'clock' && events[1].type === 'noteon' &&
+      events[1].note === 60 && events[1].velocity === 100,
+    'USB: clock between note and velocity keeps both',
+    JSON.stringify(events),
+  );
+}
+// USB: transport start/stop parse from any position (same positional dispatch order)
+{
+  const events = parseMidiMessage([0x90, 0xfa, 60, 0xfc, 100]);
+  ok(
+    events.length === 3 &&
+      events[0].type === 'start' &&
+      events[1].type === 'stop' &&
+      events[2].type === 'noteon',
+    'USB: start/stop interleave inside a note-on without breaking it',
+    JSON.stringify(events),
+  );
+}
+// USB: running status survives an interleaved realtime byte (spec: realtime never resets it)
+{
+  const events = parseMidiMessage([0x91, 36, 120, 0xf8, 38, 90]);
+  ok(
+    events.length === 3 &&
+      events[0].note === 36 &&
+      events[1].type === 'clock' &&
+      events[2].note === 38 &&
+      events[2].velocity === 90 &&
+      events[2].channel === 1,
+    'USB: running status continues across an interleaved clock',
+    JSON.stringify(events),
+  );
+}
+// USB: a non-realtime status byte still interrupts the message (bend adopted, note dropped)
+{
+  const events = parseMidiMessage([0x90, 60, 0xe0, 0, 64]);
+  ok(events.length === 0, 'USB: channel message interrupted by another status drops cleanly', JSON.stringify(events));
+}
+
+// ---- BLE realtime interleaving ------------------------------------------------------------
+
+// Realtime where a timestamp was expected, trailing the packet (no timestamp byte of its own)
+{
+  const events = parseBlePacket(dv([0x80, 0x81, 0x90, 60, 100, 0xf8]));
+  ok(
+    events.length === 2 &&
+      events[0].type === 'noteon' &&
+      events[0].note === 60 &&
+      events[1].type === 'clock',
+    'BLE: realtime after a complete message parses (no timestamp byte)',
+    JSON.stringify(events),
+  );
+}
+// Clock interleaved at the next message's start position
+{
+  const events = parseBlePacket(dv([0x80, 0x81, 0xf8, 0x82, 0x90, 60, 100]));
+  ok(
+    events.length === 2 && events[0].type === 'clock' && events[1].type === 'noteon' &&
+      events[1].note === 60,
+    'BLE: clock at the timestamp slot dispatches and resyncs',
+    JSON.stringify(events),
+  );
+}
+// Clock inside the note-on data bytes
+{
+  const events = parseBlePacket(dv([0x80, 0x81, 0x90, 0xf8, 60, 100]));
+  ok(
+    events.length === 2 && events[0].type === 'clock' && events[1].type === 'noteon' &&
+      events[1].note === 60 && events[1].velocity === 100,
+    'BLE: clock between note-on status and data keeps both',
+    JSON.stringify(events),
+  );
+}
+// Transport with proper timestamped encoding
+{
+  const start = parseBlePacket(dv([0x80, 0x81, 0xfa]));
+  const stop = parseBlePacket(dv([0x80, 0x81, 0xfc]));
+  ok(
+    start.length === 1 && start[0].type === 'start' && stop.length === 1 && stop[0].type === 'stop',
+    'BLE: timestamped start/stop parse',
+    JSON.stringify([...start, ...stop]),
+  );
+}
+// Running status across an interleaved clock
+{
+  const events = parseBlePacket(dv([0x80, 0x81, 0x90, 60, 100, 0xf8, 0x82, 62, 64]));
+  ok(
+    events.length === 3 &&
+      events[0].note === 60 &&
+      events[1].type === 'clock' &&
+      events[2].note === 62 &&
+      events[2].channel === 0,
+    'BLE: running status continues across an interleaved clock',
+    JSON.stringify(events),
+  );
+}
+
 // ---- TempoEstimator --------------------------------------------------------------------
 
 {
@@ -172,6 +288,19 @@ ok(velocityScale(200) === 1, 'oversized velocity clamps to 1');
   const est = new TempoEstimator(6, () => 100);
   ok(est.tick() === null && est.tick() === null, 'estimate withheld until the window fills');
 }
+{
+  // reset() forgets the window: the next estimate is withheld until it refills, and the
+  // refilled median describes the new clock stream, not the old one.
+  const period = 60000 / 120 / 24;
+  let t = 0;
+  const est = new TempoEstimator(4, () => (t += period));
+  for (let i = 0; i < 6; i++) est.tick();
+  est.reset();
+  ok(est.tick() === null && est.tick() === null, 'reset withholds estimates until the window refills');
+  let estimate = null;
+  for (let i = 0; i < 4; i++) estimate = est.tick();
+  ok(estimate === 120, 'estimate returns once the window has refilled', String(estimate));
+}
 
 // ---- UUID sanity ------------------------------------------------------------------------
 
@@ -179,3 +308,4 @@ ok(BLE_MIDI_SERVICE === '03b80e5a-ede8-4b33-a751-6ce34ec4c700', 'BLE MIDI servic
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
+

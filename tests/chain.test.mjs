@@ -6,7 +6,7 @@
 // is what's tested, not a replica. Byte-for-byte drift guards at the end fail loudly if the
 // regions move or change.
 //
-//   node chain.test.mjs        (also runs as part of `pnpm test`)
+//   node tests/chain.test.mjs        (also runs as part of `pnpm test`)
 
 import { readFile } from 'node:fs/promises';
 

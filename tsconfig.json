@@ -26,8 +26,8 @@
 
   // What this gate covers, and why:
   //
-  //   - Included: files this project owns that stand alone (only node:* imports) — the static
-  //     server and the icon generator — plus vite.config.js, and the src modules that pass strict
+  //   - Included: files this project owns that stand alone (only node:* imports) — the icon
+  //     generator — plus vite.config.js, and the src modules that pass strict
   //     as they stand: the synthesis/model layer (drums.js, lfo.js, fx.js, model.js, which need no
   //     annotations at all) and the two whose DOM usage is small enough to type honestly
   //     (midi.js — Web MIDI plus a declared slice of Web Bluetooth — and info.js, the manual).
@@ -38,7 +38,6 @@
   //   - index.html is not JS and is not affected by checkJs.
   "include": [
     "vite.config.js",
-    "serve.mjs",
     "scripts/make-icons.mjs",
     "src/model.js",
     "src/lfo.js",

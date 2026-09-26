@@ -5,9 +5,9 @@
 // Effects touches (createDelay/createGain/createConvolver + sampleRate/state), with
 // setTargetAtTime/setValueAtTime as no-op recorders.
 //
-//   node fx.test.mjs        (also runs as part of `npm test`)
+//   node tests/fx.test.mjs        (also runs as part of `npm test`)
 
-import { Effects, stepFx, defaultFx, migrateFx } from './src/fx.js';
+import { Effects, stepFx, defaultFx, migrateFx } from '../src/fx.js';
 
 let passed = 0;
 let failed = 0;
@@ -183,3 +183,4 @@ const project = () => {
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
+

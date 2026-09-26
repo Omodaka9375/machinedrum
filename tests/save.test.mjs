@@ -4,7 +4,7 @@
 // Instead this file loads its source, extracts the save/flush/hook region verbatim, and runs it
 // against a stub localStorage — the code under test is character-for-character what ships.
 //
-//   node save.test.mjs        (also runs as part of `npm test`)
+//   node tests/save.test.mjs        (also runs as part of `npm test`)
 
 import { readFile } from 'node:fs/promises';
 

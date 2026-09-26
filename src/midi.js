@@ -67,6 +67,15 @@ const DATA_BYTES = new Map([
   [0xd0, 1],
 ]);
 
+/** System realtime bytes this app acts on. They carry no data and may appear anywhere in a
+ * BLE packet — including inside another message — and must never disturb running status. */
+const REALTIME_TYPES = new Map([
+  [0xf8, 'clock'],
+  [0xfa, 'start'],
+  [0xfb, 'continue'],
+  [0xfc, 'stop'],
+]);
+
 /**
  * Parse one Web MIDI message (`data` from onmidimessage) into events. Handles running status.
  * Returns [] for messages that carry nothing we act on (CC, aftertouch, pitch bend) and for
@@ -82,6 +91,14 @@ export function parseMidiMessage(data) {
   let i = 0;
   while (i < data.length) {
     const byte = data[i];
+    if (byte >= 0xf8) {
+      // System realtime anywhere in the stream: dispatch on the spot WITHOUT disturbing
+      // running status (per spec — realtime carries no data and never resets it).
+      const type = REALTIME_TYPES.get(byte);
+      if (type) events.push({ type });
+      i++;
+      continue;
+    }
     if (byte & 0x80) {
       status = byte;
       i++;
@@ -98,10 +115,8 @@ export function parseMidiMessage(data) {
     const kind = status & 0xf0;
     const channel = status & 0x0f;
     if (kind === 0xf0) {
-      if (status === 0xf8) events.push({ type: 'clock' });
-      else if (status === 0xfa) events.push({ type: 'start' });
-      else if (status === 0xfb) events.push({ type: 'continue' });
-      else if (status === 0xfc) events.push({ type: 'stop' });
+      const type = REALTIME_TYPES.get(status);
+      if (type) events.push({ type });
       status = null; // system messages reset running status
       continue;
     }
@@ -110,8 +125,29 @@ export function parseMidiMessage(data) {
       status = null; // unknown status or truncated message — drop
       continue;
     }
-    const bytes = data.slice(i, i + need);
-    i += need;
+    // Collect the message's data bytes. System realtime (0xF8-0xFF) carries no data and may
+    // legally interleave inside a channel message in a raw byte stream — dispatch it on the
+    // spot and keep collecting; the message and its running status are untouched. Any other
+    // status byte interrupts: adopt it and re-read it from the top of the loop.
+    const bytes = [];
+    let interrupted = false;
+    while (bytes.length < need && i < data.length) {
+      const b = data[i];
+      if (b & 0x80) {
+        if (b >= 0xf8) {
+          const type = REALTIME_TYPES.get(b);
+          if (type) events.push({ type });
+          i++;
+          continue;
+        }
+        status = b;
+        interrupted = true;
+        break;
+      }
+      bytes.push(b);
+      i++;
+    }
+    if (interrupted || bytes.length < need) continue;
     if (kind === 0x90) {
       const [note, velocity] = bytes;
       events.push(
@@ -141,12 +177,25 @@ export function parseBlePacket(dv) {
   if (!dv || dv.byteLength < 3) return [];
   const events = [];
   const byte = (k) => (k < dv.byteLength ? dv.getUint8(k) : undefined);
+  const realtime = (b) => {
+    const type = REALTIME_TYPES.get(b);
+    if (type) events.push({ type });
+  };
   let i = 1; // header consumed
   let status = null;
   while (i < dv.byteLength) {
     const ts = byte(i);
     if (ts === undefined || !(ts & 0x80)) {
       i++; // resync: everything here should start with a timestamp byte
+      continue;
+    }
+    if (ts >= 0xf8) {
+      // Realtime where a timestamp was expected: either a sender omitted the realtime's own
+      // timestamp, or it is a genuine timestamp byte whose 7-bit value lands in 0xF8-0xFF —
+      // indistinguishable on the wire. Dispatching as realtime is the safer misread: one
+      // lost/spurious clock pulse in a median window beats a corrupted note message.
+      realtime(ts);
+      i++;
       continue;
     }
     i++;
@@ -165,10 +214,8 @@ export function parseBlePacket(dv) {
       continue;
     }
     if (kind === 0xf0) {
-      if (status === 0xf8) events.push({ type: 'clock' });
-      else if (status === 0xfa) events.push({ type: 'start' });
-      else if (status === 0xfb) events.push({ type: 'continue' });
-      else if (status === 0xfc) events.push({ type: 'stop' });
+      const type = REALTIME_TYPES.get(status);
+      if (type) events.push({ type });
       status = null;
       continue;
     }
@@ -177,9 +224,31 @@ export function parseBlePacket(dv) {
       status = null;
       continue;
     }
+    // Collect the message's data bytes. System realtime (0xF8-0xFF) carries no data and may
+    // interleave anywhere inside a message — hardware sequencers put clock pulses between
+    // the note-on bytes — so dispatch it on the spot and keep collecting; the message and
+    // its running status are untouched. A timestamp byte can legitimately BE 0xF8-0xFF (its
+    // value is 7 bits + marker), so a realtime byte is only trusted where a data byte is
+    // expected; where a timestamp or status is expected, the original positional reading
+    // applies (a timestamped realtime [ts][F8] dispatches through the status branch below).
     const bytes = [];
-    for (let k = 0; k < need; k++) bytes.push(byte(i + k));
-    i += need;
+    let interrupted = false;
+    while (bytes.length < need && i < dv.byteLength) {
+      const b = byte(i);
+      if (b & 0x80) {
+        if (b >= 0xf8) {
+          realtime(b);
+          i++;
+          continue;
+        }
+        status = b; // a new channel/system status interrupts the message
+        interrupted = true;
+        break;
+      }
+      bytes.push(b);
+      i++;
+    }
+    if (interrupted || bytes.length < need) continue;
     if (kind === 0x90) {
       const [note, velocity] = bytes;
       events.push(
@@ -225,6 +294,12 @@ export class TempoEstimator {
     }
     this.last = t;
     return estimate;
+  }
+  /** Forget the window: the next estimate is withheld until it refills. Call on transport
+   * events, so intervals from before a stop / tempo change cannot pollute the new median. */
+  reset() {
+    this.intervals = [];
+    this.last = null;
   }
 }
 
@@ -277,16 +352,23 @@ export class MidiEngine {
     // Bind the callback to the access object it was registered on: it re-reads the live input /
     // output maps of that same MIDIAccess, and it keeps `access` narrowed for the checker.
     const access = this.access;
+    // (Re)bind every input. statechange fires whenever a port appears or leaves — without this
+    // pass, a USB interface or OS-paired Bluetooth MIDI device plugged in AFTER connect()
+    // would carry notes and transport but never be listened to.
+    const bindInputs = () => {
+      for (const input of access.inputs.values()) {
+        input.onmidimessage = (msg) => {
+          for (const event of parseMidiMessage(msg.data)) this.emit(event.type, event);
+        };
+      }
+    };
     const rebind = () => {
       this.outputs = [...access.outputs.values()];
+      bindInputs();
       this.onStatus('midi', this.connected, `${access.inputs.size} input(s)`);
     };
     this.access.onstatechange = rebind;
-    for (const input of this.access.inputs.values()) {
-      input.onmidimessage = (msg) => {
-        for (const event of parseMidiMessage(msg.data)) this.emit(event.type, event);
-      };
-    }
+    bindInputs();
     return this.access.inputs.size;
   }
   disconnect() {

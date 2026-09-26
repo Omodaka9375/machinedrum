@@ -1,8 +1,8 @@
 // Vite + PWA configuration. `npm run dev` / `build` / `preview`.
 //
 // The app ships as plain ES modules with no framework, so this file only configures the PWA:
-// web app manifest, service worker precache, and icons. The hand-written serve.mjs stays useful
-// for a no-install static server, but `npm run preview` is what serves the built output.
+// web app manifest, service worker precache, and icons. `npm run preview` serves the built
+// output; `npm run dev` serves the sources.
 
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -28,6 +28,7 @@ export default defineConfig({
       // Files referenced by the manifest that are not emitted by Rollup.
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
 
+      manifestFilename: 'manifest.json',
       manifest: {
         // Relative so the manifest stays valid under the repo subpath on GitHub Pages. Vite
         // rewrites these against `base` when it emits manifest.webmanifest.
@@ -65,7 +66,7 @@ export default defineConfig({
       workbox: {
         // Everything is local and immutable-per-build, so precaching the whole output is the
         // correct offline strategy: no runtime routing, no network passes.
-        globPatterns: ['**/*.{css,html,js,svg,png,ttf,woff2,webmanifest}'],
+        globPatterns: ['**/*.{css,html,js,svg,png,ttf,woff2,json}'],
         // index.html is already precached; a navigateFallback would fight the built asset graph.
         navigateFallback: null,
         cleanupOutdatedCaches: true,
@@ -85,8 +86,7 @@ export default defineConfig({
   },
 
   preview: {
-    // 4173 is serve.mjs's port (the no-install server). Keeping preview off it means both
-    // can run side by side instead of fighting over the port.
+    // 4173 is left free for anything else the developer may run; preview claims 4174.
     port: 4174,
     // Vite binds ::1 only when given no host, and 127.0.0.1 connections then get refused.
     host: true, // dual-stack: both localhost stacks answer

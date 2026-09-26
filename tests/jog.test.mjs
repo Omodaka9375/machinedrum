@@ -4,7 +4,7 @@
 // pointer events, so the shipped threshold math is what's tested — not a replica. A byte-for-byte
 // drift guard at the end fails loudly if the region moves or changes.
 //
-//   node jog.test.mjs        (also runs as part of `npm test`)
+//   node tests/jog.test.mjs        (also runs as part of `npm test`)
 
 import { readFile } from 'node:fs/promises';
 

@@ -5,7 +5,7 @@
 //   2. #steps grid: over a held step, wheel-up/down writes a pitch parameter lock
 // Byte-for-byte drift guards fail loudly if either region moves or changes.
 //
-//   node wheel.test.mjs        (also runs as part of `pnpm test`)
+//   node tests/wheel.test.mjs        (also runs as part of `pnpm test`)
 
 import { readFile } from 'node:fs/promises';
 

@@ -11,10 +11,10 @@
 // how a save reaches the app (JSON.parse of a string) — and the result is a loose bag the test is
 // free to corrupt.
 //
-//   node shape.test.mjs        (also runs as part of `npm test`)
+//   node tests/shape.test.mjs        (also runs as part of `npm test`)
 
 import { readFile } from 'node:fs/promises';
-import { demo, validShapes } from './src/model.js';
+import { demo, validShapes } from '../src/model.js';
 
 let passed = 0;
 let failed = 0;

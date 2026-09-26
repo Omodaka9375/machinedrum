@@ -270,6 +270,59 @@ button:disabled {
   inset: 0;
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, #1a30120a 3px);
 }
+/* Easter egg: clicking the MACHINEDRUM silkscreen above the screen flips the whole instrument
+   between the classic phosphor face (pale green LCD, orange/red grid accents) and the blue
+   "UW" unit. The toggle class lives on <body>, because the followers live in TWO sections:
+   the LCD (inside .display) and the step grid (the separate .sequencer section). Text keeps
+   the classic dark ink on the blue face; the scope trace ink follows in app.js. */
+body.alt .display {
+  background: #5071f1;
+  box-shadow:
+    inset 1px 2px 9px #1630a0aa,
+    0 0 2px 1px #9db4ff66;
+}
+body.alt .lcdhead {
+  border-bottom-color: #3351c4;
+}
+/* The active LCD-page chip keeps its dark-chip idiom, recolored for blue. */
+body.alt .display .lcdPages button.active {
+  background: #0e1b47;
+  color: #b9c6ff;
+}
+/* The step grid follows the face: LED, playhead, selection cursor, lock diamond and the
+   flash/pagination accents swap their orange/red family for the blue family. Every rule is
+   prefixed body.alt, which outranks the base rules AND panel.css's later .step.held/.padHit. */
+body.alt .step:before {
+  background: #3d4a85;
+}
+body.alt .step.on:before {
+  background: #8fa8ff;
+  box-shadow: 0 0 5px #3351c4;
+}
+body.alt .step.selected,
+body.alt .step.held {
+  outline-color: #7d97ff;
+}
+body.alt .step.current {
+  background: #2c49c4;
+  box-shadow:
+    inset 0 2px 2px #9db4ff,
+    0 3px 0 #16265e;
+}
+body.alt .step.locked:after {
+  background: #b9c6ff;
+}
+body.alt .step.padHit {
+  background: #3f63e8;
+  box-shadow: 0 0 8px #5071f180;
+}
+body.alt .stepPages button.active {
+  background: #2c49c4;
+  color: #fff;
+}
+body.alt .step.keyPage {
+  border-bottom-color: #3351c4;
+}
 .lcdhead,
 .lcdfoot {
   display: flex;
