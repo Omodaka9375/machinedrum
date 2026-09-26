@@ -167,7 +167,7 @@ header b {
      MUTE/CHOKE share a row at the bottom, so the bank takes the full width and the wheel
      reclaims the strip's share. minmax(0,1fr) not 1fr so nothing inside can push past the cell. */
   grid-template-columns: minmax(0, 1fr);
-  padding: 25px 17px 15px 12px;
+  padding: 5px 17px 15px 12px;
   border-right: 1px solid #89917f;
   gap: 0;
 }
