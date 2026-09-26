@@ -179,9 +179,10 @@ header b {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 90px;
+  gap: 70px;
   margin: 24px 0 17px;
   min-width: 0;
+  padding-left: 8px;
 }
 /* Outer spacing moved to .jogrow. Auto left/right margins here would defeat it outright — auto
    margins on a flex item are resolved before justify-content gets a say. */
@@ -349,6 +350,7 @@ header b {
   flex: 1;
   margin: 0;
   font-size: 8px;
+  padding-right: 8px;
 }
 .displaycase {
   display: flex;
@@ -508,7 +510,7 @@ canvas {
 }
 .datafoot {
   margin: auto 0 0;
-  padding: 15px 20px;
+  padding: 15px 35px;
   /* Grid, not the base flex space-between: the caption text (SYNTHESIS / EFFECTS / LFO) has a
      different width on every edit page, and space-between seats the middle child off-center
      by half the width difference — the SWING / QUANT toggles visibly jumped on each page
@@ -593,7 +595,7 @@ canvas {
   padding-top: 7px;
   font-size: 10px;
   text-align: center;
-  margin: 0 0 12px;
+  margin: 0 0 0px;
 }
 .confirmkeys {
   display: flex;
@@ -634,11 +636,13 @@ canvas {
 }
 .performance {
   display: grid;
-  /* KIT first, TRANSPORT second — widths follow the swapped order. */
-  grid-template-columns: 42% 58%;
+  /* TRANSPORT first, KIT second — widths follow the order. */
+  grid-template-columns: 58% 42%;
 }
 .transport {
   padding: 20px 20px 16px;
+  /* Left column now — the column separator rides its right edge. */
+  border-right: 1px solid #89917f;
   display: grid;
   /* Title row, then everything the keys need below it. Same section pattern as .navigation:
      the h2s of every .middle section sit on one shared line (the 30px top padding), and the
@@ -683,11 +687,8 @@ canvas {
   column-gap: 9px;
   row-gap: 8px;
 }
-/* Top padding matches .transport's so the title rows start on the same line.
-   Left column now, so the column separator rides its right edge. */
-.kitactions {
-  border-right: 1px solid #89917f;
-}
+/* Top padding matches .transport's so the title rows start on the same line. */
+/* The column separator always rides the LEFT member's right edge — TRANSPORT now. */
 .kitactions h2 {
   /* KIT labels the key block, mirroring TRANSPORT / PATTERN SELECTION. No `order` — the h2
      is the first child in the DOM and the ONLY other grid item is .kitkeys (order 0), so a
