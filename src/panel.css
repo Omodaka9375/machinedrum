@@ -690,7 +690,7 @@ canvas {
   grid-column: 1/-1;
   text-align: center;
   font-size: 10px;
-  margin: 0 0 13px;
+  margin: 0 0 0px;
 }
 .kitactions button {
   order: 2;
