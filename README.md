@@ -101,3 +101,7 @@ The test suites cover the pure modules directly (parsing, scheduling shapes, mig
 ## Install it as an app
 
 Chrome and Edge offer the install icon right in the address bar (or ⋮ → *Cast, save, and share → Install page as app*). Installed, MACHINEDRUM opens in its own window, keeps working offline, and survives a wiped cache — the service worker precaches every asset.
+
+## License
+
+Released under the [MIT License](LICENSE). Built as a study of the classic hardware — an original tribute, not an emulation. All synthesis, sequencing and UI code in this repository is original work.
