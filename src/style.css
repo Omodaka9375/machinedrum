@@ -1276,7 +1276,9 @@ body {
 }
 .sitefoot {
   display: flex;
-  justify-content: space-between;
+  /* Single centered link now (the copyright line was dropped): the rule line still spans
+     the page, the link sits in its middle. */
+  justify-content: center;
   align-items: baseline;
   gap: 14px;
   /* body is a flex row (the centering layout): this must not shrink, and it owns the
