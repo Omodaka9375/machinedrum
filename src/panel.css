@@ -547,8 +547,8 @@ canvas {
   margin-bottom: 16px;
 }
 #patterns {
-  justify-content: space-between;
-  gap: 10px;
+  /* 4x2: the grid sizing lives in style.css; here only the panel spacing. */
+  gap: 8px 10px;
 }
 #patterns button {
   width: 100%;
@@ -670,35 +670,45 @@ canvas {
 .kitactions {
   padding: 20px 15px 16px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  /* Mirrors .transport: title row fixed at the top, buttons centered in the remaining height
-     (align-self on the buttons) so every .middle h2 sits on the same line. NO row gap:
-     the h2's 13px margin-bottom is the spacing, and any extra gap here shifts the centered
-     buttons down by half of it — .transport has no gap, so neither may this. */
+  /* Title row + ONE controls row holding the .kitkeys wrapper — the exact .transport /
+     .transportkeys architecture, so the h2 sits on the shared .middle title line and the
+     2x2 key block self-centers as a unit when a chain grows the row. */
   grid-template-rows: auto 1fr;
-  /* Column gap only (row-gap 0): a row gap would push the centered button row down by
-     half its height — .transport has none. The h2's 13px margin-bottom is the row spacing. */
+}
+.kitkeys {
+  align-self: center;
+  display: grid;
+  /* STORE/RELOAD row, DOWNLOAD/UPLOAD row. */
+  grid-template-columns: 1fr 1fr;
   column-gap: 9px;
-  /* Top padding matches .transport's so the title rows start on the same line.
-     Left column now, so the column separator rides its right edge. */
+  row-gap: 8px;
+}
+/* Top padding matches .transport's so the title rows start on the same line.
+   Left column now, so the column separator rides its right edge. */
+.kitactions {
   border-right: 1px solid #89917f;
 }
 .kitactions h2 {
-  /* KIT labels the STORE/RELOAD row above the buttons, mirroring TRANSPORT / PATTERN
-     SELECTION. order: 1 paints the heading first in the grid despite following in the DOM. */
-  order: 1;
+  /* KIT labels the key block, mirroring TRANSPORT / PATTERN SELECTION. No `order` — the h2
+     is the first child in the DOM and the ONLY other grid item is .kitkeys (order 0), so a
+     nonzero order here would paint the title BELOW the keys. */
   grid-column: 1/-1;
   text-align: center;
   font-size: 10px;
   margin: 0 0 0px;
 }
 .kitactions button {
-  order: 2;
-  align-self: center;
   font-size: 8px;
   padding: 8px 3px;
   width: 100%;
   height: 35px;
+}
+.kitactions #downloadKit,
+.kitactions #uploadKit {
+  /* The file-transfer pair sits in the second row of the 2x2; same sizing, slightly
+     dimmer so STORE/RELOAD stay the primary actions. */
+  font-size: 7px;
+  letter-spacing: 0.2px;
 }
 .sequencer {
   padding: 18px 18px 0;

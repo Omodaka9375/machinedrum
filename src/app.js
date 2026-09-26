@@ -6,9 +6,11 @@ import {
   labels,
   soundInfo,
   demo,
+  emptyPattern,
   resolved,
   storeKit,
   reloadKit,
+  validKit,
   recordParameter,
   validShapes,
 } from './model.js';
@@ -21,6 +23,8 @@ try {
   const saved = JSON.parse(localStorage.getItem(key));
   if (saved?.version === 1 && validShapes(saved)) project = saved;
 } catch {}
+// A 4-slot save from an older build adopts the new 8-slot layout: A–D as saved, E–H blank.
+if (project.patterns.length === 4) project.patterns.push(emptyPattern(), emptyPattern(), emptyPattern(), emptyPattern());
 migrateFx(project);
 migrateLfo(project);
 project.tracks.forEach((t, i) => {
@@ -59,7 +63,7 @@ const audio = new Audio(
       );
     $('#lcdStep').textContent = s < 0 ? '— / 16' : `${String(s + 1).padStart(2, '0')} / 16`;
     $('#lcdState').textContent = audio.playing
-      ? `${recording ? 'REC' : 'PLAY'} ${'ABCD'[p]}01`
+      ? `${recording ? 'REC' : 'PLAY'} ${'ABCDEFGH'[p]}01`
       : recording
         ? 'REC ARMED'
         : 'READY';
@@ -120,7 +124,7 @@ function hit(index, velocity) {
   if (recording && audio.playing && !audio.counting) {
     const pos = audio.liveHit(index, velocity);
     save();
-    status(`Recorded ${names[index]} /${'ABCD'[pos.pattern]}${String(pos.step + 1).padStart(2, '0')}`);
+    status(`Recorded ${names[index]} /${'ABCDEFGH'[pos.pattern]}${String(pos.step + 1).padStart(2, '0')}`);
   } else
     audio
       .audition(current(), isLocked() ? selected() : { locks: {} }, velocity)
@@ -149,7 +153,7 @@ $('#steps').innerHTML = Array.from(
   (_, i) =>
     `<button class="step" data-step="${i}"><small>${String(i + 1).padStart(2, '0')} <span>${names[i]}</span></small></button>`,
 ).join('');
-$('#patterns').innerHTML = ['A', 'B', 'C', 'D']
+$('#patterns').innerHTML = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
   .map(
     (n, i) =>
       `<button class="patcol${i}" data-pattern="${i}" aria-label="Pattern ${n}" aria-keyshortcuts="Control+Shift+${i + 1}" title="Control+Shift+${i + 1}: Pattern ${n} · Shift+click: add to the pattern chain">${n}<span class="chainmult" hidden></span></button>`,
@@ -186,7 +190,7 @@ function renderPatterns() {
     mult.hidden = times < 2;
     mult.textContent = 'x' + times;
     b.setAttribute('aria-pressed', i === pattern);
-    b.setAttribute('aria-label', `Pattern ${'ABCD'[i]}${times ? ` · in chain x${times}` : ''}`);
+    b.setAttribute('aria-label', `Pattern ${'ABCDEFGH'[i]}${times ? ` · in chain x${times}` : ''}`);
   });
   $('#chain').hidden = chain.length === 0;
   document
@@ -281,7 +285,7 @@ function render() {
     .join('');
   $('#lcdName').textContent =
     `${names[track]} / ${info?.name.split(' / ')[1] ?? current().engine.toUpperCase()}`;
-  $('#lcdPattern').textContent = `${'ABCD'[pattern]}01 · TR${String(track + 1).padStart(2, '0')}`;
+  $('#lcdPattern').textContent = `${'ABCDEFGH'[pattern]}01 · TR${String(track + 1).padStart(2, '0')}`;
   $('#lcdEdit').textContent = isLocked()
     ? `LOCK / STEP ${String(step + 1).padStart(2, '0')}`
     : recording
@@ -476,7 +480,7 @@ $('#steps').oncontextmenu = (e) => {
 // CLR and by a factory reset, kept when playback stops.
 function renderChain() {
   $('#chainSlots').innerHTML = chain
-    .map((p) => `<span class="chainslot patcol${p}">${'ABCD'[p]}</span>`)
+    .map((p) => `<span class="chainslot patcol${p}">${'ABCDEFGH'[p]}</span>`)
     .join('');
 }
 // Consulted by the scheduler at every bar boundary (audio.js, step 0). Returns the pattern for
@@ -500,7 +504,7 @@ $('#patterns').onclick = (e) => {
     if (!audio.playing) chainPlaying = -1;
     renderChain();
     renderPatterns();
-    status(`Chain ${chain.map((p) => 'ABCD'[p]).join(' ')} · loops while playing`);
+    status(`Chain ${chain.map((p) => 'ABCDEFGH'[p]).join(' ')} · loops while playing`);
     return;
   }
   pattern = +b.dataset.pattern;
@@ -511,13 +515,13 @@ $('#patterns').onclick = (e) => {
   if (audio.playing && chain.length) {
     document.querySelectorAll('.current').forEach((b) => b.classList.remove('current'));
     render();
-    status('Editing Pattern ' + 'ABCD'[pattern] + ' · the chain keeps playing');
+    status('Editing Pattern ' + 'ABCDEFGH'[pattern] + ' · the chain keeps playing');
     return;
   }
   if (audio.playing) audio.pending = pattern;
   document.querySelectorAll('.current').forEach((b) => b.classList.remove('current'));
   render();
-  status(audio.playing ? 'Pattern will switch at the next bar' : 'Editing Pattern ' + 'ABCD'[pattern]);
+  status(audio.playing ? 'Pattern will switch at the next bar' : 'Editing Pattern ' + 'ABCDEFGH'[pattern]);
 };
 $('#chainClear').onclick = async () => {
   if (!chain.length) return;
@@ -728,7 +732,7 @@ async function play() {
     $('#play').setAttribute('aria-label', 'Pause');
     status(
       chain.length
-        ? `Playing chain ${chain.map((p) => 'ABCD'[p]).join(' ')} · Shift+click a pattern button to extend it`
+        ? `Playing chain ${chain.map((p) => 'ABCDEFGH'[p]).join(' ')} · Shift+click a pattern button to extend it`
         : 'Playing · turn a knob, or select a step to lock it',
     );
   } catch {
@@ -759,7 +763,7 @@ document.addEventListener('keydown', (e) => {
     e.target.closest('input,select,textarea,[contenteditable="true"]')
   )
     return;
-  const patternKey = /^(?:Digit|Numpad)([1-4])$/.exec(e.code);
+  const patternKey = /^(?:Digit|Numpad)([1-8])$/.exec(e.code);
   if (e.ctrlKey && e.shiftKey && !e.altKey && patternKey) {
     e.preventDefault();
     if (!e.repeat) document.querySelector('[data-pattern="' + (+patternKey[1] - 1) + '"]').click();
@@ -837,6 +841,74 @@ $('#saveKit').onclick = () => {
   save();
   status('Kit stored. RELOAD brings it back, even after a refresh.');
 };
+// DOWNLOAD / UPLOAD: the kit as a small JSON file — the browser's own save/open dialogs, no
+// server. DOWNLOAD snapshots the CURRENT sounds + FX (like STORE would capture) into a file
+// named after the kit's first track, so two kits on disk stay distinguishable. UPLOAD applies
+// a file after the same validShapes-style skeleton check the localStorage restore uses — a
+// malformed file is refused with a status line, never a broken panel.
+$('#downloadKit').onclick = () => {
+  const payload = {
+    kind: 'machinedrum-kit',
+    version: 1,
+    tracks: project.tracks.map(({ engine, choke, p, send, lfo, pan }) => ({
+      engine,
+      choke: choke ?? 0,
+      p: structuredClone(p),
+      send: structuredClone(send ?? { delay: 0, reverb: 0 }),
+      lfo: structuredClone(lfo),
+      pan: pan ?? 0,
+    })),
+    fx: structuredClone(project.fx),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `machinedrum-kit-${names[0].toLowerCase()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  status('Kit downloaded — UPLOAD on any machine (or after a cache wipe) restores it');
+};
+$('#uploadKit').onclick = () => $('#kitFile').click();
+$('#kitFile').onchange = async (e) => {
+  const file = e.target.files?.[0];
+  e.target.value = ''; // same file can be re-picked after a fix
+  if (!file) return;
+  try {
+    const kit = JSON.parse(await file.text());
+    if (kit?.kind !== 'machinedrum-kit' || !validKit(kit)) {
+      status('Not a MACHINEDRUM kit file — nothing changed');
+      return;
+    }
+    if (
+      !(await confirmPattern(
+        `Load kit from "${file.name}"?\nAll 16 sounds and the FX are replaced; patterns, locks and mutes are kept.`,
+      ))
+    )
+      return;
+    gesture = null;
+    Object.keys(recordedValues).forEach((k) => delete recordedValues[k]);
+    kit.tracks.forEach((sound, i) =>
+      Object.assign(project.tracks[i], structuredClone(sound), {
+        // backfill optional fields the file may predate
+        choke: sound.choke ?? 0,
+        send: sound.send ?? { delay: 0, reverb: 0 },
+        lfo: sound.lfo ?? { wave: 0, target: 0, speed: 35, depth: 0, phase: 0, sync: 0, reset: 0, on: 1 },
+        pan: sound.pan ?? 0,
+      }),
+    );
+    if (kit.fx) project.fx = structuredClone(kit.fx);
+    storeKit(project); // the uploaded kit becomes the RELOAD baseline too
+    migrateFx(project);
+    migrateLfo(project);
+    if (audio.ctx) audio.effects.update(project);
+    save();
+    render();
+    status(`Kit loaded from ${file.name} · STORE baseline updated`);
+  } catch {
+    status('Kit file could not be read — nothing changed');
+  }
+};
 $('#reloadKit').onclick = () => {
   gesture = null;
   Object.keys(recordedValues).forEach((k) => delete recordedValues[k]);
@@ -852,7 +924,7 @@ $('#demo').onclick = async () => {
   // Same styled confirm dialog as the pattern actions — no native browser popup.
   if (
     !(await confirmPattern(
-      'Factory reset: load the four demo patterns and default sounds?\nYour current edits will be replaced.',
+      'Factory reset: load the eight demo patterns and default sounds?\nYour current edits will be replaced.',
     ))
   )
     return;
@@ -1297,12 +1369,12 @@ function midiEmit(type, detail) {
     if (audio.playing) stop();
     midiClock.reset();
   } else if (type === 'program') {
-    const p = detail.value & 3; // 1-4 -> 0-3
+    const p = detail.value & 7; // 1-8 -> 0-7
     if (p !== pattern) {
       pattern = p;
       if (audio.playing) audio.pending = p;
       render();
-      status(`Pattern ${'ABCD'[pattern]} (MIDI program change)`);
+      status(`Pattern ${'ABCDEFGH'[pattern]} (MIDI program change)`);
     }
   }
 }
@@ -1422,7 +1494,7 @@ $('#clearPattern').onclick = async () => {
   const target = pattern;
   if (
     !(await confirmPattern(
-      `Clear all notes and parameter locks in Pattern ${'ABCD'[target]}?\nPlayback will stop. Sounds, other patterns and Kit are kept.`,
+      `Clear all notes and parameter locks in Pattern ${'ABCDEFGH'[target]}?\nPlayback will stop. Sounds, other patterns and Kit are kept.`,
     ))
   )
     return;
@@ -1438,13 +1510,13 @@ $('#clearPattern').onclick = async () => {
   save();
   render();
   $('#undoClear').disabled = false;
-  status(`Pattern ${'ABCD'[target]} cleared. Undo available until refresh.`);
+  status(`Pattern ${'ABCDEFGH'[target]} cleared. Undo available until refresh.`);
 };
 $('#undoClear').onclick = async () => {
   if (!clearedPattern) return;
   if (
     !(await confirmPattern(
-      `Restore Pattern ${'ABCD'[clearedPattern.index]} before clearing? New edits in this pattern will be replaced.`,
+      `Restore Pattern ${'ABCDEFGH'[clearedPattern.index]} before clearing? New edits in this pattern will be replaced.`,
     ))
   )
     return;
@@ -1526,7 +1598,7 @@ $('#randomPattern').onclick = () => {
   if (!placed) seedAll(true);
   save();
   render();
-  status(placed ? `Pattern ${'ABCD'[target]} randomized` : 'Nothing to randomize');
+  status(placed ? `Pattern ${'ABCDEFGH'[target]} randomized` : 'Nothing to randomize');
 };
 // Tiny deterministic PRNG - same seed, same pattern; seed varies per click and per pattern slot.
 function mulberry32(a) {
@@ -1555,7 +1627,7 @@ $('#patterns').addEventListener('contextmenu', (e) => {
   patternMenu = menu;
   menu.className = 'patternMenu';
   menu.setAttribute('role', 'menu');
-  menu.setAttribute('aria-label', 'Pattern ' + 'ABCD'[target]);
+  menu.setAttribute('aria-label', 'Pattern ' + 'ABCDEFGH'[target]);
   const copy = document.createElement('button'),
     paste = document.createElement('button');
   copy.textContent = 'COPY PATTERN';
@@ -1572,7 +1644,7 @@ $('#patterns').addEventListener('contextmenu', (e) => {
     patternClipboard = structuredClone(project.patterns[target]);
     closePatternMenu();
     button.focus();
-    status('Pattern ' + 'ABCD'[target] + ' copied.');
+    status('Pattern ' + 'ABCDEFGH'[target] + ' copied.');
   };
   paste.onclick = async () => {
     const data = structuredClone(patternClipboard);
@@ -1581,14 +1653,14 @@ $('#patterns').addEventListener('contextmenu', (e) => {
       project.patterns[target].some((t) =>
         t.some((s) => s.on || Object.keys(s.locks).length || Object.keys(s.fxLocks ?? {}).length),
       ) &&
-      !(await confirmPattern('Replace Pattern ' + 'ABCD'[target] + ' with the copied pattern?'))
+      !(await confirmPattern('Replace Pattern ' + 'ABCDEFGH'[target] + ' with the copied pattern?'))
     )
       return;
     project.patterns[target] = data;
     save();
     render();
     button.focus();
-    status('Pattern ' + 'ABCD'[target] + ' pasted.');
+    status('Pattern ' + 'ABCDEFGH'[target] + ' pasted.');
   };
   menu.onkeydown = (e) => {
     if (e.key === 'Escape') {
@@ -1614,7 +1686,7 @@ document.addEventListener('scroll', closePatternMenu, true);
 $('#copyPattern').onclick = () => {
   patternClipboard = structuredClone(project.patterns[pattern]);
   $('#pastePattern').disabled = false;
-  status(`Pattern ${'ABCD'[pattern]} copied.`);
+  status(`Pattern ${'ABCDEFGH'[pattern]} copied.`);
 };
 $('#pastePattern').onclick = async () => {
   if (!patternClipboard) return;
@@ -1624,13 +1696,13 @@ $('#pastePattern').onclick = async () => {
     project.patterns[target].some((t) =>
       t.some((s) => s.on || Object.keys(s.locks).length || Object.keys(s.fxLocks ?? {}).length),
     ) &&
-    !(await confirmPattern(`Replace Pattern ${'ABCD'[target]} with the copied pattern?`))
+    !(await confirmPattern(`Replace Pattern ${'ABCDEFGH'[target]} with the copied pattern?`))
   )
     return;
   project.patterns[target] = data;
   save();
   render();
-  status(`Pattern ${'ABCD'[target]} pasted.`);
+  status(`Pattern ${'ABCDEFGH'[target]} pasted.`);
 };
 
 function setTempo(value) {

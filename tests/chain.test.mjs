@@ -69,7 +69,7 @@ function makeEl() {
   };
 }
 
-const pats = Array.from({ length: 4 }, makeEl);
+const pats = Array.from({ length: 8 }, makeEl);
 let chips = [];
 const currents = [makeEl(), makeEl()];
 const chainEl = makeEl();
@@ -157,6 +157,7 @@ runRenderPatterns(audioShim(true), [0, 1, 0], 0, 0, 0);
 ok(pats[0].set.has('chained'), 'A in chain x2 gets the chained class');
 ok(pats[1].set.has('chained'), 'B in chain gets the chained class');
 ok(!pats[2].set.has('chained') && !pats[3].set.has('chained'), 'C and D not chained');
+ok(!pats[4].set.has('chained') && !pats[7].set.has('chained'), 'E and H not chained');
 ok(pats[0].mult.hidden === false && pats[0].mult.textContent === 'x2', 'A badge shows x2', `x=${pats[0].mult.textContent}`);
 ok(pats[1].mult.hidden === true, 'B badge hidden at x1');
 ok(chainEl.hidden === false, 'chain strip visible when the chain is non-empty');

@@ -14,7 +14,7 @@
 //   node tests/shape.test.mjs        (also runs as part of `npm test`)
 
 import { readFile } from 'node:fs/promises';
-import { demo, validShapes } from '../src/model.js';
+import { demo, validShapes, validKit } from '../src/model.js';
 
 let passed = 0;
 let failed = 0;
@@ -75,8 +75,23 @@ ok(validShapes(saved()) === true, 'demo accepted after the JSON round-trip it ta
 }
 {
   const p = saved();
-  p.patterns.length = 3; // the UI assumes four pattern slots
-  ok(validShapes(p) === false, 'fewer than four patterns rejected');
+  p.patterns.length = 3; // the UI assumes eight pattern slots
+  ok(validShapes(p) === false, 'fewer than eight patterns rejected');
+}
+{
+  const p = saved();
+  p.patterns.length = 4; // a 4-slot save must NOT pass the 8-slot guard directly
+  ok(validShapes(p) === false, 'four-pattern legacy save rejected by the guard (app.js pads it)');
+}
+{
+  const p = saved();
+  // The app-side adoption path: a legacy 4-slot save is padded with four empty patterns.
+  const appSrc = await readFile('src/app.js', 'utf8');
+  ok(
+    appSrc.includes('project.patterns.length === 4') && appSrc.includes('emptyPattern'),
+    'app.js pads a legacy 4-pattern save to 8 with empty patterns',
+  );
+  ok(p.patterns.length === 8, 'fixture itself has eight patterns');
 }
 {
   const p = saved();
@@ -134,6 +149,80 @@ for (const [label, value] of [
   p.somethingNew = { hello: 'from a later build' };
   ok(validShapes(p) === true, 'unrecognised extra field tolerated (forward compatible)');
 }
+
+// ---- the kit-file guard (DOWNLOAD / UPLOAD) -------------------------------------------------
+
+/** A kit exactly as the DOWNLOAD handler builds it from a factory project. */
+const kitFile = () => {
+  const p = demo();
+  return {
+    kind: 'machinedrum-kit',
+    version: 1,
+    tracks: p.tracks.map(
+      (
+        /** @type {{ engine: string, choke?: number, p: Record<string, number>, send?: { delay: number, reverb: number }, lfo?: object, pan?: number }} */ t,
+      ) => {
+        const { engine, choke, p: prm, send, lfo, pan } = t;
+        return {
+          engine,
+          choke: choke ?? 0,
+          p: JSON.parse(JSON.stringify(prm)),
+          send: JSON.parse(JSON.stringify(send ?? { delay: 0, reverb: 0 })),
+          ...(lfo ? { lfo: JSON.parse(JSON.stringify(lfo)) } : {}),
+          pan: pan ?? 0,
+        };
+      },
+    ),
+    // demo() ships no fx either (migrateFx adds it at boot) — same minimal-case mirroring.
+    ...(p.fx ? { fx: JSON.parse(JSON.stringify(p.fx)) } : {}),
+  };
+};
+ok(validKit(kitFile()) === true, 'kit file accepted (factory round-trip)');
+{
+  const k = kitFile();
+  k.tracks[9].engine = 'analog';
+  ok(validKit(k) === false, 'kit with an unknown engine rejected');
+}
+{
+  const k = kitFile();
+  k.tracks.length = 15;
+  ok(validKit(k) === false, 'kit with fifteen tracks rejected');
+}
+{
+  const k = kitFile();
+  delete k.tracks[3].p.pitch;
+  ok(validKit(k) === false, 'kit track missing a parameter rejected');
+}
+{
+  const k = kitFile();
+  k.tracks[3].p.drive = 'hot';
+  ok(validKit(k) === false, 'kit with a non-numeric parameter rejected');
+}
+{
+  const k = kitFile();
+  k.tracks[3].send = 'nope';
+  ok(validKit(k) === false, 'kit with a malformed send rejected');
+}
+{
+  const k = kitFile();
+  k.tracks[3].pan = NaN;
+  ok(validKit(k) === false, 'kit with a NaN pan rejected');
+}
+{
+  const k = kitFile();
+  const t = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (k.tracks[3]));
+  delete t.send;
+  delete t.lfo;
+  delete t.pan;
+  delete t.choke;
+  ok(validKit(k) === true, 'kit without optional fields accepted (they are backfilled on apply)');
+}
+{
+  const k = kitFile();
+  k.tracks[3].lfo = [];
+  ok(validKit(k) === false, 'kit with an array where lfo should be rejected');
+}
+ok(validKit(null) === false && validKit('x') === false && validKit([]) === false, 'non-object kits rejected');
 
 // ---- the app actually consults the guard -------------------------------------------------------
 

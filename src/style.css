@@ -11,6 +11,12 @@
   --pat-b: #4f9db3;
   --pat-c: #b0568b;
   --pat-d: #7ba05a;
+  /* E–H extend the identity palette in the same weight — distinct hues, similar
+     luminance, none reading as "more important" than another. */
+  --pat-e: #c47a3a;
+  --pat-f: #6a8ec4;
+  --pat-g: #a05bc4;
+  --pat-h: #4fa08a;
 }
 * {
   box-sizing: border-box;
@@ -546,11 +552,13 @@ body.alt .knobcell.selected .knob {
   margin-bottom: 8px;
 }
 #patterns {
-  display: flex;
+  display: grid;
+  /* Eight slots: two rows of four, matching the A–D / E–H split the keyboard uses. */
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 #patterns button {
-  width: 42px;
+  width: 100%;
   padding: 8px;
 }
 #patterns button.pending {
@@ -591,6 +599,18 @@ body.alt .knobcell.selected .knob {
 #patterns button.patcol3.chained {
   outline-color: var(--pat-d);
 }
+#patterns button.patcol4.chained {
+  outline-color: var(--pat-e);
+}
+#patterns button.patcol5.chained {
+  outline-color: var(--pat-f);
+}
+#patterns button.patcol6.chained {
+  outline-color: var(--pat-g);
+}
+#patterns button.patcol7.chained {
+  outline-color: var(--pat-h);
+}
 #patterns button.patcol0.active {
   background: linear-gradient(#d8a13c, #a8741e);
   box-shadow:
@@ -618,6 +638,34 @@ body.alt .knobcell.selected .knob {
     inset 0 2px 1px #b1cf92,
     0 3px 0 #374b25;
   color: #1c2610;
+}
+#patterns button.patcol4.active {
+  background: linear-gradient(#c47a3a, #9c5a24);
+  box-shadow:
+    inset 0 2px 1px #e4a76b,
+    0 3px 0 #5e3512;
+  color: #2a1a08;
+}
+#patterns button.patcol5.active {
+  background: linear-gradient(#6a8ec4, #47679c);
+  box-shadow:
+    inset 0 2px 1px #a3b9e0,
+    0 3px 0 #2b3f66;
+  color: #101a2a;
+}
+#patterns button.patcol6.active {
+  background: linear-gradient(#a05bc4, #7a3f9c);
+  box-shadow:
+    inset 0 2px 1px #c893e0,
+    0 3px 0 #4a2560;
+  color: #1e1028;
+}
+#patterns button.patcol7.active {
+  background: linear-gradient(#4fa08a, #367a68);
+  box-shadow:
+    inset 0 2px 1px #8fc9b8,
+    0 3px 0 #1f4a3e;
+  color: #0a201a;
 }
 #chain {
   display: flex;
@@ -663,6 +711,18 @@ body.alt .knobcell.selected .knob {
 }
 .chainslot.patcol3 {
   background: var(--pat-d);
+}
+.chainslot.patcol4 {
+  background: var(--pat-e);
+}
+.chainslot.patcol5 {
+  background: var(--pat-f);
+}
+.chainslot.patcol6 {
+  background: var(--pat-g);
+}
+.chainslot.patcol7 {
+  background: var(--pat-h);
 }
 /* The chip sounding this bar: the dark-olive ring the step grid already uses
    for selection — a fixed color, drawn with a box, never a typeset glyph. */

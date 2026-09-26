@@ -65,7 +65,7 @@
           </button></span
         >
         <span class="portreset" aria-hidden="false"
-          ><button id="demo" title="Factory reset: load the four demo patterns and default sounds">
+          ><button id="demo" title="Factory reset: load the eight demo patterns and default sounds">
             FACTORY RESET
           </button></span
         >
@@ -131,7 +131,7 @@
           <div class="displaylabel">
             <img src="assets/sps-1-label.svg" alt="SPS-1" width="203" height="51" />
           </div>
-          <p id="status" role="status">Four built-in patterns · auto-saved in browser</p>
+          <p id="status" role="status">Eight pattern slots · auto-saved in this browser</p>
         </div>
         <div class="data">
           <div class="maker">MACHINEDRUM<span>16 VOICE SYNTHETIC DRUM MACHINE</span></div>
@@ -207,7 +207,12 @@
         <div class="performance">
           <div class="kitactions">
             <h2>KIT</h2>
-            <button id="saveKit">STORE</button><button id="reloadKit">RELOAD</button>
+            <div class="kitkeys">
+              <button id="saveKit">STORE</button><button id="reloadKit">RELOAD</button
+              ><button id="downloadKit" title="Save the current kit (16 sounds + FX) as a JSON file">DOWNLOAD</button
+              ><button id="uploadKit" title="Load a kit file downloaded from this panel">UPLOAD</button>
+            </div>
+            <input id="kitFile" type="file" accept=".json,application/json" hidden />
           </div>
           <div class="transport">
             <h2>TRANSPORT</h2>

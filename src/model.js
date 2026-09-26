@@ -79,11 +79,11 @@ export function kit() {
     send: sends[i],
   }));
 }
+export const emptyPattern = () =>
+  Array.from({ length: 16 }, () => Array.from({ length: 16 }, () => ({ on: false, locks: {} })));
 export function demo() {
-  const patterns = Array.from({ length: 4 }, () =>
-    Array.from({ length: 16 }, () => Array.from({ length: 16 }, () => ({ on: false, locks: {} }))),
-  );
-  for (let p = 0; p < 4; p++) {
+  const patterns = Array.from({ length: 8 }, emptyPattern);
+  for (let p = 0; p < 8; p++) {
     const beats = [
       [0, 4, 8, 10, 12],
       [4, 12],
@@ -111,6 +111,11 @@ export function demo() {
     if (p > 1) {
       patterns[p][5][6].on = true;
       patterns[p][6][15].on = true;
+    }
+    if (p > 3) {
+      // The E–H slots add their own tier so the second half is not a carbon copy of the first.
+      patterns[p][14][7].on = true;
+      patterns[p][12][8].on = true;
     }
     patterns[p][8][6].locks = { pitch: 74 + p * 2, decay: 45, fm: 86 };
     patterns[p][8][14].locks = { pitch: 47, decay: 60, drive: 65 };
@@ -170,7 +175,7 @@ export function validShapes(project) {
       if (typeof t.p[param] !== 'number' || !Number.isFinite(t.p[param])) return false;
     }
   }
-  if (!Array.isArray(project.patterns) || project.patterns.length !== 4) return false;
+  if (!Array.isArray(project.patterns) || project.patterns.length !== 8) return false;
   for (const pattern of project.patterns) {
     if (!Array.isArray(pattern) || pattern.length !== names.length) return false;
     for (const steps of pattern) {
@@ -200,6 +205,30 @@ export function storeKit(project) {
 export function reloadKit(project) {
   project.savedKit.forEach((sound, i) => Object.assign(project.tracks[i], clone(sound)));
   if (project.savedFx) project.fx = clone(project.savedFx);
+}
+/**
+ * Structural validation for a kit loaded from a DOWNLOADED file (UPLOAD). Same skeleton
+ * discipline as validShapes: anything not fully formed is refused, so a truncated or
+ * foreign JSON can never reach the renderer. `kind` is checked by the caller — this
+ * guards only the payload the apply loop dereferences. Optional fields (choke, send,
+ * lfo, pan, fx) are backfilled on apply, so only their TYPE is checked when present.
+ */
+export function validKit(kit) {
+  if (!isRecord(kit) || !Array.isArray(kit.tracks) || kit.tracks.length !== names.length) return false;
+  for (const t of kit.tracks) {
+    if (!isRecord(t) || !engines.includes(t.engine)) return false;
+    if (!isRecord(t.p)) return false;
+    for (const param of params) {
+      if (typeof t.p[param] !== 'number' || !Number.isFinite(t.p[param])) return false;
+    }
+    if (t.choke !== undefined && !Number.isFinite(t.choke)) return false;
+    if (t.send !== undefined && (!isRecord(t.send) || !Number.isFinite(t.send.delay) || !Number.isFinite(t.send.reverb)))
+      return false;
+    if (t.lfo !== undefined && !isRecord(t.lfo)) return false;
+    if (t.pan !== undefined && !Number.isFinite(t.pan)) return false;
+  }
+  if (kit.fx !== undefined && !isRecord(kit.fx)) return false;
+  return true;
 }
 export function recordHit(project, position, track) {
   const s = project.patterns[position.pattern][track][position.step];
