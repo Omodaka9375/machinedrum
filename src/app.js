@@ -1025,7 +1025,7 @@ function lfoText(id) {
 function renderLfo() {
   $('#lcdName').textContent = 'LFO / ' + names[track];
   $('#lcdEdit').textContent = 'TRACK ' + String(track + 1).padStart(2, '0') + ' / MODULATION';
-  document.querySelector('.datafoot span').innerHTML = '<i></i> LFO';
+  $('#paramTitle').textContent = 'LFO PARAMETERS';
   $('#hint').textContent = 'A per-track LFO · PITCH / LEVEL / FILTER / PAN · changes apply from the next trigger';
   $('#lcdValues').innerHTML = lfoSpec
     .map(([id, label], i) => lcdDial(label, lfoValue(params[i]), lfoText(id)))
@@ -1121,7 +1121,7 @@ function renderFx() {
   $('#unlock').disabled =
     editPage === 'lfo' ||
     !Object.keys(editPage === 'fx' ? (selected().fxLocks ?? {}) : selected().locks).length;
-  document.querySelector('.datafoot span').innerHTML = '<i></i> ' + (on ? 'EFFECTS' : 'SYNTHESIS');
+  $('#paramTitle').textContent = on ? 'FX PARAMETERS' : 'SYNTH PARAMETERS';
   document.querySelectorAll('[data-param]').forEach((b, i) => {
     b.disabled = editPage === 'fx' && (i >= fxSpec.length || (isLocked() && fxSpec[i]?.[0] === 'room'));
     // The pan knob drags horizontally — say so with the cursor.

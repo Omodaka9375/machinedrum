@@ -369,15 +369,6 @@ body.alt .knobcell.globalcell {
 body.alt .machine h2 {
   color: #473784;
 }
-/* The caption LED follows the face too: the lit diode next to SYNTHESIS / EFFECTS / LFO
-   swaps its red for the UW blue family (the step LED's lit pairing). Child-combinator
-   scoped: a bare `.datafoot i` also matched the timing-switch thumbs (they live inside
-   this section now) and out-specified .switchTrack i — turning them into blue dots. */
-body.alt .datafoot > span > i {
-  background: #8fa8ff;
-  border-color: #16265e;
-  box-shadow: 0 0 6px #3351c4;
-}
 .lcdhead,
 .lcdfoot {
   display: flex;
