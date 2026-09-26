@@ -1621,7 +1621,7 @@ canvas {
 
 .timingSwitches {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 5px;
 }
 .timingSwitches button {
