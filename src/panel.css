@@ -237,14 +237,19 @@ header b {
   margin: 0;
   transform: translate(-50%, -50%) rotate(270deg);
 }
-.datafoot i {
+.datafoot > span > i {
   display: inline-block;
-  background: #fa4f38;
+  /* The LIT LED from SOUND SELECTION (.track.selected i in style.css): bright red with a
+     glow and the dark rim kept — the caption dot reads "this page is powered on".
+     Scoped to the caption span's direct child: the timing-switch thumbs are ALSO <i> inside
+     this section, and a bare `.datafoot i` recolored them. */
+  background: #ff5041;
+  border: 1px solid #662e26;
   width: 7px;
   height: 7px;
   border-radius: 50%;
   margin-right: 5px;
-  box-shadow: 0 0 3px #e72c26;
+  box-shadow: 0 0 6px #ec403c;
 }
 /* MUTE now sits in .chokeRow instead of the old utility rail, where it used to stretch to that
    column's width via `.leftutility button`. Sizing is intrinsic again. MUTE ALL sits beside it
@@ -520,7 +525,7 @@ canvas {
   min-height: 132px;
 }
 .patternsection {
-  padding: 19px 22px;
+  padding: 15px 22px;
   border-right: 1px solid #89917f;
 }
 .patternsection h2 {
@@ -559,13 +564,27 @@ canvas {
   display: grid;
   grid-template-columns: 33% 67%;
   gap: 10px;
-  padding: 23px 20px;
+  padding: 15px 20px;
   border-right: 1px solid #89917f;
+}
+/* The section title spans both columns above the key pad, matching PATTERN SELECTION's
+   treatment one section over. */
+.navigation h2 {
+  grid-column: 1 / -1;
+  padding-top: 7px;
+  font-size: 10px;
+  text-align: center;
+  margin: 0 0 12px;
 }
 .confirmkeys {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  /* Not space-between: .middle stretches this section to whatever height .patternsection has,
+     and the pattern-chain strip grows that column — space-between would spread the three keys
+     across the extra height every time a chain is built. A fixed gap keeps the key group stable
+     (and vertically centered) with or without the strip. The ≤700px band re-states the gap. */
+  justify-content: center;
+  gap: 4px;
 }
 .confirmkeys button {
   font-size: 8px;
@@ -578,6 +597,10 @@ canvas {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   align-items: center;
+  /* Not the default stretch: .middle stretches this section to the pattern column's height,
+     and a tall chain makes that much taller — stretch would grow the row gap and pull the UP
+     arrow away from the bottom three. Centering packs the pad as one block instead. */
+  align-content: center;
 }
 .arrows button {
   padding: 6px 0;
@@ -596,20 +619,23 @@ canvas {
   grid-template-columns: 42% 58%;
 }
 .transport {
-  padding: 30px 20px 16px;
+  padding: 20px 20px 16px;
+  display: grid;
+  /* Title row, then everything the keys need below it. Same section pattern as .navigation:
+     the h2s of every .middle section sit on one shared line (the 30px top padding), and the
+     controls center in whatever height is left — a multi-row chain grows .middle without
+     floating the titles off that line or pinning the keys to the top. */
+  grid-template-rows: auto 1fr;
+}
+.transportkeys {
+  align-self: center;
   display: grid;
   /* Three buttons, three columns — always; each label then centers under its own button. */
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  /* Both columns of .performance anchor their first row (the h2) to the shared 30px top
-     padding. align-content: center used to float the content, but once the titles were added
-     the taller column decided the row height and the shorter one parked its title mid-air. */
-  align-content: start;
 }
 .transport h2 {
-  /* "TRANSPORT" above the REC/PLAY/STOP buttons, mirroring PATTERN SELECTION / KIT. It spans
-     the button row; align-content: start on the container pins it to the top padding. */
-  grid-column: 1/-1;
+  /* "TRANSPORT" above the REC/PLAY/STOP buttons, mirroring PATTERN SELECTION / KIT. */
   text-align: center;
   font-size: 10px;
   margin-bottom: 13px;
@@ -623,11 +649,17 @@ canvas {
   text-align: center;
 }
 .kitactions {
-  padding: 30px 15px 16px;
+  padding: 20px 15px 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  align-content: start;
-  gap: 9px;
+  /* Mirrors .transport: title row fixed at the top, buttons centered in the remaining height
+     (align-self on the buttons) so every .middle h2 sits on the same line. NO row gap:
+     the h2's 13px margin-bottom is the spacing, and any extra gap here shifts the centered
+     buttons down by half of it — .transport has no gap, so neither may this. */
+  grid-template-rows: auto 1fr;
+  /* Column gap only (row-gap 0): a row gap would push the centered button row down by
+     half its height — .transport has none. The h2's 13px margin-bottom is the row spacing. */
+  column-gap: 9px;
   /* Top padding matches .transport's so the title rows start on the same line.
      Left column now, so the column separator rides its right edge. */
   border-right: 1px solid #89917f;
@@ -643,6 +675,7 @@ canvas {
 }
 .kitactions button {
   order: 2;
+  align-self: center;
   font-size: 8px;
   padding: 8px 3px;
   width: 100%;
@@ -1696,6 +1729,15 @@ canvas {
 .timingSwitches button.active .switchTrack:before {
   background: linear-gradient(90deg, #b75d45 0 50%, #263029 50%);
 }
+/* UW phosphor: the lit half of the switch track trades its muted red for the blue family
+   (the alt-page-chip ramp), while the OFF half stays the dark slot color. Classic red above
+   is untouched — body.alt wins by specificity, so no other rule needs changing. */
+body.alt .timingSwitches button.active .switchTrack:before {
+  background: linear-gradient(90deg, #4d6fe0 0 50%, #263029 50%);
+}
+body.alt .timingSwitches button.active {
+  color: #3351c4;
+}
 
 .databody > .timingSwitches {
   grid-column: 1/-1;
@@ -1973,7 +2015,7 @@ canvas {
     padding: 3px 2px;
     gap: 5px;
   }
-  .datafoot button {
+  .datafoot > button {
     padding: 4px 6px;
   }
   .middle {
@@ -2017,6 +2059,11 @@ canvas {
     padding: 6px;
     gap: 5px;
   }
+  .navigation h2 {
+    font-size: 8px;
+    margin: 0 0 5px;
+    padding-top: 3px;
+  }
   .confirmkeys {
     gap: 5px;
   }
@@ -2046,7 +2093,8 @@ canvas {
   }
   .kitactions {
     padding: 5px;
-    gap: 4px;
+    /* column-gap only — a row gap re-introduces the centered-button offset (see base). */
+    column-gap: 4px;
   }
   .kitactions h2 {
     display: none;

@@ -32,6 +32,8 @@ let stepPage = 0,
 let track = 0,
   pattern = 0,
   step = 0,
+  // PADS-mode arrow tuning slot: index into params — left/right walk it, up/down trim it.
+  activeParam = 0,
   lock = false,
   starting = false,
   recording = false,
@@ -261,6 +263,8 @@ function render() {
     b.setAttribute('aria-valuenow', v);
     b.removeAttribute('aria-valuetext');
     b.parentElement.classList.toggle('locked', isLocked() && p in selected().locks);
+    // PADS-mode arrow-tuning slot: outline the knobcell the arrows currently trim.
+    b.parentElement.classList.toggle('selected', gridMode === 'pads' && i === activeParam);
     b.parentElement.querySelector('output').textContent = String(v).padStart(3, '0');
   });
   // Global knobs are fixed across pages: always tempo and swing — never locked, never
@@ -295,6 +299,8 @@ function render() {
   const allMuted = project.tracks.every((t) => t.mute);
   $('#muteAll').classList.toggle('active', allMuted);
   $('#muteAll').setAttribute('aria-pressed', allMuted);
+  // The MUTE ALL button flips itself between its two actions so the toggle reads as one.
+  $('#muteAll').textContent = allMuted ? 'UNMUTE ALL' : 'MUTE ALL';
   $('#unlock').disabled = !Object.keys(selected().locks).length;
   $('#choke').value = current().choke ?? 0;
   if (document.activeElement !== $('#lcdTempo')) $('#lcdTempo').value = project.bpm.toFixed(1);
@@ -913,7 +919,8 @@ function renderLfo() {
     b.style.setProperty('--angle', `${n * 2.7 - 135}deg`);
     b.parentElement.querySelector('small').textContent = String.fromCharCode(65 + i) + ' / ' + label;
     b.parentElement.querySelector('output').textContent = lfoText(id);
-    b.parentElement.classList.remove('locked');
+    b.parentElement.classList.toggle('locked', false);
+    b.parentElement.classList.toggle('selected', gridMode === 'pads' && i === activeParam);
   });
 }
 const fxSpec = [
@@ -1045,6 +1052,7 @@ function renderFx() {
         : fxActual(spec[0])
       : '—';
     b.parentElement.classList.toggle('locked', isLocked() && !!spec && spec[0] in (selected().fxLocks ?? {}));
+    b.parentElement.classList.toggle('selected', gridMode === 'pads' && i === activeParam);
   });
 }
 for (const b of document.querySelectorAll('[data-edit-page]'))
@@ -1203,6 +1211,31 @@ for (const b of document.querySelectorAll('[data-nav]'))
   b.onclick = () => {
     flash(b);
     const direction = b.dataset.nav;
+    // PADS: the steps are not the paradigm. Left / right walk the PARAMETER the arrows trim
+    // (the active knobcell is outlined), up / down trim it — the same page-aware slot mapping
+    // as dragging that knob, so the FX / LFO pages retune their own A–H.
+    if (gridMode === 'pads') {
+      if (direction === 'left' || direction === 'right') {
+        activeParam = (activeParam + (direction === 'right' ? 1 : params.length - 1)) % params.length;
+        render();
+        const titles = soundInfo[current().engine]?.labels ?? labels;
+        status(`Arrows tune ${String.fromCharCode(65 + activeParam)} / ${titles[activeParam]} — left / right picks another`);
+        return;
+      }
+      const p = params[activeParam];
+      change(
+        p,
+        (editPage === 'lfo'
+          ? lfoValue(p)
+          : editPage === 'fx'
+            ? fxValue(p)
+            : (isLocked() ? resolved(current(), selected()) : current().p)[p]) +
+          (direction === 'up' ? 1 : -1) * increment(p),
+      );
+      if (!audio.playing && !held) audition();
+      return;
+    }
+    // TRIGGERS: left / right walk the steps, up / down trim the default slot (pitch).
     if (direction === 'left' || direction === 'right') {
       if (held) return;
       step = (step + (direction === 'right' ? 1 : 15)) % 16;

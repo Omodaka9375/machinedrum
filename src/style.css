@@ -225,6 +225,17 @@ button:disabled {
 .track.muted {
   opacity: 0.35;
 }
+/* Track cells are flat silkscreen items — no background, border or chrome — so the global
+   button:active (a 2px lurch plus a dark inset band) reads as a glitch on them, not a press.
+   Same treatment as the portline buttons: kill both, and let the LED dot flare carry the
+   press; the selection itself (lit LED + bold label) is the real feedback. */
+.track:active {
+  transform: none;
+  box-shadow: none;
+}
+.track:active i {
+  filter: brightness(1.4);
+}
 .trackactions {
   display: flex;
   justify-content: center;
@@ -319,8 +330,33 @@ body.alt .stepPages button.active {
   background: #2c49c4;
   color: #fff;
 }
+/* Transport: the PLAY key and the lit TRIGGERS / PADS / MUTES button trade their red for the
+   blue family in UW mode. Scoped to these two so REC's red (the universal record convention)
+   and every other .active button keep their meaning. */
+body.alt #play {
+  background: linear-gradient(#3f63e8, #2c49c4);
+  box-shadow:
+    inset 0 2px 1px #9db4ff,
+    0 3px 0 #16265e;
+}
+body.alt .performModes button.active {
+  background: linear-gradient(#3f63e8, #2c49c4);
+  box-shadow:
+    inset 0 2px 1px #9db4ff,
+    0 3px 0 #16265e;
+  color: #fff;
+}
 body.alt .step.keyPage {
   border-bottom-color: #3351c4;
+}
+/* The caption LED follows the face too: the lit diode next to SYNTHESIS / EFFECTS / LFO
+   swaps its red for the UW blue family (the step LED's lit pairing). Child-combinator
+   scoped: a bare `.datafoot i` also matched the timing-switch thumbs (they live inside
+   this section now) and out-specified .switchTrack i — turning them into blue dots. */
+body.alt .datafoot > span > i {
+  background: #8fa8ff;
+  border-color: #16265e;
+  box-shadow: 0 0 6px #3351c4;
 }
 .lcdhead,
 .lcdfoot {
@@ -455,6 +491,15 @@ canvas {
 }
 .knobcell.locked output {
   color: var(--red);
+}
+/* PADS mode: the knobcell the arrow keys are currently tuning (left / right picks it). Same
+   cursor outline idiom the step grid uses, on the panel's marker-dark olive. */
+.knobcell.selected .knob {
+  outline: 2px solid #2f5622;
+  outline-offset: 3px;
+}
+body.alt .knobcell.selected .knob {
+  outline-color: #7d97ff;
 }
 .datafoot {
   display: flex;
