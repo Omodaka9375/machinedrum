@@ -220,6 +220,12 @@ function render() {
       t = project.tracks[i],
       seq = gridMode === 'sequence';
     b.classList.toggle('on', seq ? s.on : gridMode === 'mutes' ? !t.mute : false);
+    // Probability shows as LED brightness: a maybe-hit is a dimmer LED. 100/absent keeps
+    // the classic full-lit diode; .prob is a percentage-driven opacity on the LED only.
+    const prob = s.prob ?? 100;
+    b.classList.toggle('prob', seq && s.on && prob < 100);
+    if (seq && s.on && prob < 100) b.style.setProperty('--prob', String(prob / 100));
+    else b.style.removeProperty('--prob');
     b.classList.toggle('selected', seq ? i === step : i === track);
     b.classList.toggle(
       'locked',
@@ -296,6 +302,18 @@ function render() {
   // write it here while stopped and in sequence mode.
   if (!audio.playing && gridMode === 'sequence')
     $('#lcdStep').textContent = `${String(step + 1).padStart(2, '0')} / 16`;
+  // PROB slider edits the selected step's play chance. TRIGGERS mode only (the pads and
+  // mute views repurpose the grid); disabled otherwise so the reason is visible.
+  const probRow = $('.probrow'),
+    probEl = $('#prob'),
+    sel = project.patterns[pattern][track][step],
+    prob = sel.prob ?? 100;
+  const probActive = gridMode === 'sequence';
+  probEl.disabled = !probActive;
+  probRow.classList.toggle('disabled', !probActive);
+  probEl.value = String(prob);
+  $('#probOut').textContent = prob + '%';
+  probEl.setAttribute('aria-valuetext', prob + ' percent chance');
   $('#lock').classList.toggle('active', lock);
   $('#lock').setAttribute('aria-pressed', lock);
   $('#mute').classList.toggle('active', current().mute);
@@ -408,12 +426,20 @@ document.addEventListener(
 // The panel hint promises "hold a step + scroll wheel to lock params". Over a knob, the knob's
 // own wheel handler already does that; over the step grid the wheel mirrors the up/down arrow
 // keys (SYNTH pitch / FX send A), and change() writes the result as a parameter lock for the
-// held step.
+// held step. SHIFT+wheel instead trims the held step's PROBABILITY — the footer slider's
+// companion gesture, so a whole probability sweep needs no mouse travel.
 $('#steps').addEventListener(
   'wheel',
   (e) => {
     if (!held) return;
     e.preventDefault();
+    if (e.shiftKey) {
+      const target = project.patterns[held.pattern][held.track][held.step];
+      target.prob = Math.max(0, Math.min(100, (target.prob ?? 100) + (e.deltaY < 0 ? 5 : -5)));
+      save();
+      render();
+      return;
+    }
     change(
       'pitch',
       (editPage === 'lfo'
@@ -435,6 +461,18 @@ function releaseHold(e) {
 }
 document.addEventListener('pointerup', releaseHold);
 document.addEventListener('pointercancel', releaseHold);
+// PROB slider: writes the selected step's play chance. Stepping by 5 keeps the reads
+// countable ("every other pass", "one in four"); 100 = absent = always plays, so dragging
+// back to full removes the field and the step is exactly what it was before.
+$('#prob').oninput = (e) => {
+  if (gridMode !== 'sequence') return;
+  const v = +e.target.value;
+  const s = project.patterns[pattern][track][step];
+  if (v >= 100) delete s.prob;
+  else s.prob = v;
+  save();
+  render();
+};
 window.addEventListener('blur', () => {
   releaseHold();
   gesture = null;
@@ -1566,6 +1604,7 @@ $('#randomPattern').onclick = () => {
     beats[t].forEach((s) => {
       s.on = false;
       s.locks = {};
+      delete s.prob;
     });
     let any = false;
     for (const stepIndex of role.pool) {
@@ -1585,6 +1624,15 @@ $('#randomPattern').onclick = () => {
       const params = ['pitch', 'decay', 'drive', 'tone'];
       const param = params[Math.floor(rng() * params.length)];
       pick.locks[param] = Math.round(40 + rng() * 55);
+    }
+    // PROBABILITY BONUS: on the flavor tracks — hats, toms, FM, cymbals, noise, perc — some
+    // hits become maybe-hits so the loop keeps evolving between passes. The backbone (BD,
+    // SD, CP, SUB, RS) stays solid: a groove whose kick vanishes at random is a bug, not a
+    // feature. p<1 in the role table is the "flavor" marker; probability is 40-90% so
+    // nothing ever disappears completely.
+    if (any && role.p < 1 && t !== 13) {
+      const on = beats[t].filter((s) => s.on);
+      for (const s of on) if (rng() < 0.4) s.prob = Math.round(40 + rng() * 50);
     }
     return any;
   };

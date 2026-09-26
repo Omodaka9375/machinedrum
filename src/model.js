@@ -185,6 +185,9 @@ export function validShapes(project) {
         if (!isRecord(s.locks)) return false;
         if (s.fxLocks !== undefined && !isRecord(s.fxLocks)) return false;
         if (s.offset !== undefined && !Number.isFinite(s.offset)) return false;
+        // Play probability: optional, 0-100 integer-ish. Absent = always plays, so old
+        // saves and untouched steps stay byte-identical in meaning.
+        if (s.prob !== undefined && (!Number.isFinite(s.prob) || s.prob < 0 || s.prob > 100)) return false;
       }
     }
   }

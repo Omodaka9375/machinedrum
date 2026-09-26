@@ -149,6 +149,26 @@ for (const [label, value] of [
   p.somethingNew = { hello: 'from a later build' };
   ok(validShapes(p) === true, 'unrecognised extra field tolerated (forward compatible)');
 }
+{
+  const p = saved();
+  p.patterns[0][3][5].prob = 75;
+  ok(validShapes(p) === true, 'a step probability is accepted');
+}
+{
+  const p = saved();
+  p.patterns[0][3][5].prob = 150;
+  ok(validShapes(p) === false, 'probability above 100 rejected');
+}
+{
+  const p = saved();
+  p.patterns[0][3][5].prob = 'high';
+  ok(validShapes(p) === false, 'non-numeric probability rejected');
+}
+{
+  const p = saved();
+  p.patterns[0][3][5].prob = NaN;
+  ok(validShapes(p) === false, 'NaN probability rejected');
+}
 
 // ---- the kit-file guard (DOWNLOAD / UPLOAD) -------------------------------------------------
 

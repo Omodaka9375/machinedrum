@@ -2279,6 +2279,60 @@ button.pressed {
     0 1px 2px #17221799,
     inset 0 1px #acb69b;
 }
+/* PROB slider: the same hand-drawn skin as the master fader, WITHOUT the vertical
+   rotation — this one travels horizontally under the step grid. Scoped to the probrow so
+   the master fader's rules above stay untouched. */
+.probrow input {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 18px;
+  border: 1px solid #858d7f;
+  border-radius: 3px;
+  background: linear-gradient(#737c70, #c6ccbf);
+  box-shadow:
+    0 1px #eff2e0,
+    inset 0 1px 2px #27302399;
+  padding: 2px;
+  cursor: ew-resize;
+}
+.probrow input::-webkit-slider-runnable-track {
+  height: 7px;
+  background: #263029;
+  border-radius: 2px;
+  box-shadow: 0 1px #e5ead088;
+}
+.probrow input::-moz-range-track {
+  height: 7px;
+  background: #263029;
+  border-radius: 2px;
+  box-shadow: 0 1px #e5ead088;
+}
+.probrow input::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 13px;
+  /* (7px track - 13px thumb) / 2 — no rotation here, so this is plain cross-axis seating. */
+  margin-top: -3px;
+  border-radius: 2px;
+  border: 1px solid #202a23;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, #84907d66 2px 3px), linear-gradient(#64705f, #30392f);
+  box-shadow:
+    0 1px 2px #17221799,
+    inset 0 1px #acb69b;
+}
+.probrow input::-moz-range-thumb {
+  width: 14px;
+  height: 13px;
+  border-radius: 2px;
+  border: 1px solid #202a23;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, #84907d66 2px 3px), linear-gradient(#64705f, #30392f);
+  box-shadow:
+    0 1px 2px #17221799,
+    inset 0 1px #acb69b;
+}
 .master input::-moz-range-thumb {
   width: 14px;
   height: 13px;

@@ -106,12 +106,15 @@ export class Effects {
   }
 }
 
-export function stepFx(p, pattern, step) {
+export function stepFx(p, pattern, step, sounding) {
   const fx = { ...p.fx },
     tracks = p.tracks.map((t) => ({ send: { ...t.send } }));
   p.tracks.forEach((t, i) => {
     const s = p.patterns[pattern][i][step];
     if (t.mute || !s.on) return;
+    // Probability roll (schedule() in audio.js): a step that lost its roll this pass
+    // contributes neither voices nor FX locks — its per-step FX must not fire either.
+    if (sounding && !sounding[i]) return;
     for (const [key, value] of Object.entries(s.fxLocks ?? {})) {
       if (key === 'sendDelay') tracks[i].send.delay = value;
       else if (key === 'sendReverb') tracks[i].send.reverb = value;

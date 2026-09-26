@@ -301,12 +301,20 @@ export class Audio {
       if (this.isRecording?.() && this.step % 4 === 0) this.click(this.next, this.step === 0);
       const event = { time: this.next, step: this.step, pattern: this.pattern, voices: [] };
       this.beforeStep?.(event);
-      this.effects?.update(stepFx(p, this.pattern, this.step), this.next);
+      // Per-step probability, rolled per pass: a p<100 step skips only the times it loses.
+      // The roll happens per track per step, so one maybe-hit never silences its siblings.
+      // Playing the step (mute/skip checks aside) also decides the FX-lock path: a skipped
+      // step carries no per-step FX for this pass — stepFx gets the sounding map so sends
+      // and master locks only apply to steps that actually fired.
+      const sounding = p.tracks.map((t, i) => {
+        const s = p.patterns[this.pattern][i][this.step];
+        return !t.mute && s.on && (s.prob === undefined || s.prob >= 100 || Math.random() * 100 < s.prob);
+      });
+      this.effects?.update(stepFx(p, this.pattern, this.step, sounding), this.next);
       p.tracks.forEach((t, i) => {
         const s = p.patterns[this.pattern][i][this.step];
         if (
-          s.on &&
-          !t.mute &&
+          sounding[i] &&
           !this.skipHits.some((h) => h.index === i && Math.abs(h.time - this.next) < 0.000001)
         ) {
           event.voices[i] = this.trigger(t, s, this.next + ((s.offset ?? 0) * 60) / p.bpm / 4);
