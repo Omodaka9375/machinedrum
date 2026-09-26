@@ -16,6 +16,7 @@ import {
 } from './model.js';
 import { Audio } from './audio.js';
 import { MidiEngine, BleMidi, TempoEstimator, trackFromNote, velocityScale } from './midi.js';
+import { createLink } from './link.js';
 const $ = (s) => document.querySelector(s),
   key = 'ferro-study-v1';
 let project = demo();
@@ -772,6 +773,9 @@ async function play() {
       chainPlaying = 0;
     }
     await audio.start(chain.length ? chain[0] : pattern, recording);
+    // LINK: tell the other tabs we started (they follow if idle). Posted AFTER a successful
+    // start so a failed unlock never propagates a phantom play.
+    link.post({ type: 'play', bpm: project.bpm });
     $('#play').innerHTML =
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h5v16H5zM14 4h5v16h-5z"/></svg>';
     $('#play').setAttribute('aria-label', 'Pause');
@@ -793,6 +797,9 @@ function stop() {
   chainPlaying = -1;
   Object.keys(recordedValues).forEach((k) => delete recordedValues[k]);
   audio.stop();
+  // LINK: a stop reaches every linked tab; each one only acts if its own transport runs,
+  // so an independent second machine is never interrupted by the other's stop.
+  link.post({ type: 'stop' });
   render();
   $('#play').innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3 21 12 7 21Z"/></svg>';
   $('#play').setAttribute('aria-label', 'Play');
@@ -1475,6 +1482,50 @@ $('#bt').onclick = async () => {
   }
 };
 
+// LINK: transport + tempo sync with MACHINEDRUM tabs in the same browser (BroadcastChannel).
+// Sounds, patterns and edits stay local — only play/stop and BPM travel. The tab that hits
+// PLAY first leads: its transport followers start with it; later tempo turns propagate to
+// everyone linked. No leader election beyond "whoever is playing": an idle tab never tells
+// a playing one what to do, so two playing tabs stay independent until one stops them.
+const link = createLink({
+  onEvent: (m) => {
+    if (m.type === 'hello') {
+      // A tab just joined. Answer with our state only if WE are playing (an idle joiner
+      // must not be started by a hello from another idle tab).
+      if (audio.playing) link.post({ type: 'state', bpm: project.bpm, playing: true });
+    } else if (m.type === 'state') {
+      // A playing tab answered our hello (or reported a change): adopt its tempo, and
+      // start if we are idle — joining a session that is already rolling.
+      if (m.playing && m.bpm !== project.bpm) setTempo(m.bpm);
+      if (m.playing && !audio.playing && !starting) play();
+    } else if (m.type === 'tempo') {
+      if (m.bpm !== project.bpm) setTempo(m.bpm);
+    } else if (m.type === 'play') {
+      // Another tab started. Follow if idle; a playing tab keeps its own transport —
+      // two independent machines is the honest reading of "play" here.
+      if (m.bpm !== undefined && m.bpm !== project.bpm) setTempo(m.bpm);
+      if (!audio.playing && !starting) play();
+    } else if (m.type === 'stop') {
+      if (audio.playing) stop();
+    }
+  },
+  onStatus: (connected, extra) => {
+    const btn = $('#link');
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', connected);
+    btn.classList.toggle('active', connected);
+    status(
+      connected
+        ? 'LINK on · transport + tempo follow every MACHINEDRUM tab in this browser'
+        : 'LINK off' + (extra ? ` — ${extra}` : ''),
+    );
+  },
+});
+$('#link').onclick = () => {
+  if (link.connected) link.disconnect();
+  else link.connect();
+};
+
 const setGridMode = (mode) => {
   if (recording) return;
   releaseHold();
@@ -1766,12 +1817,20 @@ $('#pastePattern').onclick = async () => {
 
 function setTempo(value) {
   const number = Number(value);
+  let changed = false;
   if (String(value).trim() !== '' && Number.isFinite(number)) {
-    project.bpm = Math.max(40, Math.min(240, number));
+    const clamped = Math.max(40, Math.min(240, number));
+    changed = clamped !== project.bpm;
+    project.bpm = clamped;
     save();
   }
   $('#lcdTempo').value = project.bpm.toFixed(1);
+  // LINK: every tempo change (LCD typing, knob, MIDI clock) reaches the other tabs. Suppressed
+  // while handling an incoming LINK tempo, else two tabs would ping-pong the message forever.
+  if (changed && !suppressLinkTempo) link.post({ type: 'tempo', bpm: project.bpm });
 }
+// While adopting an incoming LINK tempo, setTempo must not echo it back (ping-pong guard).
+let suppressLinkTempo = false;
 $('#lcdTempo').onfocus = (e) => e.target.select();
 $('#lcdTempo').onchange = (e) => setTempo(e.target.value);
 $('#lcdTempo').onkeydown = (e) => {

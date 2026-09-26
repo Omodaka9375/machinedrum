@@ -44,6 +44,7 @@
     "src/fx.js",
     "src/drums.js",
     "src/midi.js",
-    "src/info.js"
+    "src/info.js",
+    "src/link.js"
   ]
 }

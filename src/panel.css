@@ -77,7 +77,8 @@ header b {
   padding-top: 4px;
 }
 .portmidi button,
-.portguide button {
+.portguide button,
+.portlink button {
   font: inherit;
   letter-spacing: 0.3px;
   line-height: 13px;
@@ -110,11 +111,13 @@ header b {
 /* Printed labels take no focus ring either — the connection state is already reported in the
    status line, and these are supplementary controls, not primary ones. */
 .portmidi button:focus-visible,
-.portguide button:focus-visible {
+.portguide button:focus-visible,
+.portlink button:focus-visible {
   outline: none;
 }
 .portmidi button:active,
-.portguide button:active {
+.portguide button:active,
+.portlink button:active {
   transform: none;
   box-shadow: none;
 }
@@ -125,7 +128,8 @@ header b {
    6:1 on the light end — and a dark saturated green next to the unlit #4d554a gray reads as
    "the printed label is now lit". */
 .portmidi button.active,
-.portguide button.active {
+.portguide button.active,
+.portlink button.active {
   background: none;
   color: #2f5622;
   box-shadow: none;
@@ -835,6 +839,7 @@ canvas {
   }
   .portmidi,
   .portguide,
+  .portlink,
   .portreset {
     display: flex;
     height: 26px;
