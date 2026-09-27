@@ -55,6 +55,34 @@ header b {
 .portline span {
   padding-top: 4px;
 }
+/* The hamburger (mobile only — display:none at base, revealed in the ≤700px band). Drawn as
+   SVG bars, never a typeset ☰ glyph: the portline face (PanelNarrow / local Arial Narrow)
+   holds no U+2630, so the glyph would font-link to an arbitrary machine face and render
+   differently per system — the U+25C6 lock-diamond trap. */
+#portmenu {
+  display: none;
+  position: absolute;
+  top: 3px;
+  right: 8px;
+  width: 30px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #4d554a;
+  cursor: pointer;
+  z-index: 40;
+}
+#portmenu svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+#portmenu[aria-expanded='true'] {
+  color: #2f5622;
+}
 /* GUIDE occupies the first cell where the PHONES A/B legend sat. One button, so only the
    baseline centering of .portmidi — no gap to distribute. */
 .portguide {
@@ -842,20 +870,78 @@ canvas {
   body {
     padding: 14px 8px;
   }
-  /* The portline collapses to one column; every control in it (GUIDE, MIDI/BT, FACTORY RESET)
-     stays reachable — no decorative legends remain to hide. */
+  /* MOBILE PORT MENU: the four portline cells (GUIDE | MIDI/BT | LINK | FACTORY RESET) no
+     longer stack as four full-width rows — they collapsed into a hamburger dropdown. The
+     strip itself becomes a single ~30px title bar with the ☰ button at its right edge; the
+     cells are the menu items, hidden until body.portmenu-open (the button's JS). One cell
+     per row, left-aligned, the same flat silkscreen labels. */
   .portline {
-    grid-template-columns: 1fr;
-    height: auto;
+    display: block;
+    height: 30px;
+    position: relative;
   }
-  .portmidi,
-  .portguide,
-  .portlink,
-  .portreset {
+  body.portmenu-open .portline {
+    height: auto;
+    /* Items start BELOW the ☰'s 30px band: the button is absolutely positioned at the
+       strip's top-right, so without this clearance the first item (START HERE) renders in
+       the same rows as the icon and the two overlap. */
+    padding-top: 30px;
+  }
+  #portmenu {
+    display: block;
+  }
+  .portline .portguide,
+  .portline .portmidi,
+  .portline .portlink,
+  .portline .portreset {
+    display: none;
+  }
+  body.portmenu-open .portline .portguide,
+  body.portmenu-open .portline .portlink,
+  body.portmenu-open .portline .portreset {
     display: flex;
-    height: 26px;
-    justify-content: center;
+    position: relative;
+    height: 28px;
+    width: 46%;
+    max-width: 220px;
+    margin-left: auto;
+    margin-right: 8px;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 10px;
+    background: linear-gradient(120deg, #d9d9cf, #b6b8b0);
+    border: 1px solid #89917f;
+    border-top: 0;
+  }
+  /* MIDI and BT are separate menu items: the span is a plain block (no box of its own) and
+     each button inside gets the same row treatment as the other cells — otherwise the pair
+     renders as ONE row with both labels squeezed into it. */
+  body.portmenu-open .portline .portmidi {
+    display: block;
     padding: 0;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    height: auto;
+    border: 0;
+    background: none;
+  }
+  body.portmenu-open .portline .portmidi button {
+    display: flex;
+    height: 28px;
+    width: 46%;
+    max-width: 220px;
+    margin-left: auto;
+    margin-right: 8px;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 10px;
+    background: linear-gradient(120deg, #d9d9cf, #b6b8b0);
+    border: 1px solid #89917f;
+    border-top: 0;
+  }
+  body.portmenu-open .portline .portguide {
+    border-top: 1px solid #89917f;
   }
   .upper {
     grid-template-columns: 1fr 1fr;
@@ -867,8 +953,34 @@ canvas {
   #tracks {
     grid-template-columns: repeat(4, 1fr);
   }
+  /* MASTER goes HORIZONTAL on phones: the .jogrow is a single row (the jog wheel is
+     display:none here), so the fader un-rotates into a full-width slider beside its
+     label. --travel keeps its role (the input's width) — now it is the horizontal length
+     instead of the vertical one, and no rotation means the skin's own geometry just works. */
+  .jogrow {
+    justify-content: center;
+    gap: 12px;
+  }
   .master {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-size: 7px;
+  }
+  .master .fader {
+    --travel: clamp(130px, 42vw, 220px);
+    width: var(--travel);
+    height: 22px;
+    margin: 0;
+  }
+  /* .master .fader input, not .master input: the un-rotated skin at the foot of the file
+     is later in source order and would otherwise win (media queries add no specificity) —
+     including its ns-resize cursor, which is wrong for a horizontal slider. */
+  .master .fader input {
+    position: static;
+    width: var(--travel);
+    transform: none;
+    cursor: ew-resize;
   }
   .displaycase {
     padding: 15px;
@@ -942,9 +1054,28 @@ canvas {
   .performance {
     grid-column: 1/-1;
     border-top: 1px solid #89917f;
+    /* TRANSPORT above KIT, full width each — the 58%/42% columns leave REC/PLAY/STOP
+       too narrow on phones and glue them against the section top. */
+    grid-template-columns: 1fr;
   }
   .transport {
-    padding: 15px 35px;
+    padding: 12px 10px;
+  }
+  .transport h2 {
+    /* Restored (this band's later block display:none'd it): a visible TRANSPORT caption is
+       what keeps the buttons off the top edge. */
+    display: block;
+    font-size: 8px;
+    margin: 0 0 4px;
+    padding-top: 3px;
+  }
+  .transportkeys button {
+    height: 32px;
+  }
+  .transport span {
+    /* REC / PLAY / STOP labels back under their buttons. */
+    display: block;
+    font-size: 7px;
   }
   .kitactions {
     padding: 15px 25px;
@@ -1972,11 +2103,16 @@ body.alt .timingSwitches button.active {
   .jogrow {
     margin: 10px 0 8px;
   }
-  .soundbank h2,
+  /* TRACKS caption returns on phones: it was hidden with the jog wheel (they shared the
+     top of the sound bank), but the mobile layout now has the horizontal MASTER row there —
+     the heading is the UI's title again, not a casualty of the jog's removal. */
   #jog,
   .screenbrand,
   .displaylabel {
     display: none;
+  }
+  .soundbank h2 {
+    display: block;
   }
   /* The label row goes on small screens but the status line lives under it and must stay. */
   #status {
@@ -2139,17 +2275,21 @@ body.alt .timingSwitches button.active {
     padding: 2px;
   }
   .transport {
-    padding: 6px;
+    padding: 10px 6px;
     gap: 5px;
   }
   .transport h2 {
-    display: none;
+    display: block;
+    font-size: 8px;
+    margin: 0 0 4px;
+    padding-top: 3px;
   }
   .transport button {
-    height: 28px;
+    height: 32px;
   }
   .transport span {
-    display: none;
+    display: block;
+    font-size: 7px;
   }
   .kitactions {
     padding: 5px;

@@ -1487,6 +1487,35 @@ $('#bt').onclick = async () => {
 // PLAY first leads: its transport followers start with it; later tempo turns propagate to
 // everyone linked. No leader election beyond "whoever is playing": an idle tab never tells
 // a playing one what to do, so two playing tabs stay independent until one stops them.
+// MOBILE PORT MENU: the ☰ button (CSS-revealed ≤700px) folds the portline's four silkscreen
+// labels into a dropdown. Click-away and Escape close it; choosing an item closes it (the
+// GUIDE dialog covers its own closing, the others are momentary toggles anyway).
+$('#portmenu').onclick = (e) => {
+  const open = document.body.classList.toggle('portmenu-open');
+  $('#portmenu').setAttribute('aria-expanded', open);
+};
+document.addEventListener('click', (e) => {
+  if (
+    document.body.classList.contains('portmenu-open') &&
+    !e.target.closest('.portline')
+  ) {
+    document.body.classList.remove('portmenu-open');
+    $('#portmenu').setAttribute('aria-expanded', 'false');
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.body.classList.contains('portmenu-open')) {
+    document.body.classList.remove('portmenu-open');
+    $('#portmenu').setAttribute('aria-expanded', 'false');
+  }
+});
+document.querySelector('.portline').addEventListener('click', (e) => {
+  // A click on any menu ITEM (not the ☰ itself) closes the menu after the action runs.
+  if (e.target.closest('button') && e.target.closest('#portmenu') === null) {
+    document.body.classList.remove('portmenu-open');
+    $('#portmenu').setAttribute('aria-expanded', 'false');
+  }
+});
 const link = createLink({
   onEvent: (m) => {
     if (m.type === 'hello') {
