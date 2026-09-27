@@ -41,7 +41,10 @@ header b {
 }
 .portline {
   display: grid;
-  grid-template-columns: 30% 30% 40%;
+  /* Four cells: GUIDE | MIDI/BT | LINK | FACTORY RESET. Adding the LINK cell without this
+     would wrap the fourth child onto an implicit second row — pushing FACTORY RESET down
+     out of the strip. The old 40% tail split in two so RESET keeps its right edge. */
+  grid-template-columns: 30% 30% 20% 20%;
   text-align: center;
   font-size: 8px;
   color: #4d554a;
@@ -74,6 +77,14 @@ header b {
   /* Identical to .portline span's padding-top so the labels share the legend's first-line
      baseline. align-items: flex-start, not center — the row is 38px tall and a centered
      13px line would sit ~10px below the legend lines. */
+  padding-top: 4px;
+}
+/* LINK: third cell of the portline, the same flat-label treatment — centered on the legend
+   baseline like MIDI/BT rather than inheriting the default block flow of a bare span. */
+.portlink {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   padding-top: 4px;
 }
 .portmidi button,
