@@ -76,6 +76,7 @@ export function kit() {
   return kinds.map((engine, i) => ({
     engine,
     mute: false,
+    solo: false,
     choke: i === 2 || i === 3 ? 1 : 0,
     p: {
       pitch: pitches[i],

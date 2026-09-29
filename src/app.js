@@ -221,13 +221,16 @@ function render() {
   document.querySelectorAll('[data-track]').forEach((b, i) => {
     b.classList.toggle('selected', i === track);
     b.classList.toggle('muted', project.tracks[i].mute);
+    b.classList.toggle('solo', !!project.tracks[i].solo);
     b.setAttribute('aria-pressed', i === track);
   });
+  const anySolo = project.tracks.some((x) => x.solo);
   document.querySelectorAll('[data-step]').forEach((b, i) => {
     const s = project.patterns[pattern][track][i],
       t = project.tracks[i],
       seq = gridMode === 'sequence';
-    b.classList.toggle('on', seq ? s.on : gridMode === 'mutes' ? !t.mute : false);
+    b.classList.toggle('on', seq ? s.on : gridMode === 'mutes' ? !t.mute && (!anySolo || !!t.solo) : false);
+    b.classList.toggle('solo', !seq && gridMode === 'mutes' && !!t.solo);
     // Probability shows as LED brightness: a maybe-hit is a dimmer LED. 100/absent keeps
     // the classic full-lit diode; .prob is a percentage-driven opacity on the LED only.
     const prob = s.prob ?? 100;
@@ -246,7 +249,7 @@ function render() {
       seq
         ? `Step ${i + 1} ${s.on ? 'on' : 'off'}${Object.keys(s.locks).length + Object.keys(s.fxLocks ?? {}).length ? ' · locked' : ''}`
         : gridMode === 'mutes'
-          ? `Mute track ${i + 1} ${names[i]} ${t.mute ? 'muted' : 'audible'}`
+          ? `Mute track ${i + 1} ${names[i]} ${t.mute ? 'muted' : 'audible'}${t.solo ? ', soloed' : ''}`
           : `Hit track ${i + 1} ${names[i]}`,
     );
     b.setAttribute('aria-pressed', seq ? s.on : gridMode === 'mutes' ? t.mute : i === track);
@@ -264,7 +267,7 @@ function render() {
       ? 'TRIG SEQUENCER'
       : gridMode === 'pads'
         ? 'LIVE PADS / 16 VOICES'
-        : 'TRACK MUTES / LIT = AUDIBLE';
+        : 'MUTES + SOLO / LIT = SOUNDS';
   const info = soundInfo[current().engine],
     titles = info?.labels ?? labels;
   $('#hint').textContent =
@@ -326,6 +329,8 @@ function render() {
   $('#lock').setAttribute('aria-pressed', lock);
   $('#mute').classList.toggle('active', current().mute);
   $('#mute').setAttribute('aria-pressed', current().mute);
+  $('#solo').classList.toggle('active', !!current().solo);
+  $('#solo').setAttribute('aria-pressed', !!current().solo);
   const allMuted = project.tracks.every((t) => t.mute);
   $('#muteAll').classList.toggle('active', allMuted);
   $('#muteAll').setAttribute('aria-pressed', allMuted);
@@ -604,12 +609,23 @@ $('#mute').onclick = () => {
   render();
   save();
 };
-$('#muteAll').onclick = () => {
-  const all = project.tracks.every((t) => t.mute);
-  for (const t of project.tracks) t.mute = !all;
+$('#solo').onclick = () => {
+  const t = current();
+  t.solo = !t.solo;
   render();
   save();
-  status(all ? 'All tracks unmuted' : 'All tracks muted');
+  status(t.solo ? `${names[track]} solo — every other track goes silent` : 'Solo off');
+};
+$('#muteAll').onclick = () => {
+  const all = project.tracks.every((t) => t.mute);
+  const solos = project.tracks.some((t) => t.solo);
+  for (const t of project.tracks) {
+    t.mute = !all;
+    t.solo = false; // the panic key: either press also clears every solo
+  }
+  render();
+  save();
+  status(all ? `All tracks unmuted${solos ? ' · solos cleared' : ''}` : 'All tracks muted');
 };
 $('#audition').onclick = () => {
   flash($('#audition'));
@@ -835,6 +851,7 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     if (e.repeat || held) return;
     if (recording || gridMode === 'pads') hit(stepKey + (e.shiftKey ? 8 : 0));
+    else if (gridMode === 'mutes') choose(stepKey + (e.shiftKey ? 8 : 0));
     else if (e.shiftKey) hit(track);
     else {
       gridMode = 'sequence';
@@ -863,6 +880,7 @@ document.addEventListener('keydown', (e) => {
     Enter: () => $('#audition').click(), // same action, but flashes the TRIG button like Escape does EXIT
     KeyL: () => $('#lock').click(),
     KeyU: () => $(e.shiftKey ? '#muteMode' : '#mute').click(),
+    KeyS: () => $('#solo').click(), // S = solo the current track; mute always wins over solo
     KeyG: () => $('#trigMode').click(), // G = back to the step grid from either performance mode
     KeyP: () => $('#padMode').click(),
     KeyR: () => $('#record').click(),
@@ -1395,9 +1413,10 @@ for (const b of document.querySelectorAll('[data-nav]'))
 $('#play').title = 'Space: play / stop';
 $('#audition').title = 'Enter: audition the current sound';
 $('#mute').title = 'U: mute the current track';
+$('#solo').title = 'S: solo the current track — every other track goes silent';
 $('#copyPattern').title = 'Copy the current pattern — the clipboard is shared with right-clicking a pattern slot';
 $('#pastePattern').title = 'Replace the current pattern with the copied one';
-$('#muteAll').title = 'Mute or unmute every track';
+$('#muteAll').title = 'Mute or unmute every track · either press clears all solos';
 $('#lock').title = 'L: toggle per-step parameter lock';
 $('#exitLock').title = 'Esc: exit parameter lock';
 

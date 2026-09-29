@@ -31,12 +31,17 @@ const ok = (cond, label, extra = '') => {
     'schedule() rolls Math.random() against s.prob; absent/100 always sounds',
   );
   ok(
-    src.includes('!t.mute && s.on &&'),
-    'mute and on are still hard gates around the probability roll',
+    src.includes('!t.mute && (!anySolo || t.solo) && s.on &&'),
+    'mute, solo and on are still hard gates around the probability roll',
   );
   ok(
     src.includes('stepFx(p, this.pattern, this.step, sounding)'),
     'the sounding map is passed to stepFx, so skipped steps carry no FX',
+  );
+  // Live hits follow the sequencer's gates too: a solo elsewhere silences a live tap.
+  ok(
+    src.includes('!t.mute && (!p.tracks.some((x) => x.solo) || t.solo)'),
+    'liveHit respects mute and solo',
   );
   // Manual paths must NOT roll: audition/liveHit/trigger fire voices unconditionally — the
   // only roll in the codebase is the schedule() expression above.

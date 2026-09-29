@@ -280,11 +280,15 @@ export class Audio {
       position.voices?.[index]?.stop(now);
       this.skipHits.push({ time: position.time, index });
     }
-    if (!t.mute) this.trigger(t, s, now + 0.003, velocity);
+    // Live hits follow the sequencer's gates: a solo elsewhere silences this one too.
+    if (!t.mute && (!p.tracks.some((x) => x.solo) || t.solo)) this.trigger(t, s, now + 0.003, velocity);
     return position;
   }
   schedule() {
     const p = this.get();
+    // SOLO: hoisted once per pass — when any track is soloed, only soloed tracks sound.
+    // A muted track stays silent even while soloed; mute always wins.
+    const anySolo = p.tracks.some((t) => t.solo);
     while (this.next < this.ctx.currentTime + 0.07) {
       if (this.step === 0) {
         if (this.pending !== null) {
@@ -308,7 +312,7 @@ export class Audio {
       // and master locks only apply to steps that actually fired.
       const sounding = p.tracks.map((t, i) => {
         const s = p.patterns[this.pattern][i][this.step];
-        return !t.mute && s.on && (s.prob === undefined || s.prob >= 100 || Math.random() * 100 < s.prob);
+        return !t.mute && (!anySolo || t.solo) && s.on && (s.prob === undefined || s.prob >= 100 || Math.random() * 100 < s.prob);
       });
       this.effects?.update(stepFx(p, this.pattern, this.step, sounding), this.next);
       p.tracks.forEach((t, i) => {
